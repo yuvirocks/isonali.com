@@ -61,10 +61,14 @@
       display: flex; align-items: center; justify-content: space-between;
     }
     .brand {
-      display: inline-flex; align-items: baseline; text-decoration: none;
-      font: italic 600 28px/1 var(--serif); letter-spacing: -.5px;
+      display: inline-flex; align-items: center; gap: 3px; text-decoration: none;
+      font: italic 600 28px/1 var(--serif); letter-spacing: -.7px;
     }
-    .brand::first-letter { color: var(--gold); }
+    .brand-mic {
+      width: 14px; height: 29px; flex: 0 0 auto; color: var(--gold);
+      overflow: visible;
+    }
+    .brand-name { margin-left: -1px; }
     .brand-dot { color: var(--gold); }
     .nav-links { display: flex; align-items: center; gap: 28px; }
     .nav-links a {
@@ -215,17 +219,25 @@
     }
     .kids-art {
       min-height: 560px; padding: 54px; display: flex; flex-direction: column; justify-content: space-between;
-      background: var(--coral); color: #fff; border-radius: 200px 200px 24px 24px;
+      background: #26334a; color: #fff; border-radius: 200px 200px 24px 24px;
       position: relative; overflow: hidden;
     }
     .kids-art::before {
-      content: ""; position: absolute; width: 340px; height: 340px; right: -150px; top: 120px;
-      border: 60px solid rgba(244,201,93,.38); border-radius: 50%;
+      content: ""; position: absolute; inset: 0; z-index: 1;
+      background: linear-gradient(180deg, rgba(11,20,36,.72) 0%, rgba(11,20,36,.08) 42%, rgba(11,20,36,.64) 100%);
     }
-    .kids-art small { font-size: 13px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; }
+    .kids-art img {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      object-fit: cover; object-position: 52% center;
+    }
+    .kids-art small {
+      position: relative; z-index: 2; font-size: 13px; font-weight: 600;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
     .kids-art strong {
-      position: relative; z-index: 2; max-width: 380px;
+      position: relative; z-index: 2; max-width: 410px;
       font: 500 clamp(48px, 5vw, 72px)/.96 var(--serif); letter-spacing: -.04em;
+      text-shadow: 0 3px 24px rgba(0,0,0,.45);
     }
     .kids-art strong em { color: var(--yellow); }
     .kids-copy .section-title { color: #fff; }
@@ -384,7 +396,13 @@
 
   <header class="nav" id="nav">
     <div class="nav-inner">
-      <a class="brand" href="#top" aria-label="iSonali home">iSonali<span class="brand-dot">.</span></a>
+      <a class="brand" href="#top" aria-label="iSonali home">
+        <svg class="brand-mic" viewBox="0 0 16 32" aria-hidden="true">
+          <rect x="4" y="1" width="8" height="17" rx="4" fill="currentColor"/>
+          <path d="M2 13v2a6 6 0 0 0 12 0v-2M8 21v7M4.5 29h7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+        <span class="brand-name">Sonali<span class="brand-dot">.</span></span>
+      </a>
       <nav class="nav-links" id="nav-links" aria-label="Main navigation">
         <a href="#about">About</a>
         <a href="#programs">Programs</a>
@@ -485,6 +503,7 @@
     <section class="section kids" id="kids">
       <div class="section-inner kids-layout">
         <div class="kids-art reveal">
+          <img src="assets/indian-kids-public-speaking.png" alt="Indian children learning public speaking with a microphone" width="1122" height="1402" loading="lazy">
           <small>Super Speakers Academy · Ages 6–18</small>
           <strong>Big ideas deserve a <em>brave voice.</em></strong>
         </div>
@@ -544,7 +563,13 @@
 
   <footer>
     <div class="footer-inner">
-      <a class="brand" href="#top">iSonali<span class="brand-dot">.</span></a>
+      <a class="brand" href="#top" aria-label="iSonali home">
+        <svg class="brand-mic" viewBox="0 0 16 32" aria-hidden="true">
+          <rect x="4" y="1" width="8" height="17" rx="4" fill="currentColor"/>
+          <path d="M2 13v2a6 6 0 0 0 12 0v-2M8 21v7M4.5 29h7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+        <span class="brand-name">Sonali<span class="brand-dot">.</span></span>
+      </a>
       <div class="footer-links">
         <a href="#about">About</a><a href="#programs">Programs</a><a href="#kids">Kids</a>
         <a href="https://instagram.com/isonalidotcom" target="_blank" rel="noopener">Instagram</a>
