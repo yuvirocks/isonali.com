@@ -1,0 +1,9 @@
+{
+  "rewrites": [
+    {
+      "source": "/",
+      "has": [{ "type": "host", "value": "login.isonali.com" }],
+      "destination": "/dashboard.html"
+    }
+  ]
+}
