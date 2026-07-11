@@ -18,6 +18,13 @@
  * Sheets auto-created: Registrations, CRM, InstaPlanner, InstaMetrics, Payments
  */
 
+/* ================= EDIT THESE TWO LINES ================= */
+var DASH_PASSWORD = "Shon@2026"; // dashboard login password
+var SHEET_ID = "";               // ONLY if script is not attached to the Sheet:
+                                 // paste the long id from the Sheet URL
+                                 // docs.google.com/spreadsheets/d/THIS_PART/edit
+/* ======================================================== */
+
 var SHEETS = {
   REG: "Registrations",
   CRM: "CRM",
@@ -39,8 +46,8 @@ function spreadsheet_() {
   if (!ss) {
     // Standalone script (not bound to the Sheet): set Script Property SHEET_ID
     // to the ID from the Sheet's URL (docs.google.com/spreadsheets/d/<SHEET_ID>/edit)
-    var id = PropertiesService.getScriptProperties().getProperty("SHEET_ID");
-    if (!id) throw new Error("Set SHEET_ID script property (script is not bound to a Sheet)");
+    var id = SHEET_ID || PropertiesService.getScriptProperties().getProperty("SHEET_ID");
+    if (!id) throw new Error("Fill in the SHEET_ID line at the top of this file (script is not attached to a Sheet)");
     ss = SpreadsheetApp.openById(id);
   }
   return ss;
@@ -63,8 +70,8 @@ function ok_(obj) {
 }
 
 function authed_(key) {
-  var real = PropertiesService.getScriptProperties().getProperty("DASH_KEY");
-  return real && key === real;
+  var real = PropertiesService.getScriptProperties().getProperty("DASH_KEY") || DASH_PASSWORD;
+  return !!real && key === real;
 }
 
 /* ---------------- READS (dashboard) ---------------- */
