@@ -1,18 +1,18 @@
 /**
- * iSonali Dashboard Backend — Google Apps Script
+ * iSonali Dashboard Backend - Google Apps Script
  * ------------------------------------------------
  * Replaces/extends the existing registration capture script.
  *
  * SETUP (one time):
- * 1. Open script.google.com → your existing project (or a new one bound to the Sheet).
+ * 1. Open script.google.com -> your existing project (or a new one bound to the Sheet).
  * 2. Paste this entire file over the old code.
- * 3. Project Settings → Script Properties → add:
+ * 3. Project Settings -> Script Properties -> add:
  *      DASH_KEY        = the dashboard password you choose (e.g. Sonali@2026!)
- *      RZP_KEY_ID      = (optional) Razorpay Key Id      → enables payment sync
- *      RZP_KEY_SECRET  = (optional) Razorpay Key Secret  → enables payment sync
- * 4. Deploy → Manage deployments → Edit → New version → Deploy
- *    (Execute as: Me · Who has access: Anyone)
- * 5. Copy the /exec URL into dashboard.html (SCRIPT_URL) — it is usually
+ *      RZP_KEY_ID      = (optional) Razorpay Key Id      -> enables payment sync
+ *      RZP_KEY_SECRET  = (optional) Razorpay Key Secret  -> enables payment sync
+ * 4. Deploy -> Manage deployments -> Edit -> New version -> Deploy
+ *    (Execute as: Me | Who has access: Anyone)
+ * 5. Copy the /exec URL into dashboard.html (SCRIPT_URL) - it is usually
  *    the same URL the website already uses.
  *
  * Sheets auto-created: Registrations, CRM, InstaPlanner, InstaMetrics, Payments
@@ -110,7 +110,7 @@ function doPost(e) {
   var data = {};
   try { data = JSON.parse(e.postData.contents); } catch (err) { return ok_({ ok: false, error: "bad json" }); }
 
-  // Public: website registration form (no key required — same as before)
+  // Public: website registration form (no key required - same as before)
   if (!data.action || data.action === "register") {
     sheet_(SHEETS.REG).appendRow([
       data.timestamp || new Date().toISOString(),
