@@ -244,11 +244,18 @@
     .kids-copy > p { color: rgba(255,255,255,.65); font-size: 16px; line-height: 1.75; margin: 28px 0 34px; }
     .age-options { border-top: 1px solid var(--line-dark); margin-bottom: 34px; }
     .age-option {
-      display: flex; justify-content: space-between; gap: 20px;
+      display: flex; justify-content: space-between; align-items: center; gap: 20px;
       padding: 18px 0; border-bottom: 1px solid var(--line-dark);
     }
     .age-option strong { color: #fff; font-size: 14px; }
-    .age-option span { color: rgba(255,255,255,.5); font-size: 13px; }
+    .age-option span { color: rgba(255,255,255,.5); font-size: 13px; margin-left: auto; }
+    .tier-pay {
+      border: 1px solid var(--coral); background: transparent; color: var(--coral);
+      padding: 7px 18px; border-radius: 999px; font-size: 11px; font-weight: 600;
+      letter-spacing: .1em; text-transform: uppercase; cursor: pointer;
+      transition: background .2s, color .2s; white-space: nowrap;
+    }
+    .tier-pay:hover { background: var(--coral); color: #fff; }
     .kids-actions { display: flex; flex-wrap: wrap; gap: 12px; }
     .button-coral { background: var(--coral); color: #fff; }
 
@@ -512,9 +519,9 @@
           <h2 class="section-title">A safe place to speak, try and grow.</h2>
           <p>Age-appropriate coaching through storytelling, debate, presentations and playful practice. Children learn to express themselves without fear while parents receive clear progress updates.</p>
           <div class="age-options">
-            <div class="age-option"><strong>Little Stars</strong><span>Ages 6–10 · ₹99/session</span></div>
-            <div class="age-option"><strong>Rising Leaders</strong><span>Ages 11–14 · ₹199/session</span></div>
-            <div class="age-option"><strong>Young Champions</strong><span>Ages 15–18 · ₹299/session</span></div>
+            <div class="age-option"><strong>Little Stars</strong><span>Ages 6–10 · ₹99/session</span><button class="tier-pay register" data-program="Little Stars (Ages 6–10)" data-price="₹99/session">Register</button></div>
+            <div class="age-option"><strong>Rising Leaders</strong><span>Ages 11–14 · ₹199/session</span><button class="tier-pay register" data-program="Rising Leaders (Ages 11–14)" data-price="₹199/session">Register</button></div>
+            <div class="age-option"><strong>Young Champions</strong><span>Ages 15–18 · ₹299/session</span><button class="tier-pay register" data-program="Young Champions (Ages 15–18)" data-price="₹299/session">Register</button></div>
           </div>
           <div class="kids-actions">
             <button class="button button-coral register" data-program="Kids Coaching Program" data-price="From ₹99">Enquire for your child</button>
@@ -600,6 +607,18 @@
   <script>
     const config = {
       razorpay: "https://razorpay.me/@sonalimohankshirsagar",
+      // Fixed-amount payment links per program. Generate each one in the Razorpay
+      // app (Razorpay.me → share with a specific amount) and paste the full URL here.
+      // Until a link is added, the button falls back to the open razorpay.me page.
+      paymentLinks: {
+        "Speak with Confidence": "https://rzp.io/rzp/bX61biE",           // ₹999
+        "Executive Presence Masterclass": "https://rzp.io/rzp/9ybKWWh",  // ₹1,999
+        "Voice & Impact Workshop": "https://rzp.io/rzp/IZYMf8jQ",        // ₹1,499
+        "Little Stars (Ages 6–10)": "https://rzp.io/rzp/HutrOAG",      // ₹99
+        "Rising Leaders (Ages 11–14)": "https://rzp.io/rzp/LjANMPS",   // ₹199
+        "Young Champions (Ages 15–18)": "https://rzp.io/rzp/8JmYlqZc", // ₹299
+        "Kids Coaching Program": ""             // enquiry — leave blank to keep open amount
+      },
       sheets: "https://script.google.com/macros/s/AKfycbyZwNn9UKtLUZ4kWrn9AhZC5eZw_ko86GDBlKUI373UEFdz3_QegwfSafUblYbGKxA/exec",
       whatsapp: "919421357124"
     };
@@ -680,13 +699,12 @@
         body: JSON.stringify(data)
       }).catch(error => console.error("Registration save failed", error));
 
-      const params = new URLSearchParams({
-        "prefill[name]": data.name,
-        "prefill[email]": data.email,
-        "prefill[contact]": data.phone,
-        description: selectedProgram
-      });
-      window.open(config.razorpay + "?" + params.toString(), "_blank", "noopener");
+      const payUrl = new URL(config.paymentLinks[selectedProgram] || config.razorpay);
+      payUrl.searchParams.set("prefill[name]", data.name);
+      payUrl.searchParams.set("prefill[email]", data.email);
+      payUrl.searchParams.set("prefill[contact]", data.phone);
+      payUrl.searchParams.set("description", selectedProgram);
+      window.open(payUrl.toString(), "_blank", "noopener");
       paymentMessage.classList.add("show");
     });
 
