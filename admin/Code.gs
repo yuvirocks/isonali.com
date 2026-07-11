@@ -23,22 +23,30 @@ var DASH_PASSWORD = "Shon@2026"; // dashboard login password
 var SHEET_ID = "145sNrUGAKGSHSKyNz9g0sdWRB-WHkytSbySGw5J-87Y"; // ONLY if script is not attached to the Sheet:
                                  // paste the long id from the Sheet URL
                                  // docs.google.com/spreadsheets/d/THIS_PART/edit
+/* ==== OPTIONAL: YouTube (fills the video views table automatically) ====
+   1. console.cloud.google.com -> create project -> enable "YouTube Data API v3"
+   2. Credentials -> Create API key -> paste below
+   3. Put the channel handle (like @isonalidotcom) below                    */
+var YT_API_KEY = "";
+var YT_CHANNEL = ""; // example: "@isonalidotcom"
 /* ======================================================== */
 
 var SHEETS = {
   REG: "Registrations",
   CRM: "CRM",
-  PLAN: "InstaPlanner",
+  PLAN: "ContentPlanner",
   METRICS: "InstaMetrics",
-  PAY: "Payments"
+  PAY: "Payments",
+  WEB: "Webinars"
 };
 
 var HEADERS = {
   Registrations: ["Timestamp","Name","Email","Phone","City","Role","Program","Price","PaymentStatus"],
   CRM: ["Key","Name","Email","Phone","Status","Tags","Notes","LastContact"],
-  InstaPlanner: ["Id","Date","Idea","Caption","Status","PostedUrl","Result"],
+  ContentPlanner: ["Id","Platform","Type","Date","Idea","Caption","Status","Link","Views","Likes","Notes"],
   InstaMetrics: ["Date","Followers","Reach","ProfileViews","LinkClicks","Notes"],
-  Payments: ["PaymentId","Date","Amount","Currency","Status","Method","Email","Contact","Description"]
+  Payments: ["PaymentId","Date","Amount","Currency","Status","Method","Email","Contact","Description"],
+  Webinars: ["Id","Title","DateTime","Platform","JoinLink","Price","Status","Notes"]
 };
 
 function spreadsheet_() {
@@ -91,11 +99,16 @@ function doGet(e) {
       planner: readSheet_(SHEETS.PLAN),
       metrics: readSheet_(SHEETS.METRICS),
       payments: readSheet_(SHEETS.PAY),
-      razorpayConfigured: !!PropertiesService.getScriptProperties().getProperty("RZP_KEY_ID")
+      webinars: readSheet_(SHEETS.WEB),
+      razorpayConfigured: !!PropertiesService.getScriptProperties().getProperty("RZP_KEY_ID"),
+      youtubeConfigured: !!YT_API_KEY
     });
   }
   if (p.action === "syncRazorpay") {
     return ok_(syncRazorpay_());
+  }
+  if (p.action === "youtube") {
+    return ok_(youtubeStats_());
   }
   return ok_({ ok: false, error: "unknown action" });
 }
@@ -137,6 +150,8 @@ function doPost(e) {
     case "addPlan":      return ok_(addPlan_(data));
     case "updatePlan":   return ok_(updatePlan_(data));
     case "addMetrics":   return ok_(addMetrics_(data));
+    case "addWebinar":   return ok_(addWebinar_(data));
+    case "updateWebinar":return ok_(updateWebinar_(data));
     default:             return ok_({ ok: false, error: "unknown action" });
   }
 }
@@ -172,27 +187,51 @@ function upsertCrm_(d) {
   return { ok: true };
 }
 
+// Content planner: Id, Platform, Type, Date, Idea, Caption, Status, Link, Views, Likes, Notes
 function addPlan_(d) {
-  sheet_(SHEETS.PLAN).appendRow([Utilities.getUuid(), d.date || "", d.idea || "",
-    d.caption || "", d.status || "Idea", "", ""]);
+  sheet_(SHEETS.PLAN).appendRow([Utilities.getUuid(), d.platform || "Instagram",
+    d.type || "Post", d.date || "", d.idea || "", d.caption || "",
+    d.status || "Idea", d.link || "", d.views || "", d.likes || "", d.notes || ""]);
   return { ok: true };
 }
 
 function updatePlan_(d) {
   var sh = sheet_(SHEETS.PLAN);
   var values = sh.getDataRange().getValues();
+  var cols = { platform:2, type:3, date:4, idea:5, caption:6, status:7, link:8, views:9, likes:10, notes:11 };
   for (var r = 1; r < values.length; r++) {
     if (String(values[r][0]) === String(d.id)) {
-      if (d.date != null) sh.getRange(r + 1, 2).setValue(d.date);
-      if (d.idea != null) sh.getRange(r + 1, 3).setValue(d.idea);
-      if (d.caption != null) sh.getRange(r + 1, 4).setValue(d.caption);
-      if (d.status != null) sh.getRange(r + 1, 5).setValue(d.status);
-      if (d.postedUrl != null) sh.getRange(r + 1, 6).setValue(d.postedUrl);
-      if (d.result != null) sh.getRange(r + 1, 7).setValue(d.result);
+      for (var k in cols) {
+        if (d[k] != null) sh.getRange(r + 1, cols[k]).setValue(d[k]);
+      }
       return { ok: true };
     }
   }
   return { ok: false, error: "plan not found" };
+}
+
+// Webinars: Id, Title, DateTime, Platform, JoinLink, Price, Status, Notes
+function addWebinar_(d) {
+  var id = Utilities.getUuid();
+  sheet_(SHEETS.WEB).appendRow([id, d.title || "", d.dateTime || "",
+    d.platform || "Google Meet", d.joinLink || "", d.price || "",
+    d.status || "Planned", d.notes || ""]);
+  return { ok: true, id: id };
+}
+
+function updateWebinar_(d) {
+  var sh = sheet_(SHEETS.WEB);
+  var values = sh.getDataRange().getValues();
+  var cols = { title:2, dateTime:3, platform:4, joinLink:5, price:6, status:7, notes:8 };
+  for (var r = 1; r < values.length; r++) {
+    if (String(values[r][0]) === String(d.id)) {
+      for (var k in cols) {
+        if (d[k] != null) sh.getRange(r + 1, cols[k]).setValue(d[k]);
+      }
+      return { ok: true };
+    }
+  }
+  return { ok: false, error: "webinar not found" };
 }
 
 function addMetrics_(d) {
@@ -228,4 +267,63 @@ function syncRazorpay_() {
     added++;
   });
   return { ok: true, added: added, total: items.length };
+}
+
+/* ---------------- YOUTUBE STATS (optional) ---------------- */
+
+function youtubeStats_() {
+  if (!YT_API_KEY || !YT_CHANNEL) return { ok: false, error: "YouTube not configured" };
+  var base = "https://www.googleapis.com/youtube/v3/";
+  var key = "&key=" + YT_API_KEY;
+
+  // 1. Find the channel (by @handle or channel id)
+  var chUrl = base + "channels?part=contentDetails,statistics,snippet" +
+    (YT_CHANNEL.charAt(0) === "@" ? "&forHandle=" + encodeURIComponent(YT_CHANNEL)
+                                  : "&id=" + encodeURIComponent(YT_CHANNEL)) + key;
+  var ch = fetchJson_(chUrl);
+  if (!ch.items || !ch.items.length) return { ok: false, error: "channel not found" };
+  var channel = ch.items[0];
+  var uploads = channel.contentDetails.relatedPlaylists.uploads;
+
+  // 2. Latest 25 uploads
+  var pl = fetchJson_(base + "playlistItems?part=contentDetails&maxResults=25&playlistId=" + uploads + key);
+  var ids = (pl.items || []).map(function (i) { return i.contentDetails.videoId; }).join(",");
+  if (!ids) return { ok: true, channel: channelInfo_(channel), videos: [] };
+
+  // 3. Stats for those videos
+  var vids = fetchJson_(base + "videos?part=snippet,statistics,contentDetails&id=" + ids + key);
+  var videos = (vids.items || []).map(function (v) {
+    return {
+      id: v.id,
+      title: v.snippet.title,
+      publishedAt: v.snippet.publishedAt,
+      thumbnail: (v.snippet.thumbnails.medium || v.snippet.thumbnails.default || {}).url || "",
+      views: +(v.statistics.viewCount || 0),
+      likes: +(v.statistics.likeCount || 0),
+      comments: +(v.statistics.commentCount || 0),
+      isShort: isShort_(v.contentDetails.duration)
+    };
+  });
+  return { ok: true, channel: channelInfo_(channel), videos: videos };
+}
+
+function channelInfo_(c) {
+  return {
+    title: c.snippet.title,
+    subscribers: +(c.statistics.subscriberCount || 0),
+    totalViews: +(c.statistics.viewCount || 0),
+    videoCount: +(c.statistics.videoCount || 0)
+  };
+}
+
+function isShort_(isoDuration) {
+  // Shorts are 3 minutes or less (PT#M#S)
+  var m = String(isoDuration || "").match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+  if (!m) return false;
+  var secs = (+m[1] || 0) * 3600 + (+m[2] || 0) * 60 + (+m[3] || 0);
+  return secs > 0 && secs <= 180;
+}
+
+function fetchJson_(url) {
+  return JSON.parse(UrlFetchApp.fetch(url, { muteHttpExceptions: true }).getContentText());
 }

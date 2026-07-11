@@ -44,6 +44,16 @@ Until DNS is live you can also open the dashboard at `isonali.com/dashboard.html
 3. [search.google.com/search-console](https://search.google.com/search-console) → Add property `isonali.com` → verify via DNS TXT record on GoDaddy.
 4. Vercel project → **Analytics** tab → Enable (free tier is enough).
 
+## 3b. YouTube auto-tracking (optional, ~5 min, free)
+
+Makes all of Sonali's videos + views appear automatically in Content Studio:
+
+1. [console.cloud.google.com](https://console.cloud.google.com) → create a project → APIs & Services → Enable **YouTube Data API v3**.
+2. Credentials → **Create API key** → copy it.
+3. In `Code.gs`, fill in the two lines near the top:
+   `var YT_API_KEY = "your-key";` and `var YT_CHANNEL = "@channelhandle";`
+4. Deploy a new version (Manage deployments → ✏️ → New version).
+
 ## 4. Instagram (one-time, free)
 
 1. Instagram app → Settings → *Switch to professional account* → **Creator → Coach**.
