@@ -20,7 +20,7 @@
 
 /* ================= EDIT THESE TWO LINES ================= */
 var DASH_PASSWORD = "Shon@2026"; // dashboard login password
-var SHEET_ID = "";               // ONLY if script is not attached to the Sheet:
+var SHEET_ID = "145sNrUGAKGSHSKyNz9g0sdWRB-WHkytSbySGw5J-87Y"; // ONLY if script is not attached to the Sheet:
                                  // paste the long id from the Sheet URL
                                  // docs.google.com/spreadsheets/d/THIS_PART/edit
 /* ======================================================== */
