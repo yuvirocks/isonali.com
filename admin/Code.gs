@@ -34,8 +34,20 @@ var HEADERS = {
   Payments: ["PaymentId","Date","Amount","Currency","Status","Method","Email","Contact","Description"]
 };
 
-function sheet_(name) {
+function spreadsheet_() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
+  if (!ss) {
+    // Standalone script (not bound to the Sheet): set Script Property SHEET_ID
+    // to the ID from the Sheet's URL (docs.google.com/spreadsheets/d/<SHEET_ID>/edit)
+    var id = PropertiesService.getScriptProperties().getProperty("SHEET_ID");
+    if (!id) throw new Error("Set SHEET_ID script property (script is not bound to a Sheet)");
+    ss = SpreadsheetApp.openById(id);
+  }
+  return ss;
+}
+
+function sheet_(name) {
+  var ss = spreadsheet_();
   var sh = ss.getSheetByName(name);
   if (!sh) {
     sh = ss.insertSheet(name);
