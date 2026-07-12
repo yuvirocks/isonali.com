@@ -759,8 +759,13 @@
       // Latest Instagram posts/reels for the carousel. To update: open the post
       // in Instagram -> Share -> Copy link -> paste here (newest first).
       instagramPosts: [
-        // "https://www.instagram.com/p/XXXXXXXXXXX/",
-        // "https://www.instagram.com/reel/XXXXXXXXXXX/"
+        "https://www.instagram.com/reel/DZRGaETC39t/",
+        "https://www.instagram.com/reel/DX8ly8XTWQH/",
+        "https://www.instagram.com/reel/DaX0BPvCPhH/",
+        "https://www.instagram.com/reel/DXwlZPUzemT/",
+        "https://www.instagram.com/reel/DXkzF64k7bn/",
+        "https://www.instagram.com/reel/DXTFDj3E6Bg/",
+        "https://www.instagram.com/reel/DZ_uxK1TMuu/"
       ]
     };
 
@@ -885,12 +890,14 @@
 
     // Instagram carousel: renders official embed iframes, swipeable + arrow buttons
     (function () {
-      const posts = (config.instagramPosts || []).filter(u => /instagram\.com\/(p|reel|tv)\//.test(u));
+      const posts = (config.instagramPosts || [])
+        .map(u => { const m = String(u).match(/instagram\.com\/(?:[^\/]+\/)?(p|reel|tv)\/([A-Za-z0-9_-]+)/); return m ? "https://www.instagram.com/" + m[1] + "/" + m[2] + "/" : null; })
+        .filter(Boolean);
       if (!posts.length) return;
       const section = document.getElementById("instagram");
       const track = document.getElementById("insta-track");
       posts.forEach(url => {
-        const clean = url.split("?")[0].replace(/\/?$/, "/");
+        const clean = url;
         const card = document.createElement("a");
         card.className = "insta-card";
         card.href = clean;
