@@ -37,7 +37,8 @@ var SHEETS = {
   PLAN: "ContentPlanner",
   METRICS: "InstaMetrics",
   PAY: "Payments",
-  WEB: "Webinars"
+  WEB: "Webinars",
+  ENQ: "Enquiries"
 };
 
 var HEADERS = {
@@ -46,7 +47,8 @@ var HEADERS = {
   ContentPlanner: ["Id","Platform","Type","Date","Idea","Caption","Status","Link","Views","Likes","Notes"],
   InstaMetrics: ["Date","Followers","Reach","ProfileViews","LinkClicks","Notes"],
   Payments: ["PaymentId","Date","Amount","Currency","Status","Method","Email","Contact","Description"],
-  Webinars: ["Id","Title","DateTime","Platform","JoinLink","Price","Status","Notes"]
+  Webinars: ["Id","Title","DateTime","Platform","JoinLink","Price","Status","Notes"],
+  Enquiries: ["Id","Timestamp","Name","Email","Phone","Course","Message","Status","Reply","RepliedAt"]
 };
 
 function spreadsheet_() {
@@ -100,6 +102,7 @@ function doGet(e) {
       metrics: readSheet_(SHEETS.METRICS),
       payments: readSheet_(SHEETS.PAY),
       webinars: readSheet_(SHEETS.WEB),
+      enquiries: readSheet_(SHEETS.ENQ),
       razorpayConfigured: !!PropertiesService.getScriptProperties().getProperty("RZP_KEY_ID"),
       youtubeConfigured: !!YT_API_KEY
     });
@@ -130,6 +133,15 @@ function doPost(e) {
   var data = {};
   try { data = JSON.parse(e.postData.contents); } catch (err) { return ok_({ ok: false, error: "bad json" }); }
 
+  // Public: course enquiry from the website contact form (no key required)
+  if (data.action === "enquiry") {
+    sheet_(SHEETS.ENQ).appendRow([Utilities.getUuid(),
+      data.timestamp || new Date().toISOString(),
+      data.name || "", data.email || "", data.phone || "",
+      data.course || "", data.message || "", "New", "", ""]);
+    return ok_({ ok: true });
+  }
+
   // Public: website registration form (no key required - same as before)
   if (!data.action || data.action === "register") {
     sheet_(SHEETS.REG).appendRow([
@@ -152,6 +164,7 @@ function doPost(e) {
     case "addMetrics":   return ok_(addMetrics_(data));
     case "addWebinar":   return ok_(addWebinar_(data));
     case "updateWebinar":return ok_(updateWebinar_(data));
+    case "replyEnquiry": return ok_(replyEnquiry_(data));
     default:             return ok_({ ok: false, error: "unknown action" });
   }
 }
@@ -238,6 +251,36 @@ function addMetrics_(d) {
   sheet_(SHEETS.METRICS).appendRow([d.date || new Date().toISOString().slice(0, 10),
     d.followers || "", d.reach || "", d.profileViews || "", d.linkClicks || "", d.notes || ""]);
   return { ok: true };
+}
+
+// Reply to an enquiry: saves the reply, marks status, and (if the person left an
+// email) sends the reply from Sonali's Gmail automatically.
+function replyEnquiry_(d) {
+  var sh = sheet_(SHEETS.ENQ);
+  var values = sh.getDataRange().getValues();
+  for (var r = 1; r < values.length; r++) {
+    if (String(values[r][0]) === String(d.id)) {
+      var email = values[r][3], name = values[r][2], course = values[r][5];
+      if (d.reply != null) sh.getRange(r + 1, 9).setValue(d.reply);
+      sh.getRange(r + 1, 8).setValue(d.status || "Replied");
+      sh.getRange(r + 1, 10).setValue(new Date().toISOString());
+      var emailSent = false;
+      if (d.sendEmail && d.reply && email) {
+        try {
+          MailApp.sendEmail({
+            to: email,
+            subject: "Re: your enquiry about " + (course || "iSonali coaching"),
+            body: "Hi " + (name || "") + ",\n\n" + d.reply +
+              "\n\nWarm regards,\nSonali\nisonali.com | WhatsApp: +91 94213 57124",
+            name: "Sonali - isonali.com"
+          });
+          emailSent = true;
+        } catch (err) { /* mail quota or invalid address - reply is still saved */ }
+      }
+      return { ok: true, emailSent: emailSent };
+    }
+  }
+  return { ok: false, error: "enquiry not found" };
 }
 
 /* ---------------- RAZORPAY SYNC (optional) ---------------- */

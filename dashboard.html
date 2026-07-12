@@ -141,6 +141,7 @@
     <nav class="tabs" id="tabs">
       <button data-tab="home" class="active">🏠 Home</button>
       <button data-tab="students">👥 My Students</button>
+      <button data-tab="enquiries" id="enq-tab-btn">💬 Enquiries</button>
       <button data-tab="webinars">🎤 My Webinars</button>
       <button data-tab="content">📱 Content Studio</button>
       <button data-tab="website">🌐 My Website</button>
@@ -201,6 +202,16 @@
           <tbody></tbody>
         </table>
       </div>
+    </section>
+
+    <!-- ============ ENQUIRIES ============ -->
+    <section class="tab-panel" id="tab-enquiries">
+      <h2 class="panel-title">Course enquiries</h2>
+      <div class="panel-sub">Questions people sent from your website. Write your answer and tap "Send by email" — it goes from your own Gmail. Or reply on WhatsApp with one tap.</div>
+      <div class="toolbar">
+        <select id="enq-filter"><option value="">Show all</option><option value="New">🔴 New — waiting for reply</option><option value="Replied">✅ Replied</option><option value="Closed">Closed</option></select>
+      </div>
+      <div id="enq-list"></div>
     </section>
 
     <!-- ============ WEBINARS ============ -->
@@ -372,7 +383,7 @@ const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwlXHe48tdODJKeKzK-Y
 const SITE = "https://isonali.com";
 
 let KEY = sessionStorage.getItem("dashKey") || "";
-let DATA = { registrations:[], crm:[], planner:[], metrics:[], payments:[], webinars:[] };
+let DATA = { registrations:[], crm:[], planner:[], metrics:[], payments:[], webinars:[], enquiries:[] };
 let YT = null, charts = {};
 
 /* ---------- helpers ---------- */
@@ -413,7 +424,7 @@ async function loadData(){
   const res = await apiGet({action:"data"}).catch(()=>null);
   if(!res || !res.ok){ toast("Could not load — check internet and try again"); return; }
   DATA = res;
-  renderHome(); renderStudents(); renderWebinars(); renderPlanner(); renderInsta();
+  renderHome(); renderStudents(); renderEnquiries(); renderWebinars(); renderPlanner(); renderInsta();
 }
 
 /* ---------- HOME ---------- */
@@ -494,6 +505,56 @@ async function markPaid(ts,phone){
 async function saveNote(key,notes,name,email,phone){
   const res=await apiPost({action:"upsertCrm",crmKey:key,notes,name,email,phone,lastContact:new Date().toISOString().slice(0,10)});
   toast(res.ok?"Note saved ✓":"Could not save");
+}
+
+/* ---------- ENQUIRIES ---------- */
+function renderEnquiries(){
+  const list=(DATA.enquiries||[]).slice().sort((a,b)=>{
+    if((a.Status==="New")!==(b.Status==="New")) return a.Status==="New"?-1:1;
+    return new Date(b.Timestamp)-new Date(a.Timestamp);
+  });
+  const fresh=list.filter(e=>e.Status==="New").length;
+  $("enq-tab-btn").textContent = "💬 Enquiries"+(fresh?` (${fresh})`:"");
+  const f=$("enq-filter").value;
+  const box=$("enq-list");
+  const rows=list.filter(e=>!f||e.Status===f);
+  box.innerHTML = rows.length ? rows.map(e=>{
+    const isNew=e.Status==="New";
+    return `<div class="webinar-card" style="${isNew?"border-color:var(--coral)":""}">
+      <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:baseline">
+        <h4>${esc(e.Name)} <span class="pill ${isNew?"pending":"paid"}" style="margin-left:8px">${isNew?"🔴 New":esc(e.Status)}</span></h4>
+        <span style="font-size:12.5px;color:rgba(255,255,255,.45)">${fmtDateTime(e.Timestamp)}</span>
+      </div>
+      <div class="webinar-meta">Asking about: <strong style="color:var(--gold-light)">${esc(e.Course)}</strong> · ${esc(e.Phone)}${e.Email?" · "+esc(e.Email):""}</div>
+      <p style="background:var(--navy-2);border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-size:14px;margin-bottom:12px">"${esc(e.Message)||"(no message written)"}"</p>
+      <textarea id="reply-${esc(e.Id)}" placeholder="Write your answer here…" style="width:100%;background:var(--navy-2);border:1px solid var(--line);color:#fff;border-radius:10px;padding:10px 12px;min-height:56px">${esc(e.Reply||"")}</textarea>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+        ${e.Email?`<button class="btn solid" onclick="sendEnquiryReply('${esc(e.Id)}',true)">📧 Send by email</button>`:""}
+        <button class="btn wa" onclick="waEnquiryReply('${esc(e.Id)}','${esc(e.Phone)}','${esc(e.Name)}')">Reply on WhatsApp</button>
+        <button class="btn" onclick="sendEnquiryReply('${esc(e.Id)}',false)">Save answer only</button>
+        ${e.Status!=="Closed"?`<button class="btn" onclick="closeEnquiry('${esc(e.Id)}')">Mark as done</button>`:""}
+      </div>
+    </div>`;
+  }).join("") : `<div class="box"><div class="empty">No enquiries here yet. When someone asks a question on your website, it appears in this list. 💬</div></div>`;
+}
+$("enq-filter").addEventListener("input",renderEnquiries);
+
+async function sendEnquiryReply(id,byEmail){
+  const reply=$("reply-"+id).value.trim();
+  if(!reply) return toast("Write your answer first");
+  toast(byEmail?"Sending…":"Saving…");
+  const res=await apiPost({action:"replyEnquiry",id,reply,sendEmail:byEmail,status:"Replied"});
+  if(res.ok){ toast(byEmail?(res.emailSent?"Email sent to them ✓":"Saved ✓ (email could not be sent)"):"Answer saved ✓"); loadData(); }
+  else toast("Could not save, try again");
+}
+async function waEnquiryReply(id,phone,name){
+  const reply=$("reply-"+id).value.trim();
+  window.open(waLink(phone, reply || `Hi ${name}! Sonali here from isonali.com — thanks for your enquiry 🙂`),"_blank","noopener");
+  if(reply) await apiPost({action:"replyEnquiry",id,reply,sendEmail:false,status:"Replied"}).then(()=>loadData());
+}
+async function closeEnquiry(id){
+  const res=await apiPost({action:"replyEnquiry",id,status:"Closed"});
+  if(res.ok){ toast("Marked as done ✓"); loadData(); }
 }
 
 /* ---------- WEBINARS ---------- */

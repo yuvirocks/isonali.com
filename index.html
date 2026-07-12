@@ -279,11 +279,15 @@
     .contact h2 { margin: 0; font: 500 clamp(50px, 6vw, 84px)/.98 var(--serif); letter-spacing: -.045em; }
     .contact p { margin: 22px 0 0; max-width: 560px; line-height: 1.7; opacity: .72; }
     .contact-form { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .contact-form input, .contact-form textarea {
+    .contact-form input, .contact-form textarea, .contact-form select {
       width: 100%; border: 1px solid rgba(11,20,36,.25); background: rgba(255,255,255,.25);
-      color: var(--navy); padding: 15px 16px; outline: none;
+      color: var(--navy); padding: 15px 16px; outline: none; font: inherit;
     }
-    .contact-form input:focus, .contact-form textarea:focus { border-color: var(--navy); background: rgba(255,255,255,.4); }
+    .contact-form input:focus, .contact-form textarea:focus, .contact-form select:focus { border-color: var(--navy); background: rgba(255,255,255,.4); }
+    .contact-success { grid-column: 1 / -1; display: none; padding: 14px 16px; background: rgba(63,166,111,.15); border: 1px solid rgba(63,166,111,.4); color: var(--navy); font-weight: 600; }
+    .contact-success.show { display: block; }
+    .contact-alt { grid-column: 1 / -1; text-align: center; font-size: 13px; opacity: .65; }
+    .contact-alt a { color: inherit; }
     .contact-form textarea { grid-column: 1 / -1; min-height: 96px; resize: vertical; }
     .contact-form .button { grid-column: 1 / -1; }
     ::placeholder { color: rgba(11,20,36,.58); }
@@ -567,15 +571,26 @@
       <div class="contact-inner">
         <div class="reveal">
           <h2>Ready to be heard?</h2>
-          <p>Tell Sonali what you are preparing for. Your message will open in WhatsApp, ready to send.</p>
+          <p>Have a question about any course? Send it here — your enquiry goes straight to Sonali and she will reply personally.</p>
         </div>
         <form class="contact-form reveal" id="contact-form">
           <input id="contact-name" name="name" type="text" placeholder="Your name" autocomplete="name" required>
-          <input id="contact-phone" name="phone" type="tel" placeholder="Phone number" autocomplete="tel">
+          <input id="contact-phone" name="phone" type="tel" placeholder="Phone number" autocomplete="tel" required>
           <input id="contact-email" name="email" type="email" placeholder="Email address" autocomplete="email" required>
-          <input id="contact-role" name="role" type="text" placeholder="Profession / grade">
-          <textarea id="contact-goal" name="goal" placeholder="What would you like help with?"></textarea>
-          <button class="button button-dark" type="submit">Continue on WhatsApp</button>
+          <select id="contact-course" name="course" required>
+            <option value="" disabled selected>Which course are you asking about?</option>
+            <option>Speak with Confidence (₹999)</option>
+            <option>Executive Presence Masterclass (₹1,999)</option>
+            <option>Voice &amp; Impact Workshop (₹1,499)</option>
+            <option>Little Stars — Ages 6–10 (₹99/session)</option>
+            <option>Rising Leaders — Ages 11–14 (₹199/session)</option>
+            <option>Young Champions — Ages 15–18 (₹299/session)</option>
+            <option>General question</option>
+          </select>
+          <textarea id="contact-goal" name="goal" placeholder="Your question or what you would like help with"></textarea>
+          <button class="button button-dark" type="submit" id="contact-submit">Send my enquiry</button>
+          <div class="contact-success" id="contact-success">Thank you! Your enquiry has reached Sonali — she will get back to you soon. 🎤</div>
+          <div class="contact-alt">Prefer chat? <a id="contact-wa-link" href="#" target="_blank" rel="noopener">Message Sonali on WhatsApp instead</a></div>
         </form>
       </div>
     </section>
@@ -723,20 +738,35 @@
 
     document.getElementById("contact-form").addEventListener("submit", event => {
       event.preventDefault();
+      const enquiry = {
+        action: "enquiry",
+        name: document.getElementById("contact-name").value.trim(),
+        email: document.getElementById("contact-email").value.trim(),
+        phone: document.getElementById("contact-phone").value.trim(),
+        course: document.getElementById("contact-course").value,
+        message: document.getElementById("contact-goal").value.trim(),
+        timestamp: new Date().toISOString()
+      };
+      fetch(config.sheets, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(enquiry)
+      }).catch(error => console.error("Enquiry save failed", error));
+      document.getElementById("contact-success").classList.add("show");
+      document.getElementById("contact-submit").disabled = true;
+      document.getElementById("contact-submit").textContent = "Enquiry sent ✓";
+    });
+
+    document.getElementById("contact-wa-link").addEventListener("click", event => {
+      event.preventDefault();
       const name = document.getElementById("contact-name").value.trim();
-      const email = document.getElementById("contact-email").value.trim();
-      const phone = document.getElementById("contact-phone").value.trim();
-      const role = document.getElementById("contact-role").value.trim();
+      const course = document.getElementById("contact-course").value;
       const goal = document.getElementById("contact-goal").value.trim();
-      const message = [
-        "Hi Sonali, I reached out from isonali.com.",
-        "",
-        "Name: " + name,
-        "Email: " + email,
-        "Phone: " + phone,
-        "Profession / grade: " + role,
-        "Goal: " + goal
-      ].join("\n");
+      const message = "Hi Sonali, I reached out from isonali.com." +
+        (name ? "\nName: " + name : "") +
+        (course ? "\nAsking about: " + course : "") +
+        (goal ? "\nQuestion: " + goal : "");
       window.open("https://wa.me/" + config.whatsapp + "?text=" + encodeURIComponent(message), "_blank", "noopener");
     });
 
