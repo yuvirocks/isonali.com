@@ -279,6 +279,18 @@
             </div>
           </div>
 
+          <div class="box">
+            <h3>🎞️ Reels on my website</h3>
+            <div class="sub">These reels appear in the carousel on isonali.com. Paste a reel link and tap Add — the website updates by itself. Newest goes first.</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <input id="insta-url" placeholder="Paste the Instagram reel link here…" style="flex:1;min-width:200px;background:var(--navy);border:1px solid var(--line);color:#fff;padding:10px 12px;border-radius:10px">
+              <button class="btn solid" id="insta-add">Add to website</button>
+            </div>
+            <div class="scroll-x" style="margin-top:14px">
+              <table id="insta-table"><thead><tr><th>#</th><th>Reel</th><th>Added</th><th></th></tr></thead><tbody></tbody></table>
+            </div>
+          </div>
+
           <div class="box" id="yt-box">
             <h3>🏆 Your YouTube videos — what's working</h3>
             <div class="sub" id="yt-sub">Videos with the most views are at the top. Make more content like your top 3!</div>
@@ -383,7 +395,7 @@ const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwlXHe48tdODJKeKzK-Y
 const SITE = "https://isonali.com";
 
 let KEY = sessionStorage.getItem("dashKey") || "";
-let DATA = { registrations:[], crm:[], planner:[], metrics:[], payments:[], webinars:[], enquiries:[] };
+let DATA = { registrations:[], crm:[], planner:[], metrics:[], payments:[], webinars:[], enquiries:[], instaPosts:[] };
 let YT = null, charts = {};
 
 /* ---------- helpers ---------- */
@@ -424,7 +436,7 @@ async function loadData(){
   const res = await apiGet({action:"data"}).catch(()=>null);
   if(!res || !res.ok){ toast("Could not load — check internet and try again"); return; }
   DATA = res;
-  renderHome(); renderStudents(); renderEnquiries(); renderWebinars(); renderPlanner(); renderInsta();
+  renderHome(); renderStudents(); renderEnquiries(); renderWebinars(); renderPlanner(); renderInsta(); renderInstaPosts();
 }
 
 /* ---------- HOME ---------- */
@@ -648,6 +660,32 @@ function renderPlanner(){
 async function updatePlanItem(id,fields){
   const res=await apiPost({action:"updatePlan",id,...fields});
   toast(res.ok?"Saved ✓":"Could not save");
+}
+
+/* ---------- WEBSITE REELS ---------- */
+function renderInstaPosts(){
+  const tb=$("insta-table").querySelector("tbody"); tb.innerHTML="";
+  (DATA.instaPosts||[]).forEach((p,i)=>{
+    tb.insertAdjacentHTML("beforeend",`<tr>
+      <td>${i+1}</td>
+      <td><a href="${esc(p.Url)}" target="_blank" rel="noopener" style="font-size:13px">${esc(String(p.Url).replace("https://www.instagram.com/",""))}</a></td>
+      <td style="white-space:nowrap;color:rgba(255,255,255,.45);font-size:12.5px">${p.Added?fmtDate(p.Added):""}</td>
+      <td><button class="btn" onclick="removeInstaPost('${esc(p.Id)}')">🗑 Remove</button></td></tr>`);
+  });
+  if(!tb.children.length) tb.innerHTML=`<tr><td colspan="4" class="empty">No reels added yet — paste a link above and it appears on the website.</td></tr>`;
+}
+$("insta-add").addEventListener("click",async()=>{
+  const url=$("insta-url").value.trim();
+  if(!url) return toast("Paste a reel link first");
+  toast("Adding…");
+  const res=await apiPost({action:"addInstaPost",url});
+  if(res.ok){ toast("Added — it's on the website now ✓"); $("insta-url").value=""; loadData(); }
+  else toast(res.error||"Could not add");
+});
+async function removeInstaPost(id){
+  const res=await apiPost({action:"removeInstaPost",id});
+  if(res.ok){ toast("Removed from website ✓"); loadData(); }
+  else toast("Could not remove");
 }
 
 /* ---------- YOUTUBE ---------- */

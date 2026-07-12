@@ -38,7 +38,8 @@ var SHEETS = {
   METRICS: "InstaMetrics",
   PAY: "Payments",
   WEB: "Webinars",
-  ENQ: "Enquiries"
+  ENQ: "Enquiries",
+  INSTA: "InstaPosts"
 };
 
 var HEADERS = {
@@ -48,7 +49,8 @@ var HEADERS = {
   InstaMetrics: ["Date","Followers","Reach","ProfileViews","LinkClicks","Notes"],
   Payments: ["PaymentId","Date","Amount","Currency","Status","Method","Email","Contact","Description"],
   Webinars: ["Id","Title","DateTime","Platform","JoinLink","Price","Status","Notes"],
-  Enquiries: ["Id","Timestamp","Name","Email","Phone","Course","Message","Status","Reply","RepliedAt"]
+  Enquiries: ["Id","Timestamp","Name","Email","Phone","Course","Message","Status","Reply","RepliedAt"],
+  InstaPosts: ["Id","Url","Added"]
 };
 
 function spreadsheet_() {
@@ -91,6 +93,11 @@ function doGet(e) {
   if (p.action === "login") {
     return ok_({ ok: authed_(p.key) });
   }
+  // Public: list of Instagram posts shown on the website (no key needed)
+  if (p.action === "instaPosts") {
+    var rows = readSheet_(SHEETS.INSTA);
+    return ok_({ ok: true, posts: rows.map(function (r) { return r.Url; }) });
+  }
   if (!authed_(p.key)) return ok_({ ok: false, error: "unauthorized" });
 
   if (p.action === "data") {
@@ -103,6 +110,7 @@ function doGet(e) {
       payments: readSheet_(SHEETS.PAY),
       webinars: readSheet_(SHEETS.WEB),
       enquiries: readSheet_(SHEETS.ENQ),
+      instaPosts: readSheet_(SHEETS.INSTA),
       razorpayConfigured: !!PropertiesService.getScriptProperties().getProperty("RZP_KEY_ID"),
       youtubeConfigured: !!YT_API_KEY
     });
@@ -165,6 +173,8 @@ function doPost(e) {
     case "addWebinar":   return ok_(addWebinar_(data));
     case "updateWebinar":return ok_(updateWebinar_(data));
     case "replyEnquiry": return ok_(replyEnquiry_(data));
+    case "addInstaPost": return ok_(addInstaPost_(data));
+    case "removeInstaPost": return ok_(removeInstaPost_(data));
     default:             return ok_({ ok: false, error: "unknown action" });
   }
 }
@@ -310,6 +320,33 @@ function syncRazorpay_() {
     added++;
   });
   return { ok: true, added: added, total: items.length };
+}
+
+// Website Instagram carousel management. Newest links go on top.
+function addInstaPost_(d) {
+  var m = String(d.url || "").match(/instagram\.com\/(?:[^\/]+\/)?(p|reel|tv)\/([A-Za-z0-9_-]+)/);
+  if (!m) return { ok: false, error: "That does not look like an Instagram post link" };
+  var url = "https://www.instagram.com/" + m[1] + "/" + m[2] + "/";
+  var sh = sheet_(SHEETS.INSTA);
+  var values = sh.getDataRange().getValues();
+  for (var r = 1; r < values.length; r++) {
+    if (String(values[r][1]) === url) return { ok: false, error: "That post is already on the website" };
+  }
+  sh.insertRowAfter(1);
+  sh.getRange(2, 1, 1, 3).setValues([[Utilities.getUuid(), url, new Date().toISOString()]]);
+  return { ok: true, url: url };
+}
+
+function removeInstaPost_(d) {
+  var sh = sheet_(SHEETS.INSTA);
+  var values = sh.getDataRange().getValues();
+  for (var r = 1; r < values.length; r++) {
+    if (String(values[r][0]) === String(d.id)) {
+      sh.deleteRow(r + 1);
+      return { ok: true };
+    }
+  }
+  return { ok: false, error: "post not found" };
 }
 
 /* ---------------- YOUTUBE STATS (optional) ---------------- */

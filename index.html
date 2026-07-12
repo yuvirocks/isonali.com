@@ -305,16 +305,20 @@
     }
     .insta-track::-webkit-scrollbar { display: none; }
     .insta-card {
-      flex: 0 0 320px; scroll-snap-align: start; border-radius: 18px; overflow: hidden;
-      background: var(--navy); border: 1px solid var(--line-dark);
+      position: relative; flex: 0 0 300px; height: 533px; scroll-snap-align: start;
+      border-radius: 18px; overflow: hidden; background: #000; border: 1px solid var(--line-dark);
       transition: transform .25s, border-color .25s;
     }
     .insta-card:hover { transform: translateY(-4px); border-color: rgba(200,154,74,.5); }
-    .insta-card iframe { display: block; width: 320px; height: 460px; border: 0; background: #fff; }
+    /* The iframe is taller than the card and shifted up, so Instagram's header
+       (avatar + "View profile") and bottom bar are cropped out of view. */
+    .insta-card iframe {
+      position: absolute; top: -54px; left: 0; width: 100%; height: calc(100% + 200px);
+      border: 0; background: #000;
+    }
     @media (max-width: 700px) {
       .insta { padding: 54px 0 58px; }
-      .insta-card { flex-basis: 280px; }
-      .insta-card iframe { width: 280px; height: 420px; }
+      .insta-card { flex-basis: 270px; height: 480px; }
     }
 
     .stories { background: var(--paper); color: var(--ink); overflow: hidden; }
@@ -888,32 +892,41 @@
       window.open("https://wa.me/" + config.whatsapp + "?text=" + encodeURIComponent(message), "_blank", "noopener");
     });
 
-    // Instagram carousel: renders official embed iframes, swipeable + arrow buttons
-    (function () {
-      const posts = (config.instagramPosts || [])
-        .map(u => { const m = String(u).match(/instagram\.com\/(?:[^\/]+\/)?(p|reel|tv)\/([A-Za-z0-9_-]+)/); return m ? "https://www.instagram.com/" + m[1] + "/" + m[2] + "/" : null; })
-        .filter(Boolean);
+    // Instagram carousel: plays reels inline. The list is managed from the
+    // dashboard (Content Studio -> Reels on my website); config.instagramPosts
+    // is only a fallback if the dashboard list is empty or unreachable.
+    (async function () {
+      const normalize = u => {
+        const m = String(u).match(/instagram\.com\/(?:[^\/]+\/)?(p|reel|tv)\/([A-Za-z0-9_-]+)/);
+        return m ? "https://www.instagram.com/" + m[1] + "/" + m[2] + "/" : null;
+      };
+      let posts = [];
+      try {
+        const res = await fetch(config.sheets + "?action=instaPosts");
+        const json = await res.json();
+        if (json.ok && json.posts) posts = json.posts;
+      } catch (err) { /* fall back below */ }
+      if (!posts.length) posts = config.instagramPosts || [];
+      posts = posts.map(normalize).filter(Boolean);
       if (!posts.length) return;
+
       const section = document.getElementById("instagram");
       const track = document.getElementById("insta-track");
       posts.forEach(url => {
-        const clean = url;
-        const card = document.createElement("a");
+        const card = document.createElement("div");
         card.className = "insta-card";
-        card.href = clean;
-        card.target = "_blank";
-        card.rel = "noopener";
-        card.setAttribute("aria-label", "Open this post on Instagram");
         const frame = document.createElement("iframe");
-        frame.src = clean + "embed/";
+        frame.src = url + "embed/";
         frame.loading = "lazy";
         frame.setAttribute("scrolling", "no");
-        frame.title = "Instagram post";
+        frame.setAttribute("allow", "autoplay; encrypted-media");
+        frame.setAttribute("allowfullscreen", "true");
+        frame.title = "Instagram reel";
         card.appendChild(frame);
         track.appendChild(card);
       });
       section.hidden = false;
-      const step = () => (track.querySelector(".insta-card")?.offsetWidth || 320) + 16;
+      const step = () => (track.querySelector(".insta-card")?.offsetWidth || 300) + 16;
       document.getElementById("insta-prev").addEventListener("click", () => track.scrollBy({ left: -step(), behavior: "smooth" }));
       document.getElementById("insta-next").addEventListener("click", () => track.scrollBy({ left: step(), behavior: "smooth" }));
     })();
