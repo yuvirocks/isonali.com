@@ -289,6 +289,34 @@
     .kids-actions { display: flex; flex-wrap: wrap; gap: 12px; }
     .button-coral { background: var(--coral); color: #fff; }
 
+    .insta { background: var(--navy-2); padding: 70px 0 76px; border-top: 1px solid var(--line-dark); border-bottom: 1px solid var(--line-dark); }
+    .insta-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; flex-wrap: wrap; margin-bottom: 28px; }
+    .insta-title { margin: 6px 0 0; font: 600 clamp(28px, 3.5vw, 44px)/1 var(--serif); color: #fff; letter-spacing: -.02em; }
+    .insta-nav { display: flex; align-items: center; gap: 10px; }
+    .insta-nav button {
+      width: 48px; height: 48px; border: 1.5px solid var(--line-dark); border-radius: 50%;
+      background: transparent; color: #fff; cursor: pointer; font-size: 18px;
+      transition: background .2s, color .2s, border-color .2s, transform .2s;
+    }
+    .insta-nav button:hover { background: var(--gold); border-color: var(--gold); color: var(--navy); transform: translateY(-2px); }
+    .insta-track {
+      display: flex; gap: 16px; overflow-x: auto; scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch; scrollbar-width: none; padding: 6px 2px 10px;
+    }
+    .insta-track::-webkit-scrollbar { display: none; }
+    .insta-card {
+      flex: 0 0 320px; scroll-snap-align: start; border-radius: 18px; overflow: hidden;
+      background: var(--navy); border: 1px solid var(--line-dark);
+      transition: transform .25s, border-color .25s;
+    }
+    .insta-card:hover { transform: translateY(-4px); border-color: rgba(200,154,74,.5); }
+    .insta-card iframe { display: block; width: 320px; height: 460px; border: 0; background: #fff; }
+    @media (max-width: 700px) {
+      .insta { padding: 54px 0 58px; }
+      .insta-card { flex-basis: 280px; }
+      .insta-card iframe { width: 280px; height: 420px; }
+    }
+
     .stories { background: var(--paper); color: var(--ink); overflow: hidden; }
     .story-stage { display: grid; grid-template-columns: 1.3fr .7fr; gap: 90px; align-items: end; }
     .story-quote { margin: 0; font: italic 500 clamp(36px, 4.5vw, 66px)/1.12 var(--serif); letter-spacing: -.035em; }
@@ -513,6 +541,23 @@
       </div>
     </div>
 
+    <section class="insta" id="instagram" hidden>
+      <div class="section-inner">
+        <div class="insta-head reveal">
+          <div>
+            <div class="section-index">Fresh from Instagram</div>
+            <h2 class="insta-title">@isonalidotcom</h2>
+          </div>
+          <div class="insta-nav">
+            <button type="button" id="insta-prev" aria-label="Previous posts">←</button>
+            <button type="button" id="insta-next" aria-label="Next posts">→</button>
+            <a class="button button-outline" href="https://www.instagram.com/isonalidotcom/" target="_blank" rel="noopener">Follow</a>
+          </div>
+        </div>
+        <div class="insta-track reveal" id="insta-track" tabindex="0" aria-label="Instagram posts, swipe to browse"></div>
+      </div>
+    </section>
+
     <section class="section light" id="about">
       <div class="section-inner">
         <div class="section-head reveal">
@@ -710,7 +755,13 @@
         "Kids Coaching Program": ""             // enquiry — leave blank to keep open amount
       },
       sheets: "https://script.google.com/macros/s/AKfycbwlXHe48tdODJKeKzK-YMihm42FBZeA6cFc5bfxQk02lNQKZaoHcIkU2J8leN4BQU-UUw/exec",
-      whatsapp: "919421357124"
+      whatsapp: "919421357124",
+      // Latest Instagram posts/reels for the carousel. To update: open the post
+      // in Instagram -> Share -> Copy link -> paste here (newest first).
+      instagramPosts: [
+        // "https://www.instagram.com/p/XXXXXXXXXXX/",
+        // "https://www.instagram.com/reel/XXXXXXXXXXX/"
+      ]
     };
 
     const nav = document.getElementById("nav");
@@ -831,6 +882,34 @@
         (goal ? "\nQuestion: " + goal : "");
       window.open("https://wa.me/" + config.whatsapp + "?text=" + encodeURIComponent(message), "_blank", "noopener");
     });
+
+    // Instagram carousel: renders official embed iframes, swipeable + arrow buttons
+    (function () {
+      const posts = (config.instagramPosts || []).filter(u => /instagram\.com\/(p|reel|tv)\//.test(u));
+      if (!posts.length) return;
+      const section = document.getElementById("instagram");
+      const track = document.getElementById("insta-track");
+      posts.forEach(url => {
+        const clean = url.split("?")[0].replace(/\/?$/, "/");
+        const card = document.createElement("a");
+        card.className = "insta-card";
+        card.href = clean;
+        card.target = "_blank";
+        card.rel = "noopener";
+        card.setAttribute("aria-label", "Open this post on Instagram");
+        const frame = document.createElement("iframe");
+        frame.src = clean + "embed/";
+        frame.loading = "lazy";
+        frame.setAttribute("scrolling", "no");
+        frame.title = "Instagram post";
+        card.appendChild(frame);
+        track.appendChild(card);
+      });
+      section.hidden = false;
+      const step = () => (track.querySelector(".insta-card")?.offsetWidth || 320) + 16;
+      document.getElementById("insta-prev").addEventListener("click", () => track.scrollBy({ left: -step(), behavior: "smooth" }));
+      document.getElementById("insta-next").addEventListener("click", () => track.scrollBy({ left: step(), behavior: "smooth" }));
+    })();
 
     const stories = [
       { quote: "I went from dreading presentations to delivering keynotes with complete confidence.", name: "Priya Sharma", role: "VP of Marketing · Tech startup" },
