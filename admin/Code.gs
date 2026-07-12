@@ -29,6 +29,10 @@ var SHEET_ID = "145sNrUGAKGSHSKyNz9g0sdWRB-WHkytSbySGw5J-87Y"; // ONLY if script
    3. Put the channel handle (like @isonalidotcom) below                    */
 var YT_API_KEY = "";
 var YT_CHANNEL = ""; // example: "@isonalidotcom"
+
+/* Website reels: videos in this Drive folder play on isonali.com.
+   The folder is created automatically on first use - just drop video files in. */
+var REELS_FOLDER = "iSonali Website Reels";
 /* ======================================================== */
 
 var SHEETS = {
@@ -38,8 +42,7 @@ var SHEETS = {
   METRICS: "InstaMetrics",
   PAY: "Payments",
   WEB: "Webinars",
-  ENQ: "Enquiries",
-  INSTA: "InstaPosts"
+  ENQ: "Enquiries"
 };
 
 var HEADERS = {
@@ -49,8 +52,7 @@ var HEADERS = {
   InstaMetrics: ["Date","Followers","Reach","ProfileViews","LinkClicks","Notes"],
   Payments: ["PaymentId","Date","Amount","Currency","Status","Method","Email","Contact","Description"],
   Webinars: ["Id","Title","DateTime","Platform","JoinLink","Price","Status","Notes"],
-  Enquiries: ["Id","Timestamp","Name","Email","Phone","Course","Message","Status","Reply","RepliedAt"],
-  InstaPosts: ["Id","Url","Added"]
+  Enquiries: ["Id","Timestamp","Name","Email","Phone","Course","Message","Status","Reply","RepliedAt"]
 };
 
 function spreadsheet_() {
@@ -93,10 +95,9 @@ function doGet(e) {
   if (p.action === "login") {
     return ok_({ ok: authed_(p.key) });
   }
-  // Public: list of Instagram posts shown on the website (no key needed)
+  // Public: reel videos shown on the website (no key needed)
   if (p.action === "instaPosts") {
-    var rows = readSheet_(SHEETS.INSTA);
-    return ok_({ ok: true, posts: rows.map(function (r) { return r.Url; }) });
+    return ok_(websiteReels_());
   }
   if (!authed_(p.key)) return ok_({ ok: false, error: "unauthorized" });
 
@@ -110,7 +111,7 @@ function doGet(e) {
       payments: readSheet_(SHEETS.PAY),
       webinars: readSheet_(SHEETS.WEB),
       enquiries: readSheet_(SHEETS.ENQ),
-      instaPosts: readSheet_(SHEETS.INSTA),
+      reels: websiteReels_(),
       razorpayConfigured: !!PropertiesService.getScriptProperties().getProperty("RZP_KEY_ID"),
       youtubeConfigured: !!YT_API_KEY
     });
@@ -173,8 +174,7 @@ function doPost(e) {
     case "addWebinar":   return ok_(addWebinar_(data));
     case "updateWebinar":return ok_(updateWebinar_(data));
     case "replyEnquiry": return ok_(replyEnquiry_(data));
-    case "addInstaPost": return ok_(addInstaPost_(data));
-    case "removeInstaPost": return ok_(removeInstaPost_(data));
+    case "removeReel":   return ok_(removeReel_(data));
     default:             return ok_({ ok: false, error: "unknown action" });
   }
 }
@@ -322,31 +322,40 @@ function syncRazorpay_() {
   return { ok: true, added: added, total: items.length };
 }
 
-// Website Instagram carousel management. Newest links go on top.
-function addInstaPost_(d) {
-  var m = String(d.url || "").match(/instagram\.com\/(?:[^\/]+\/)?(p|reel|tv)\/([A-Za-z0-9_-]+)/);
-  if (!m) return { ok: false, error: "That does not look like an Instagram post link" };
-  var url = "https://www.instagram.com/" + m[1] + "/" + m[2] + "/";
-  var sh = sheet_(SHEETS.INSTA);
-  var values = sh.getDataRange().getValues();
-  for (var r = 1; r < values.length; r++) {
-    if (String(values[r][1]) === url) return { ok: false, error: "That post is already on the website" };
-  }
-  sh.insertRowAfter(1);
-  sh.getRange(2, 1, 1, 3).setValues([[Utilities.getUuid(), url, new Date().toISOString()]]);
-  return { ok: true, url: url };
+// Website reels: served from a Drive folder so videos play natively on the
+// site with no Instagram player, buttons or banners.
+function reelsFolder_() {
+  var it = DriveApp.getFoldersByName(REELS_FOLDER);
+  return it.hasNext() ? it.next() : DriveApp.createFolder(REELS_FOLDER);
 }
 
-function removeInstaPost_(d) {
-  var sh = sheet_(SHEETS.INSTA);
-  var values = sh.getDataRange().getValues();
-  for (var r = 1; r < values.length; r++) {
-    if (String(values[r][0]) === String(d.id)) {
-      sh.deleteRow(r + 1);
-      return { ok: true };
-    }
+function websiteReels_() {
+  var cache = CacheService.getScriptCache();
+  var hit = cache.get("reels_v1");
+  if (hit) return JSON.parse(hit);
+  var folder = reelsFolder_();
+  var files = folder.getFiles();
+  var list = [];
+  while (files.hasNext()) {
+    var f = files.next();
+    if (String(f.getMimeType()).indexOf("video/") !== 0) continue;
+    try { f.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW); } catch (err) {}
+    list.push({ id: f.getId(), name: f.getName(), added: f.getDateCreated().toISOString() });
   }
-  return { ok: false, error: "post not found" };
+  list.sort(function (a, b) { return a.added < b.added ? 1 : -1; });
+  var res = { ok: true, videos: list, folderUrl: folder.getUrl() };
+  cache.put("reels_v1", JSON.stringify(res), 300); // 5 min cache
+  return res;
+}
+
+function removeReel_(d) {
+  try {
+    DriveApp.getFileById(String(d.id)).setTrashed(true);
+    CacheService.getScriptCache().remove("reels_v1");
+    return { ok: true };
+  } catch (err) {
+    return { ok: false, error: "could not remove video" };
+  }
 }
 
 /* ---------------- YOUTUBE STATS (optional) ---------------- */

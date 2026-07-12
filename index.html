@@ -310,12 +310,25 @@
       transition: transform .25s, border-color .25s;
     }
     .insta-card:hover { transform: translateY(-4px); border-color: rgba(200,154,74,.5); }
-    /* The iframe is taller than the card and shifted up, so Instagram's header
-       (avatar + "View profile") and bottom bar are cropped out of view. */
+    /* Fallback Instagram embeds: iframe is taller than the card and shifted up,
+       so Instagram's header (avatar + "View profile") is cropped out of view. */
     .insta-card iframe {
       position: absolute; top: -54px; left: 0; width: 100%; height: calc(100% + 200px);
       border: 0; background: #000;
     }
+    /* Native player for self-hosted reels: just the video, nothing else. */
+    .insta-card video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; background: #000; }
+    .insta-play {
+      position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+      background: rgba(11,20,36,.25); border: 0; cursor: pointer; transition: opacity .25s;
+    }
+    .insta-play::before {
+      content: ""; width: 74px; height: 74px; border-radius: 50%;
+      background: rgba(255,255,255,.92) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%230b1424'><path d='M8 5.5v13l11-6.5z'/></svg>") center/38px no-repeat;
+      box-shadow: 0 10px 30px rgba(0,0,0,.4); transition: transform .2s;
+    }
+    .insta-play:hover::before { transform: scale(1.08); }
+    .insta-card.playing .insta-play { opacity: 0; pointer-events: none; }
     @media (max-width: 700px) {
       .insta { padding: 54px 0 58px; }
       .insta-card { flex-basis: 270px; height: 480px; }
@@ -900,32 +913,66 @@
         const m = String(u).match(/instagram\.com\/(?:[^\/]+\/)?(p|reel|tv)\/([A-Za-z0-9_-]+)/);
         return m ? "https://www.instagram.com/" + m[1] + "/" + m[2] + "/" : null;
       };
-      let posts = [];
+      const section = document.getElementById("instagram");
+      const track = document.getElementById("insta-track");
+
+      // Preferred source: Sonali's own video files (Drive folder, managed from
+      // the dashboard). Plays natively - no Instagram player, buttons or banners.
+      let videos = [];
       try {
         const res = await fetch(config.sheets + "?action=instaPosts");
         const json = await res.json();
-        if (json.ok && json.posts) posts = json.posts;
+        if (json.ok && json.videos) videos = json.videos;
       } catch (err) { /* fall back below */ }
-      if (!posts.length) posts = config.instagramPosts || [];
-      posts = posts.map(normalize).filter(Boolean);
-      if (!posts.length) return;
 
-      const section = document.getElementById("instagram");
-      const track = document.getElementById("insta-track");
-      posts.forEach(url => {
-        const card = document.createElement("div");
-        card.className = "insta-card";
-        const frame = document.createElement("iframe");
-        frame.src = url + "embed/";
-        frame.loading = "lazy";
-        frame.setAttribute("scrolling", "no");
-        frame.setAttribute("allow", "autoplay; encrypted-media");
-        frame.setAttribute("allowfullscreen", "true");
-        frame.title = "Instagram reel";
-        card.appendChild(frame);
-        track.appendChild(card);
-      });
-      section.hidden = false;
+      if (videos.length) {
+        videos.forEach(v => {
+          const card = document.createElement("div");
+          card.className = "insta-card";
+          const vid = document.createElement("video");
+          vid.src = "https://drive.google.com/uc?export=download&id=" + v.id;
+          vid.poster = "https://drive.google.com/thumbnail?id=" + v.id + "&sz=w600";
+          vid.loop = true; vid.playsInline = true; vid.preload = "none";
+          const overlay = document.createElement("button");
+          overlay.className = "insta-play";
+          overlay.setAttribute("aria-label", "Play video");
+          overlay.addEventListener("click", () => {
+            track.querySelectorAll("video").forEach(o => { if (o !== vid) { o.pause(); o.closest(".insta-card").classList.remove("playing"); } });
+            vid.play(); card.classList.add("playing");
+          });
+          vid.addEventListener("click", () => { vid.pause(); card.classList.remove("playing"); });
+          vid.addEventListener("error", () => {
+            // Drive refused direct streaming - use Drive's own player instead
+            const frame = document.createElement("iframe");
+            frame.src = "https://drive.google.com/file/d/" + v.id + "/preview";
+            frame.style.top = "0"; frame.style.height = "100%";
+            frame.setAttribute("allow", "autoplay");
+            frame.title = v.name || "Reel";
+            card.innerHTML = ""; card.appendChild(frame);
+          });
+          card.appendChild(vid); card.appendChild(overlay);
+          track.appendChild(card);
+        });
+        section.hidden = false;
+      } else {
+        // Fallback: Instagram embeds (some reels may refuse inline play there)
+        const posts = (config.instagramPosts || []).map(normalize).filter(Boolean);
+        if (!posts.length) return;
+        posts.forEach(url => {
+          const card = document.createElement("div");
+          card.className = "insta-card";
+          const frame = document.createElement("iframe");
+          frame.src = url + "embed/";
+          frame.loading = "lazy";
+          frame.setAttribute("scrolling", "no");
+          frame.setAttribute("allow", "autoplay; encrypted-media");
+          frame.setAttribute("allowfullscreen", "true");
+          frame.title = "Instagram reel";
+          card.appendChild(frame);
+          track.appendChild(card);
+        });
+        section.hidden = false;
+      }
       const step = () => (track.querySelector(".insta-card")?.offsetWidth || 300) + 16;
       document.getElementById("insta-prev").addEventListener("click", () => track.scrollBy({ left: -step(), behavior: "smooth" }));
       document.getElementById("insta-next").addEventListener("click", () => track.scrollBy({ left: step(), behavior: "smooth" }));
