@@ -433,7 +433,7 @@
         <a href="#kids">Kids</a>
         <a href="#stories">Stories</a>
         <a href="#contact">Contact</a>
-        <a class="button button-gold" href="#contact">Book a call</a>
+        <a class="button button-gold" href="#contact" id="book-call-btn">Book a call</a>
       </nav>
       <button class="menu-toggle" id="menu-toggle" aria-label="Open menu" aria-expanded="false"></button>
     </div>
@@ -585,6 +585,7 @@
             <option>Little Stars — Ages 6–10 (₹99/session)</option>
             <option>Rising Leaders — Ages 11–14 (₹199/session)</option>
             <option>Young Champions — Ages 15–18 (₹299/session)</option>
+            <option>Book a free discovery call</option>
             <option>General question</option>
           </select>
           <textarea id="contact-goal" name="goal" placeholder="Your question or what you would like help with"></textarea>
@@ -756,6 +757,14 @@
       document.getElementById("contact-success").classList.add("show");
       document.getElementById("contact-submit").disabled = true;
       document.getElementById("contact-submit").textContent = "Enquiry sent ✓";
+    });
+
+    document.getElementById("book-call-btn").addEventListener("click", () => {
+      const course = document.getElementById("contact-course");
+      course.value = "Book a free discovery call";
+      const goal = document.getElementById("contact-goal");
+      if (!goal.value.trim()) goal.placeholder = "When is a good time to call you, and what would you like to discuss?";
+      setTimeout(() => document.getElementById("contact-name").focus({ preventScroll: true }), 600);
     });
 
     document.getElementById("contact-wa-link").addEventListener("click", event => {
