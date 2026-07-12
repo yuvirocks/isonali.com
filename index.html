@@ -205,19 +205,37 @@
     .principle p { margin: 0; font-size: 14px; }
 
     .programs { background: var(--ivory); color: var(--ink); }
-    .program-list { border-top: 1px solid var(--line-light); }
-    .program {
-      display: grid; grid-template-columns: 78px 1fr 250px 170px; gap: 28px;
-      align-items: center; padding: 34px 0; border-bottom: 1px solid var(--line-light);
-      transition: padding .2s, background .2s;
+    .programs-sub { max-width: 580px; color: var(--muted); font-size: 16px; line-height: 1.75; margin: -26px 0 46px; }
+    .module-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .module {
+      position: relative; display: flex; flex-direction: column;
+      background: #fff; border: 1px solid var(--line-light); border-radius: 24px;
+      padding: 36px 30px 28px; box-shadow: 0 6px 24px rgba(23,32,51,.06);
+      transition: transform .25s, box-shadow .25s, border-color .25s;
     }
-    .program:hover { padding-inline: 18px; background: rgba(255,255,255,.45); }
-    .program-number { color: var(--gold); font: italic 500 24px var(--serif); }
-    .program h3 { margin: 0 0 7px; font: 500 clamp(25px, 2.6vw, 36px)/1.1 var(--serif); }
-    .program p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.6; }
-    .program-meta { color: var(--muted); font-size: 13px; line-height: 1.65; }
-    .program-meta strong { color: var(--ink); font-size: 16px; }
-    .program .button { width: 100%; }
+    .module:hover { transform: translateY(-6px); box-shadow: 0 20px 48px rgba(23,32,51,.14); border-color: rgba(200,154,74,.55); }
+    .module .module-tag {
+      font-size: 11px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase;
+      color: var(--gold); margin-bottom: 14px;
+    }
+    .module h3 { margin: 0 0 10px; font: 600 27px/1.15 var(--serif); letter-spacing: -.015em; }
+    .module > p { margin: 0 0 18px; color: var(--muted); font-size: 14px; line-height: 1.65; }
+    .module ul { list-style: none; margin: 0 0 24px; padding: 0; }
+    .module li { position: relative; padding-left: 24px; margin-bottom: 9px; font-size: 13.5px; line-height: 1.5; color: var(--ink); }
+    .module li::before { content: "✓"; position: absolute; left: 0; color: var(--gold); font-weight: 700; }
+    .module .module-price {
+      margin-top: auto; padding-top: 16px; border-top: 1px solid var(--line-light);
+      display: flex; align-items: baseline; gap: 8px; margin-bottom: 16px;
+    }
+    .module .module-price strong { font: 600 36px var(--serif); color: var(--ink); letter-spacing: -.02em; }
+    .module .module-price span { color: var(--muted); font-size: 12.5px; }
+    .module .badge {
+      position: absolute; top: -13px; left: 30px; background: var(--navy); color: var(--gold-light);
+      font-size: 10.5px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+      padding: 6px 14px; border-radius: 999px; box-shadow: 0 6px 16px rgba(11,20,36,.25);
+    }
+    .module.spotlight { border-color: rgba(200,154,74,.6); box-shadow: 0 14px 40px rgba(200,154,74,.18); }
+    @media (max-width: 920px) { .module-cards { grid-template-columns: 1fr; gap: 24px; } }
 
     .kids {
       position: relative; overflow: hidden; background: #16233a;
@@ -442,8 +460,6 @@
       .section { padding: 90px 0; }
       .about-grid, .kids-layout, .story-stage, .contact-inner { grid-template-columns: 1fr; gap: 52px; }
       .section-head { grid-template-columns: 1fr; gap: 18px; }
-      .program { grid-template-columns: 52px 1fr 150px; }
-      .program .button { grid-column: 2 / -1; width: fit-content; }
       .kids-art { min-height: 480px; }
       .story-stage { align-items: start; }
       .contact-form { max-width: 650px; }
@@ -466,9 +482,6 @@
       .section { padding: 72px 0; }
       .section-head { margin-bottom: 46px; }
       .about-grid { gap: 48px; }
-      .program { grid-template-columns: 42px 1fr; gap: 16px; padding: 27px 0; }
-      .program-meta { grid-column: 2; }
-      .program .button { grid-column: 2; width: 100%; }
       .kids-art { min-height: 420px; padding: 36px 28px; border-radius: 150px 150px 18px 18px; }
       .kids-layout { gap: 42px; }
       .kids-actions .button { width: 100%; }
@@ -645,27 +658,47 @@
     <section class="section programs" id="programs">
       <div class="section-inner">
         <div class="section-head reveal">
-          <div class="section-index">03 / Adult programs</div>
-          <h2 class="section-title">Choose the room you are ready to <em>own.</em></h2>
+          <div class="section-index">03 / For professionals</div>
+          <h2 class="section-title">Mastering Corporate <em>Communications.</em></h2>
         </div>
-        <div class="program-list">
-          <article class="program reveal">
-            <div class="program-number">01</div>
-            <div><h3>Speak with Confidence</h3><p>Move beyond stage fear and deliver clear, compelling presentations.</p></div>
-            <div class="program-meta"><strong>₹999</strong><br>Saturday · 11 AM IST</div>
-            <button class="button button-dark register" data-program="Speak with Confidence" data-price="₹999">Register</button>
+        <p class="programs-sub reveal">One focused program, three practical modules. Take the module you need right now — or all three to own every conversation at work.</p>
+        <div class="module-cards">
+          <article class="module reveal">
+            <div class="module-tag">Module 01</div>
+            <h3>Interview Prep</h3>
+            <p>Walk into any interview calm, structured and memorable.</p>
+            <ul>
+              <li>Answer frameworks that organise your story</li>
+              <li>Confidence for HR, technical &amp; salary rounds</li>
+              <li>Live mock interviews with direct feedback</li>
+            </ul>
+            <div class="module-price"><strong>₹999</strong><span>per participant</span></div>
+            <button class="button button-dark register" data-program="Interview Prep" data-price="₹999">Register</button>
           </article>
-          <article class="program reveal">
-            <div class="program-number">02</div>
-            <div><h3>Executive Presence</h3><p>Communicate authority and authenticity in boardrooms and negotiations.</p></div>
-            <div class="program-meta"><strong>₹1,999</strong><br>2nd & 4th Sunday</div>
-            <button class="button button-dark register" data-program="Executive Presence Masterclass" data-price="₹1,999">Register</button>
+          <article class="module spotlight reveal">
+            <span class="badge">Most chosen</span>
+            <div class="module-tag">Module 02</div>
+            <h3>Presentation Skills</h3>
+            <p>Deliver presentations people remember — in meetings or on stage.</p>
+            <ul>
+              <li>Structure ideas so decisions get made</li>
+              <li>Voice, pace and presence under pressure</li>
+              <li>Handle tough Q&amp;A with composure</li>
+            </ul>
+            <div class="module-price"><strong>₹1,499</strong><span>per participant</span></div>
+            <button class="button button-dark register" data-program="Presentation Skills" data-price="₹1,499">Register</button>
           </article>
-          <article class="program reveal">
-            <div class="program-number">03</div>
-            <div><h3>Voice & Impact</h3><p>Use voice, energy and body language as practical leadership tools.</p></div>
-            <div class="program-meta"><strong>₹1,499</strong><br>1st Friday · 7 PM</div>
-            <button class="button button-dark register" data-program="Voice & Impact Workshop" data-price="₹1,499">Register</button>
+          <article class="module reveal">
+            <div class="module-tag">Module 03</div>
+            <h3>Client Communication</h3>
+            <p>Build trust, handle difficult conversations and close with clarity.</p>
+            <ul>
+              <li>Client meetings that build confidence in you</li>
+              <li>Negotiation &amp; difficult-conversation playbooks</li>
+              <li>Emails and follow-ups that move deals forward</li>
+            </ul>
+            <div class="module-price"><strong>₹1,999</strong><span>per participant</span></div>
+            <button class="button button-dark register" data-program="Client Communication" data-price="₹1,999">Register</button>
           </article>
         </div>
       </div>
@@ -702,9 +735,9 @@
           <input id="contact-email" name="email" type="email" placeholder="Email address" autocomplete="email" required>
           <select id="contact-course" name="course" required>
             <option value="" disabled selected>Which course are you asking about?</option>
-            <option>Speak with Confidence (₹999)</option>
-            <option>Executive Presence Masterclass (₹1,999)</option>
-            <option>Voice &amp; Impact Workshop (₹1,499)</option>
+            <option>Interview Prep (₹999)</option>
+            <option>Presentation Skills (₹1,499)</option>
+            <option>Client Communication (₹1,999)</option>
             <option>Little Stars — Ages 6–10 (₹99/session)</option>
             <option>Rising Leaders — Ages 11–14 (₹199/session)</option>
             <option>Young Champions — Ages 15–18 (₹299/session)</option>
@@ -763,9 +796,9 @@
       // app (Razorpay.me → share with a specific amount) and paste the full URL here.
       // Until a link is added, the button falls back to the open razorpay.me page.
       paymentLinks: {
-        "Speak with Confidence": "https://rzp.io/rzp/bX61biE",           // ₹999
-        "Executive Presence Masterclass": "https://rzp.io/rzp/9ybKWWh",  // ₹1,999
-        "Voice & Impact Workshop": "https://rzp.io/rzp/IZYMf8jQ",        // ₹1,499
+        "Interview Prep": "https://rzp.io/rzp/bX61biE",         // ₹999
+        "Presentation Skills": "https://rzp.io/rzp/IZYMf8jQ",   // ₹1,499
+        "Client Communication": "https://rzp.io/rzp/9ybKWWh",   // ₹1,999
         "Little Stars (Ages 6–10)": "https://rzp.io/rzp/HutrOAG",      // ₹99
         "Rising Leaders (Ages 11–14)": "https://rzp.io/rzp/LjANMPS",   // ₹199
         "Young Champions (Ages 15–18)": "https://rzp.io/rzp/8JmYlqZc", // ₹299
