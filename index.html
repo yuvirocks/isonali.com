@@ -242,20 +242,35 @@
     .kids-art strong em { color: var(--yellow); }
     .kids-copy .section-title { color: #fff; }
     .kids-copy > p { color: rgba(255,255,255,.65); font-size: 16px; line-height: 1.75; margin: 28px 0 34px; }
-    .age-options { border-top: 1px solid var(--line-dark); margin-bottom: 34px; }
-    .age-option {
-      display: flex; justify-content: space-between; align-items: center; gap: 20px;
-      padding: 18px 0; border-bottom: 1px solid var(--line-dark);
+    .age-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 34px 0; }
+    .age-card {
+      position: relative; background: rgba(255,255,255,.05); border: 1px solid var(--line-dark);
+      border-radius: 22px; padding: 30px 18px 18px; text-align: center;
+      transition: transform .25s, border-color .25s, background .25s;
     }
-    .age-option strong { color: #fff; font-size: 14px; }
-    .age-option span { color: rgba(255,255,255,.5); font-size: 13px; margin-left: auto; }
-    .tier-pay {
-      border: 1px solid var(--coral); background: transparent; color: var(--coral);
-      padding: 7px 18px; border-radius: 999px; font-size: 11px; font-weight: 600;
-      letter-spacing: .1em; text-transform: uppercase; cursor: pointer;
-      transition: background .2s, color .2s; white-space: nowrap;
+    .age-card:hover { transform: translateY(-6px); border-color: var(--coral); background: rgba(239,107,91,.09); }
+    .age-card.popular { border-color: rgba(244,201,93,.55); background: rgba(244,201,93,.06); }
+    .age-card .badge {
+      position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+      background: var(--yellow); color: var(--navy); font-size: 10.5px; font-weight: 700;
+      letter-spacing: .1em; text-transform: uppercase; padding: 5px 14px; border-radius: 999px; white-space: nowrap;
     }
-    .tier-pay:hover { background: var(--coral); color: #fff; }
+    .age-card .icon { font-size: 36px; display: block; margin-bottom: 10px; }
+    .age-card h3 { color: #fff; font: 600 21px var(--serif); margin: 0 0 3px; letter-spacing: -.01em; }
+    .age-card .ages { color: rgba(255,255,255,.55); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; }
+    .age-card .price { color: var(--yellow); font: 600 40px var(--serif); margin: 16px 0 0; line-height: 1; }
+    .age-card .price small { font: 500 12.5px var(--sans); color: rgba(255,255,255,.5); letter-spacing: .02em; }
+    .age-card .perk { color: rgba(255,255,255,.6); font-size: 13px; line-height: 1.55; margin: 12px 0 18px; min-height: 40px; }
+    .age-card .big-register {
+      display: block; width: 100%; padding: 15px 10px; border: 0; border-radius: 14px;
+      background: var(--coral); color: #fff; font: 700 14.5px var(--sans); letter-spacing: .03em;
+      cursor: pointer; transition: filter .2s, transform .2s; box-shadow: 0 10px 24px rgba(239,107,91,.35);
+    }
+    .age-card .big-register:hover { filter: brightness(1.12); transform: scale(1.03); }
+    @media (max-width: 860px) {
+      .age-cards { grid-template-columns: 1fr; gap: 22px; }
+      .age-card { padding: 32px 22px 22px; }
+    }
     .kids-actions { display: flex; flex-wrap: wrap; gap: 12px; }
     .button-coral { background: var(--coral); color: #fff; }
 
@@ -429,8 +444,8 @@
       </a>
       <nav class="nav-links" id="nav-links" aria-label="Main navigation">
         <a href="#about">About</a>
-        <a href="#programs">Programs</a>
         <a href="#kids">Kids</a>
+        <a href="#programs">Adults</a>
         <a href="#stories">Stories</a>
         <a class="button button-gold" href="#contact">Contact Me</a>
       </nav>
@@ -494,10 +509,56 @@
       </div>
     </section>
 
+    <section class="section kids" id="kids">
+      <div class="section-inner kids-layout">
+        <div class="kids-art reveal">
+          <img src="assets/indian-kids-public-speaking.png" alt="Indian children learning public speaking with a microphone" width="1122" height="1402" loading="lazy">
+          <small>Super Speakers Academy · Ages 6–18</small>
+          <strong>Big ideas deserve a <em>brave voice.</em></strong>
+        </div>
+        <div class="kids-copy reveal">
+          <div class="section-index">02 / For young speakers</div>
+          <h2 class="section-title">Give your child a voice for <em>life.</em></h2>
+          <p>Age-appropriate coaching through storytelling, debate, presentations and playful practice. Children learn to express themselves without fear while parents receive clear progress updates.</p>
+          <div class="age-cards">
+            <div class="age-card">
+              <span class="icon">⭐</span>
+              <h3>Little Stars</h3>
+              <div class="ages">Ages 6–10</div>
+              <div class="price">₹99 <small>/ session</small></div>
+              <p class="perk">Storytelling, show-and-tell and speaking games that make confidence fun.</p>
+              <button class="big-register register" data-program="Little Stars (Ages 6–10)" data-price="₹99/session">Register my child</button>
+            </div>
+            <div class="age-card popular">
+              <span class="badge">Most popular</span>
+              <span class="icon">🌟</span>
+              <h3>Rising Leaders</h3>
+              <div class="ages">Ages 11–14</div>
+              <div class="price">₹199 <small>/ session</small></div>
+              <p class="perk">Debates, speeches and class presentations — fear becomes excitement.</p>
+              <button class="big-register register" data-program="Rising Leaders (Ages 11–14)" data-price="₹199/session">Register my child</button>
+            </div>
+            <div class="age-card">
+              <span class="icon">🏆</span>
+              <h3>Young Champions</h3>
+              <div class="ages">Ages 15–18</div>
+              <div class="price">₹299 <small>/ session</small></div>
+              <p class="perk">Interviews, stage talks and leadership presence for the real world.</p>
+              <button class="big-register register" data-program="Young Champions (Ages 15–18)" data-price="₹299/session">Register my child</button>
+            </div>
+          </div>
+          <div class="kids-actions">
+            <button class="button button-coral register" data-program="Kids Coaching Program" data-price="From ₹99">Not sure? Enquire first</button>
+            <a class="button button-outline" href="#contact">Ask a question</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <section class="section programs" id="programs">
       <div class="section-inner">
         <div class="section-head reveal">
-          <div class="section-index">02 / Adult programs</div>
+          <div class="section-index">03 / Adult programs</div>
           <h2 class="section-title">Choose the room you are ready to <em>own.</em></h2>
         </div>
         <div class="program-list">
@@ -519,30 +580,6 @@
             <div class="program-meta"><strong>₹1,499</strong><br>1st Friday · 7 PM</div>
             <button class="button button-dark register" data-program="Voice & Impact Workshop" data-price="₹1,499">Register</button>
           </article>
-        </div>
-      </div>
-    </section>
-
-    <section class="section kids" id="kids">
-      <div class="section-inner kids-layout">
-        <div class="kids-art reveal">
-          <img src="assets/indian-kids-public-speaking.png" alt="Indian children learning public speaking with a microphone" width="1122" height="1402" loading="lazy">
-          <small>Super Speakers Academy · Ages 6–18</small>
-          <strong>Big ideas deserve a <em>brave voice.</em></strong>
-        </div>
-        <div class="kids-copy reveal">
-          <div class="section-index">03 / For young speakers</div>
-          <h2 class="section-title">A safe place to speak, try and grow.</h2>
-          <p>Age-appropriate coaching through storytelling, debate, presentations and playful practice. Children learn to express themselves without fear while parents receive clear progress updates.</p>
-          <div class="age-options">
-            <div class="age-option"><strong>Little Stars</strong><span>Ages 6–10 · ₹99/session</span><button class="tier-pay register" data-program="Little Stars (Ages 6–10)" data-price="₹99/session">Register</button></div>
-            <div class="age-option"><strong>Rising Leaders</strong><span>Ages 11–14 · ₹199/session</span><button class="tier-pay register" data-program="Rising Leaders (Ages 11–14)" data-price="₹199/session">Register</button></div>
-            <div class="age-option"><strong>Young Champions</strong><span>Ages 15–18 · ₹299/session</span><button class="tier-pay register" data-program="Young Champions (Ages 15–18)" data-price="₹299/session">Register</button></div>
-          </div>
-          <div class="kids-actions">
-            <button class="button button-coral register" data-program="Kids Coaching Program" data-price="From ₹99">Enquire for your child</button>
-            <a class="button button-outline" href="#contact">Ask a question</a>
-          </div>
         </div>
       </div>
     </section>
@@ -606,7 +643,7 @@
         <span class="brand-name">Sonali<span class="brand-dot">.</span></span>
       </a>
       <div class="footer-links">
-        <a href="#about">About</a><a href="#programs">Programs</a><a href="#kids">Kids</a>
+        <a href="#about">About</a><a href="#kids">Kids</a><a href="#programs">Adults</a>
         <a href="https://instagram.com/isonalidotcom" target="_blank" rel="noopener">Instagram</a>
       </div>
       <div class="copyright">© <span id="year"></span> iSonali.<br>Speak · Connect · Inspire.</div>
