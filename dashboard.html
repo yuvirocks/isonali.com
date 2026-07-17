@@ -5,36 +5,39 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>iSonali — Dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --cream: #FBF6EC;
-    --card: #FFFFFF;
-    --ink: #2E2418;
-    --ink-soft: #6B5F4E;
-    --hairline: #EAE0CB;
-    --gold-1: #F3D98A;
-    --gold-2: #C9A227;
-    --gold-3: #9C7A2E;
-    --paid-bg: #E4F2E9;
-    --paid-ink: #2F6B47;
-    --pending-bg: #FBEBD9;
-    --pending-ink: #A9660F;
-    --danger: #B23B3B;
+    --cream:#FBF6EC;
+    --cream-2:#F3EBDA;
+    --card:#FFFFFF;
+    --ink:#2B2419;
+    --ink-soft:#6B5F4C;
+    --gold:#C9982F;
+    --gold-deep:#A87A1E;
+    --gold-light:#F1DFAF;
+    --line:#E7DCC2;
+    --green:#3F7A4E;
+    --green-bg:#E7F3E9;
+    --amber:#B4791C;
+    --amber-bg:#FBEED9;
+    --red:#B04A3C;
+    --shadow: 0 10px 30px rgba(60,45,10,0.08);
     --radius: 16px;
-    --shadow: 0 2px 10px rgba(46,36,24,0.06), 0 1px 2px rgba(46,36,24,0.04);
   }
-  *{box-sizing:border-box;}
+  *{box-sizing:border-box; margin:0; padding:0;}
   body{
-    margin:0;
-    background: var(--cream);
-    color: var(--ink);
     font-family:'DM Sans', sans-serif;
-    -webkit-font-smoothing: antialiased;
+    background:
+      radial-gradient(circle at 10% 0%, var(--gold-light) 0%, transparent 45%),
+      var(--cream);
+    color:var(--ink);
+    min-height:100vh;
   }
-  h1,h2,h3,.serif{ font-family:'Playfair Display', serif; }
+  h1,h2,h3{ font-family:'Playfair Display', serif; }
+  ::selection{ background:var(--gold-light); }
 
-  /* ---------- Login ---------- */
+  /* ---------- LOGIN ---------- */
   #loginScreen{
     min-height:100vh;
     display:flex;
@@ -43,615 +46,581 @@
     padding:24px;
   }
   .login-card{
-    background:var(--card);
-    border-radius:24px;
-    box-shadow:var(--shadow);
-    padding:44px 36px;
     width:100%;
     max-width:380px;
+    background:var(--card);
+    border-radius: 20px;
+    padding:40px 32px;
+    box-shadow:var(--shadow);
+    border:1px solid var(--line);
     text-align:center;
-    border:1px solid var(--hairline);
   }
-  .brand-mark{
-    width:64px;height:64px;border-radius:50%;
+  .login-mark{
+    width:56px; height:56px;
+    border-radius:50%;
     margin:0 auto 18px;
-    display:flex;align-items:center;justify-content:center;
-    border:2px solid var(--gold-2);
-    font-family:'Playfair Display',serif;
-    font-weight:700;font-size:30px;
-    background: linear-gradient(135deg, var(--gold-1), var(--gold-3));
-    -webkit-background-clip:text; background-clip:text; color:transparent;
+    background:linear-gradient(135deg, var(--gold), var(--gold-deep));
+    display:flex; align-items:center; justify-content:center;
+    color:#fff; font-family:'Playfair Display',serif; font-weight:700; font-size:22px;
+    box-shadow:0 8px 20px rgba(169,122,20,0.35);
   }
-  .login-card h1{ font-size:24px; margin:0 0 4px; }
-  .login-card p.sub{ color:var(--ink-soft); margin:0 0 26px; font-size:14px; }
-  .field-label{ display:block; text-align:left; font-size:13px; font-weight:600; margin-bottom:6px; color:var(--ink-soft); }
-  input[type=password], input[type=text], input[type=email], input[type=tel], input[type=date], textarea, select{
+  .login-card h1{ font-size:24px; color:var(--ink); margin-bottom:6px;}
+  .login-card p{ color:var(--ink-soft); font-size:14px; margin-bottom:26px;}
+  #loginKey{
     width:100%;
-    padding:13px 14px;
+    padding:14px 16px;
     border-radius:12px;
-    border:1.5px solid var(--hairline);
-    font-family:'DM Sans',sans-serif;
+    border:1.5px solid var(--line);
+    background:var(--cream);
     font-size:15px;
-    background:#FEFCF7;
+    font-family:'DM Sans',sans-serif;
     color:var(--ink);
     outline:none;
-    transition:border-color .15s;
+    transition:.2s border-color;
   }
-  input:focus, textarea:focus, select:focus{ border-color:var(--gold-2); }
+  #loginKey:focus{ border-color:var(--gold); }
   .btn{
     display:inline-flex; align-items:center; justify-content:center; gap:8px;
-    border:none; border-radius:999px;
-    font-family:'DM Sans',sans-serif; font-weight:700; font-size:14.5px;
-    padding:13px 22px; cursor:pointer;
-    transition: transform .12s ease, box-shadow .12s ease, opacity .12s;
+    border:none; cursor:pointer;
+    font-family:'DM Sans', sans-serif; font-weight:700; font-size:15px;
+    border-radius:12px;
+    padding:14px 20px;
+    transition:.18s transform ease, .18s box-shadow ease, .18s opacity ease;
   }
-  .btn:active{ transform: scale(0.97); }
-  .btn-primary{
-    background: linear-gradient(135deg, var(--gold-1), var(--gold-2));
-    color:#3A2C0F;
-    box-shadow: 0 4px 14px rgba(201,162,39,0.35);
+  .btn:active{ transform:scale(.98); }
+  .btn-gold{
+    background:linear-gradient(135deg, var(--gold), var(--gold-deep));
+    color:#fff;
+    box-shadow:0 10px 22px rgba(169,122,20,0.30);
     width:100%;
+    margin-top:14px;
   }
-  .btn-primary:hover{ box-shadow: 0 6px 18px rgba(201,162,39,0.45); }
-  .btn-secondary{
-    background:#FFFFFF; color:var(--ink); border:1.5px solid var(--hairline);
+  .btn-gold:hover{ box-shadow:0 12px 26px rgba(169,122,20,0.4); }
+  #loginError{
+    color:var(--red); font-size:13px; margin-top:12px; min-height:16px;
   }
-  .btn-secondary:hover{ border-color:var(--gold-2); }
-  .btn-small{ padding:8px 16px; font-size:13px; }
-  .error-msg{ color:var(--danger); font-size:13.5px; margin-top:14px; display:none; }
 
-  /* ---------- App shell ---------- */
-  #app{ display:none; max-width:920px; margin:0 auto; padding:20px 16px 60px; }
-  .topbar{
+  /* ---------- APP SHELL ---------- */
+  #app{ display:none; }
+  header.topbar{
+    background:var(--card);
+    border-bottom:1px solid var(--line);
+    padding:18px 24px;
     display:flex; align-items:center; justify-content:space-between;
-    gap:12px; margin-bottom:22px; flex-wrap:wrap;
+    gap:16px; flex-wrap:wrap;
+    position:sticky; top:0; z-index:20;
   }
-  .topbar-left{ display:flex; align-items:center; gap:12px; }
-  .topbar-logo{
-    font-family:'Playfair Display',serif; font-weight:700; font-size:22px;
+  .brand{ display:flex; align-items:center; gap:12px; }
+  .brand-mark{
+    width:38px; height:38px; border-radius:50%;
+    background:linear-gradient(135deg, var(--gold), var(--gold-deep));
+    display:flex; align-items:center; justify-content:center;
+    color:#fff; font-family:'Playfair Display',serif; font-weight:700;
   }
-  .topbar-logo span{ color:var(--gold-3); }
-  .topbar-right{ display:flex; align-items:center; gap:10px; }
-  .icon-btn{
-    background:#FFFFFF; border:1.5px solid var(--hairline); border-radius:999px;
-    padding:9px 14px; font-size:13px; font-weight:600; color:var(--ink-soft);
-    cursor:pointer;
-  }
+  .brand-text h1{ font-size:18px; line-height:1.1; }
+  .brand-text span{ font-size:12px; color:var(--ink-soft); }
+  #lastSynced{ font-size:12px; color:var(--ink-soft); }
 
-  /* Sync button — signature element */
+  .sync-row{ display:flex; align-items:center; gap:14px; }
   #syncBtn{
-    background: linear-gradient(135deg, var(--gold-1), var(--gold-2));
-    color:#3A2C0F; border:none; border-radius:999px;
-    padding:13px 22px; font-weight:700; font-size:14.5px;
-    display:flex; align-items:center; gap:9px; cursor:pointer;
-    box-shadow: 0 4px 14px rgba(201,162,39,0.35);
+    background:linear-gradient(135deg, var(--gold), var(--gold-deep));
+    color:#fff; box-shadow:0 8px 18px rgba(169,122,20,0.28);
+    padding:12px 22px;
   }
-  #syncBtn .coin{ font-size:16px; display:inline-block; }
-  #syncBtn.syncing .coin{ animation: spin 0.9s linear infinite; }
-  @keyframes spin{ to{ transform: rotate(360deg);} }
-  #syncStatus{ font-size:12.5px; color:var(--ink-soft); margin-top:6px; text-align:right; }
-
-  .toast{
-    position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px);
-    background: var(--ink); color:#FBF6EC; padding:13px 22px; border-radius:999px;
-    font-size:14px; font-weight:600; box-shadow:0 8px 24px rgba(0,0,0,0.25);
-    opacity:0; pointer-events:none; transition: all .25s ease; z-index:50;
+  #syncBtn.loading{ opacity:.7; pointer-events:none; }
+  #syncBtn .dot{
+    width:8px; height:8px; border-radius:50%; background:#fff;
+    display:inline-block;
   }
-  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+  #logoutBtn{
+    background:transparent; color:var(--ink-soft);
+    border:1.5px solid var(--line); padding:10px 16px;
+  }
+  #syncToast{
+    position:fixed; top:18px; left:50%; transform:translateX(-50%) translateY(-140%);
+    background:var(--ink); color:#FBF6EC; padding:12px 22px; border-radius:12px;
+    font-size:14px; font-weight:600; box-shadow:var(--shadow);
+    transition:.3s transform ease; z-index:100;
+  }
+  #syncToast.show{ transform:translateX(-50%) translateY(0); }
 
-  /* Stat cards */
+  main{ max-width:1080px; margin:0 auto; padding:24px; }
+
+  /* ---------- STAT CARDS ---------- */
   .stats{
-    display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:24px;
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    gap:16px;
+    margin-bottom:28px;
   }
   .stat-card{
-    background:var(--card); border-radius:var(--radius); padding:18px 16px;
-    border-top:3px solid var(--gold-2); box-shadow:var(--shadow);
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:20px;
+    box-shadow:var(--shadow);
   }
-  .stat-num{ font-family:'Playfair Display',serif; font-weight:700; font-size:28px; line-height:1; }
-  .stat-label{ font-size:12.5px; color:var(--ink-soft); margin-top:6px; font-weight:600; }
+  .stat-card .label{ font-size:12.5px; color:var(--ink-soft); font-weight:600; letter-spacing:.02em; text-transform:uppercase;}
+  .stat-card .value{ font-family:'Playfair Display', serif; font-size:30px; margin-top:8px; color:var(--ink);}
+  .stat-card.gold .value{ color:var(--gold-deep); }
+  .stat-card.green .value{ color:var(--green); }
+  .stat-card.amber .value{ color:var(--amber); }
 
-  /* Tabs */
-  .tabs{ display:flex; gap:6px; margin-bottom:18px; flex-wrap:wrap; }
-  .tab{
-    padding:10px 18px; border-radius:999px; font-size:14px; font-weight:600;
-    cursor:pointer; color:var(--ink-soft); background:transparent; border:1.5px solid transparent;
+  /* ---------- TABS ---------- */
+  .tabs{
+    display:flex; gap:8px; margin-bottom:20px;
+    border-bottom:1.5px solid var(--line);
+    overflow-x:auto;
   }
-  .tab.active{ background:var(--ink); color:#FBF6EC; }
-  .tab:not(.active):hover{ border-color:var(--hairline); }
-
-  .panel{ display:none; }
-  .panel.active{ display:block; }
-
-  .toolbar{ display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap; align-items:center; }
-  .toolbar input[type=text]{ flex:1; min-width:180px; }
-  .chip-row{ display:flex; gap:8px; }
-  .chip{
-    padding:8px 15px; border-radius:999px; font-size:13px; font-weight:600;
-    background:#FFFFFF; border:1.5px solid var(--hairline); cursor:pointer; color:var(--ink-soft);
+  .tab-btn{
+    background:none; border:none; cursor:pointer;
+    font-family:'DM Sans',sans-serif; font-weight:600; font-size:14.5px;
+    color:var(--ink-soft);
+    padding:12px 6px; margin-right:22px;
+    border-bottom:2.5px solid transparent;
     white-space:nowrap;
   }
-  .chip.active{ background:var(--gold-2); border-color:var(--gold-2); color:#3A2C0F; }
+  .tab-btn.active{ color:var(--gold-deep); border-color:var(--gold); }
+  .tab-panel{ display:none; }
+  .tab-panel.active{ display:block; }
 
-  /* Registration / list cards */
-  .list{ display:flex; flex-direction:column; gap:10px; }
+  .panel-toolbar{
+    display:flex; justify-content:space-between; align-items:center;
+    margin-bottom:14px; gap:12px; flex-wrap:wrap;
+  }
+  .search-input{
+    padding:10px 14px; border-radius:10px; border:1.5px solid var(--line);
+    background:var(--card); font-family:'DM Sans',sans-serif; font-size:14px;
+    min-width:220px; outline:none;
+  }
+  .search-input:focus{ border-color:var(--gold); }
+  .filter-pills{ display:flex; gap:8px; flex-wrap:wrap; }
+  .pill{
+    padding:7px 14px; border-radius:999px; font-size:13px; font-weight:600;
+    border:1.5px solid var(--line); background:var(--card); color:var(--ink-soft);
+    cursor:pointer;
+  }
+  .pill.active{ background:var(--gold-light); border-color:var(--gold); color:var(--gold-deep); }
+
+  /* ---------- CARDS LIST ---------- */
+  .card-list{ display:flex; flex-direction:column; gap:12px; }
   .item-card{
-    background:var(--card); border-radius:14px; padding:16px 18px;
-    box-shadow:var(--shadow); border:1px solid var(--hairline);
-    display:flex; justify-content:space-between; align-items:center; gap:14px; flex-wrap:wrap;
+    background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
+    padding:18px 20px; box-shadow:var(--shadow);
+    display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap;
   }
-  .item-main{ min-width:200px; }
-  .item-name{ font-family:'Playfair Display',serif; font-weight:700; font-size:17px; }
-  .item-sub{ font-size:13.5px; color:var(--ink-soft); margin-top:3px; }
-  .item-sub b{ color:var(--ink); font-weight:600; }
-  .badge{
-    display:inline-block; padding:5px 12px; border-radius:999px; font-size:12px; font-weight:700;
-    margin-top:6px;
+  .item-main{ flex:1; min-width:220px; }
+  .item-main h3{ font-size:16.5px; color:var(--ink); margin-bottom:4px; }
+  .item-meta{ font-size:13.5px; color:var(--ink-soft); line-height:1.6; }
+  .item-meta b{ color:var(--ink); font-weight:600; }
+  .item-side{ display:flex; flex-direction:column; align-items:flex-end; gap:10px; justify-content:space-between; }
+  .price-tag{ font-family:'Playfair Display', serif; font-size:19px; color:var(--ink); }
+  .status-tag{
+    padding:6px 12px; border-radius:999px; font-size:12.5px; font-weight:700;
   }
-  .badge.paid{ background:var(--paid-bg); color:var(--paid-ink); }
-  .badge.pending{ background:var(--pending-bg); color:var(--pending-ink); }
-  .item-actions{ display:flex; gap:8px; align-items:center; }
-  .price-tag{ font-family:'Playfair Display',serif; font-weight:700; font-size:16px; color:var(--gold-3); }
+  .status-tag.paid{ background:var(--green-bg); color:var(--green); }
+  .status-tag.awaiting{ background:var(--amber-bg); color:var(--amber); }
+  .mini-btn{
+    background:none; border:1.5px solid var(--line); color:var(--ink-soft);
+    padding:7px 12px; border-radius:9px; font-size:12.5px; font-weight:600; cursor:pointer;
+  }
+  .mini-btn:hover{ border-color:var(--gold); color:var(--gold-deep); }
 
   .empty-state{
     text-align:center; padding:60px 20px; color:var(--ink-soft);
   }
-  .empty-state .emoji{ font-size:38px; display:block; margin-bottom:12px; }
+  .empty-state h3{ color:var(--ink); font-size:18px; margin-bottom:6px; }
 
-  /* Simple form card */
-  .form-card{
-    background:var(--card); border-radius:var(--radius); padding:20px; box-shadow:var(--shadow);
-    border:1px solid var(--hairline); margin-bottom:18px;
+  footer.foot{
+    text-align:center; padding:30px; color:var(--ink-soft); font-size:12.5px;
   }
-  .form-row{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px; }
-  .form-row.full{ grid-template-columns:1fr; }
-  .form-card h3{ margin:0 0 14px; font-size:17px; }
 
-  @media (max-width: 700px){
-    .stats{ grid-template-columns:repeat(2,1fr); }
-    .form-row{ grid-template-columns:1fr; }
-    .item-card{ flex-direction:column; align-items:flex-start; }
-    .item-actions{ width:100%; justify-content:flex-start; }
+  @media (max-width:720px){
+    .stats{ grid-template-columns:repeat(2, 1fr); }
+    header.topbar{ padding:14px 16px; }
+    main{ padding:16px; }
+    .item-card{ flex-direction:column; }
+    .item-side{ align-items:flex-start; flex-direction:row; width:100%; justify-content:space-between; }
   }
 </style>
 </head>
 <body>
 
-  <!-- ============ LOGIN ============ -->
+  <!-- ===================== LOGIN ===================== -->
   <div id="loginScreen">
     <div class="login-card">
-      <div class="brand-mark">S</div>
+      <div class="login-mark">iS</div>
       <h1>iSonali Dashboard</h1>
-      <p class="sub">Enter your password to open your bookings &amp; payments.</p>
-      <label class="field-label" for="pwInput">Dashboard password</label>
-      <input type="password" id="pwInput" placeholder="••••••••" style="margin-bottom:16px;">
-      <button class="btn btn-primary" id="loginBtn">Unlock Dashboard</button>
-      <p class="error-msg" id="loginError">That password didn't work. Please try again.</p>
+      <p>Enter your access key to continue</p>
+      <input type="password" id="loginKey" placeholder="Access key" autocomplete="off">
+      <button class="btn btn-gold" id="loginBtn">Unlock Dashboard</button>
+      <div id="loginError"></div>
     </div>
   </div>
 
-  <!-- ============ APP ============ -->
+  <!-- ===================== APP ===================== -->
   <div id="app">
-    <div class="topbar">
-      <div class="topbar-left">
-        <div class="topbar-logo"><span>i</span>Sonali</div>
-      </div>
-      <div class="topbar-right">
-        <div>
-          <button id="syncBtn"><span class="coin">🪙</span> Check for New Payments</button>
-          <div id="syncStatus">Not checked yet</div>
-        </div>
-        <button class="icon-btn" id="logoutBtn">Log out</button>
-      </div>
-    </div>
-
-    <div class="stats">
-      <div class="stat-card"><div class="stat-num" id="statTotal">–</div><div class="stat-label">Total Bookings</div></div>
-      <div class="stat-card"><div class="stat-num" id="statPaid">–</div><div class="stat-label">Paid</div></div>
-      <div class="stat-card"><div class="stat-num" id="statPending">–</div><div class="stat-label">Awaiting Payment</div></div>
-      <div class="stat-card"><div class="stat-num" id="statRevenue">–</div><div class="stat-label">Revenue Collected</div></div>
-    </div>
-
-    <div class="tabs">
-      <div class="tab active" data-tab="registrations">📋 Bookings</div>
-      <div class="tab" data-tab="payments">💳 Payments</div>
-      <div class="tab" data-tab="contacts">👥 Contacts</div>
-      <div class="tab" data-tab="planner">📅 Content Ideas</div>
-    </div>
-
-    <!-- ---------- Bookings ---------- -->
-    <div class="panel active" id="panel-registrations">
-      <div class="toolbar">
-        <input type="text" id="regSearch" placeholder="Search by name, phone, or program...">
-        <div class="chip-row">
-          <div class="chip active" data-filter="all">All</div>
-          <div class="chip" data-filter="paid">Paid</div>
-          <div class="chip" data-filter="pending">Pending</div>
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark">iS</div>
+        <div class="brand-text">
+          <h1>iSonali Dashboard</h1>
+          <span id="lastSynced">Not synced yet</span>
         </div>
       </div>
-      <div class="list" id="regList"></div>
-    </div>
-
-    <!-- ---------- Payments ---------- -->
-    <div class="panel" id="panel-payments">
-      <div class="toolbar">
-        <input type="text" id="paySearch" placeholder="Search by email or phone...">
+      <div class="sync-row">
+        <button class="btn btn-gold" id="syncBtn"><span class="dot"></span> Check for New Payments</button>
+        <button class="btn" id="logoutBtn">Log out</button>
       </div>
-      <div class="list" id="payList"></div>
-    </div>
+    </header>
 
-    <!-- ---------- Contacts ---------- -->
-    <div class="panel" id="panel-contacts">
-      <div class="form-card">
-        <h3>Add or update a contact</h3>
-        <div class="form-row">
-          <div><label class="field-label">Name</label><input type="text" id="crmName"></div>
-          <div><label class="field-label">Phone (used as the ID)</label><input type="tel" id="crmPhone"></div>
+    <div id="syncToast"></div>
+
+    <main>
+      <section class="stats">
+        <div class="stat-card">
+          <div class="label">Total Bookings</div>
+          <div class="value" id="statTotal">0</div>
         </div>
-        <div class="form-row">
-          <div><label class="field-label">Email</label><input type="email" id="crmEmail"></div>
-          <div><label class="field-label">Status</label>
-            <select id="crmStatus">
-              <option>Lead</option><option>Contacted</option><option>Enrolled</option><option>Inactive</option>
-            </select>
+        <div class="stat-card green">
+          <div class="label">Paid</div>
+          <div class="value" id="statPaid">0</div>
+        </div>
+        <div class="stat-card amber">
+          <div class="label">Awaiting Payment</div>
+          <div class="value" id="statAwaiting">0</div>
+        </div>
+        <div class="stat-card gold">
+          <div class="label">Revenue Collected</div>
+          <div class="value" id="statRevenue">₹0</div>
+        </div>
+      </section>
+
+      <nav class="tabs">
+        <button class="tab-btn active" data-tab="bookings">Bookings</button>
+        <button class="tab-btn" data-tab="payments">Payments</button>
+        <button class="tab-btn" data-tab="contacts">Contacts</button>
+        <button class="tab-btn" data-tab="content">Content Ideas</button>
+      </nav>
+
+      <!-- BOOKINGS -->
+      <section class="tab-panel active" id="tab-bookings">
+        <div class="panel-toolbar">
+          <input class="search-input" id="bookingsSearch" placeholder="Search by name, phone, or program...">
+          <div class="filter-pills" id="bookingsFilter">
+            <button class="pill active" data-filter="all">All</button>
+            <button class="pill" data-filter="paid">Paid</button>
+            <button class="pill" data-filter="awaiting">Awaiting</button>
           </div>
         </div>
-        <div class="form-row full">
-          <div><label class="field-label">Notes</label><textarea id="crmNotes" rows="2"></textarea></div>
-        </div>
-        <button class="btn btn-primary" id="crmSaveBtn" style="width:auto;">Save Contact</button>
-      </div>
-      <div class="toolbar"><input type="text" id="crmSearch" placeholder="Search contacts..."></div>
-      <div class="list" id="crmList"></div>
-    </div>
+        <div class="card-list" id="bookingsList"></div>
+      </section>
 
-    <!-- ---------- Planner ---------- -->
-    <div class="panel" id="panel-planner">
-      <div class="form-card">
-        <h3>Add a content idea</h3>
-        <div class="form-row">
-          <div><label class="field-label">Date</label><input type="date" id="planDate"></div>
-          <div><label class="field-label">Idea</label><input type="text" id="planIdea" placeholder="e.g. Reel: 3 tips for confident intros"></div>
+      <!-- PAYMENTS -->
+      <section class="tab-panel" id="tab-payments">
+        <div class="panel-toolbar">
+          <input class="search-input" id="paymentsSearch" placeholder="Search by email, phone, or payment ID...">
         </div>
-        <div class="form-row full">
-          <div><label class="field-label">Caption (optional)</label><textarea id="planCaption" rows="2"></textarea></div>
+        <div class="card-list" id="paymentsList"></div>
+      </section>
+
+      <!-- CONTACTS (CRM) -->
+      <section class="tab-panel" id="tab-contacts">
+        <div class="panel-toolbar">
+          <input class="search-input" id="contactsSearch" placeholder="Search contacts...">
         </div>
-        <button class="btn btn-primary" id="planSaveBtn" style="width:auto;">Add Idea</button>
-      </div>
-      <div class="list" id="planList"></div>
-    </div>
+        <div class="card-list" id="contactsList"></div>
+      </section>
+
+      <!-- CONTENT IDEAS (InstaPlanner) -->
+      <section class="tab-panel" id="tab-content">
+        <div class="panel-toolbar">
+          <input class="search-input" id="contentSearch" placeholder="Search ideas...">
+        </div>
+        <div class="card-list" id="contentList"></div>
+      </section>
+    </main>
+
+    <footer class="foot">iSonali.com · Internal dashboard</footer>
   </div>
-
-  <div class="toast" id="toast"></div>
 
 <script>
 /* =========================================================
-   CONFIGURE THIS: paste your Apps Script Web App /exec URL
+   CONFIG — paste your Apps Script /exec URL below
    ========================================================= */
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbynFJ4Bei8sg7a30WlFmqLE8M536R1pOgNNeIxyFIJGmTlzEFozopNIuPWzdYgQ0oLNMQ/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbynFJ4Bei8sg7a30WlFmqLE8M536R1pOgNNeIxyFIJGmTlzEFozopNIuPWzdYgQ0oLNMQ/exec
+";
 
-let DASH_KEY = localStorage.getItem('isonali_dash_key') || '';
-let DATA = { registrations: [], payments: [], crm: [], planner: [] };
+const DATA = { registrations: [], crm: [], planner: [], metrics: [], payments: [] };
+let ACCESS_KEY = localStorage.getItem('isonali_dash_key') || '';
 
-/* ---------- helpers ---------- */
-function showToast(msg){
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(()=> t.classList.remove('show'), 2600);
-}
-function fmtMoney(n){
-  n = Number(n)||0;
-  return '₹' + n.toLocaleString('en-IN');
-}
-function last10(phone){ return String(phone||'').replace(/\D/g,'').slice(-10); }
+/* ---------------- LOGIN ---------------- */
+const loginScreen = document.getElementById('loginScreen');
+const appEl = document.getElementById('app');
+const loginError = document.getElementById('loginError');
 
-async function apiGet(action, extraParams){
-  const url = new URL(SCRIPT_URL);
-  url.searchParams.set('action', action);
-  url.searchParams.set('key', DASH_KEY);
-  if (extraParams) Object.entries(extraParams).forEach(([k,v])=>url.searchParams.set(k,v));
-  const res = await fetch(url.toString());
-  return res.json();
-}
-async function apiPost(payload){
-  // text/plain avoids a CORS preflight against Apps Script
-  const res = await fetch(SCRIPT_URL, {
-    method:'POST',
-    headers: { 'Content-Type':'text/plain;charset=utf-8' },
-    body: JSON.stringify(Object.assign({ key: DASH_KEY }, payload))
-  });
-  return res.json();
-}
-
-/* ---------- login ---------- */
-document.getElementById('loginBtn').addEventListener('click', doLogin);
-document.getElementById('pwInput').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
-
-async function doLogin(){
-  const pw = document.getElementById('pwInput').value.trim();
-  if (!pw) return;
-  DASH_KEY = pw;
+async function tryLogin(key){
+  loginError.textContent = '';
+  if(!key){ loginError.textContent = 'Enter your access key.'; return; }
   try{
-    const r = await apiGet('login');
-    if (r.ok){
-      localStorage.setItem('isonali_dash_key', DASH_KEY);
-      document.getElementById('loginScreen').style.display='none';
-      document.getElementById('app').style.display='block';
-      loadAll();
+    const res = await fetch(`${SCRIPT_URL}?action=login&key=${encodeURIComponent(key)}`);
+    const json = await res.json();
+    if(json.ok){
+      ACCESS_KEY = key;
+      localStorage.setItem('isonali_dash_key', key);
+      showApp();
     } else {
-      document.getElementById('loginError').style.display='block';
+      loginError.textContent = 'That key was not recognized. Try again.';
     }
   } catch(err){
-    document.getElementById('loginError').textContent = "Couldn't connect. Check your internet connection and try again.";
-    document.getElementById('loginError').style.display='block';
+    loginError.textContent = 'Could not reach the dashboard. Check your connection.';
   }
 }
 
+document.getElementById('loginBtn').addEventListener('click', ()=> tryLogin(document.getElementById('loginKey').value.trim()));
+document.getElementById('loginKey').addEventListener('keydown', e=>{ if(e.key==='Enter') tryLogin(e.target.value.trim()); });
 document.getElementById('logoutBtn').addEventListener('click', ()=>{
   localStorage.removeItem('isonali_dash_key');
-  location.reload();
+  ACCESS_KEY = '';
+  appEl.style.display = 'none';
+  loginScreen.style.display = 'flex';
 });
 
-/* auto-login if we already have a saved key */
-window.addEventListener('DOMContentLoaded', async ()=>{
-  if (DASH_KEY){
-    try{
-      const r = await apiGet('login');
-      if (r.ok){
-        document.getElementById('loginScreen').style.display='none';
-        document.getElementById('app').style.display='block';
-        loadAll();
-        return;
-      }
-    }catch(e){}
-  }
-});
+function showApp(){
+  loginScreen.style.display = 'none';
+  appEl.style.display = 'block';
+  loadData();
+}
 
-/* ---------- load data ---------- */
-async function loadAll(){
+/* ---------------- DATA LOADING ---------------- */
+async function loadData(){
   try{
-    const r = await apiGet('data');
-    if (!r.ok){ showToast('Could not load data'); return; }
-    DATA.registrations = r.registrations || [];
-    DATA.payments = r.payments || [];
-    DATA.crm = r.crm || [];
-    DATA.planner = r.planner || [];
-    renderStats();
-    renderRegistrations();
-    renderPayments();
-    renderCrm();
-    renderPlanner();
+    const res = await fetch(`${SCRIPT_URL}?action=data&key=${encodeURIComponent(ACCESS_KEY)}`);
+    const json = await res.json();
+    if(!json.ok){ toast('Session expired — please log in again.'); return; }
+    DATA.registrations = json.registrations || [];
+    DATA.crm = json.crm || [];
+    DATA.planner = json.planner || [];
+    DATA.metrics = json.metrics || [];
+    DATA.payments = json.payments || [];
+    renderStats(); renderBookings(); renderPayments(); renderContacts(); renderContent();
+    document.getElementById('lastSynced').textContent = 'Updated ' + new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
   } catch(err){
-    showToast("Couldn't reach the dashboard server.");
+    toast('Could not load data. Check SCRIPT_URL and try again.');
   }
 }
 
-function renderStats(){
-  const regs = DATA.registrations;
-  const paid = regs.filter(r=>r.PaymentStatus==='PAID');
-  const pending = regs.filter(r=>r.PaymentStatus!=='PAID');
-  const revenue = DATA.payments.reduce((sum,p)=> sum + (Number(p.Amount)||0), 0);
-  document.getElementById('statTotal').textContent = regs.length;
-  document.getElementById('statPaid').textContent = paid.length;
-  document.getElementById('statPending').textContent = pending.length;
-  document.getElementById('statRevenue').textContent = fmtMoney(revenue);
+document.getElementById('syncBtn').addEventListener('click', async ()=>{
+  const btn = document.getElementById('syncBtn');
+  btn.classList.add('loading');
+  btn.innerHTML = '<span class="dot"></span> Checking...';
+  try{
+    const res = await fetch(`${SCRIPT_URL}?action=sync&key=${encodeURIComponent(ACCESS_KEY)}`);
+    const json = await res.json();
+    const foundCount = (json && typeof json.newCount === 'number') ? json.newCount : 0;
+    await loadData();
+    toast(foundCount > 0 ? `✓ Found ${foundCount} new payment${foundCount===1?'':'s'}` : '✓ You are all caught up');
+  } catch(err){
+    toast('Sync failed — check your connection and try again.');
+  } finally{
+    btn.classList.remove('loading');
+    btn.innerHTML = '<span class="dot"></span> Check for New Payments';
+  }
+});
+
+function toast(msg){
+  const t = document.getElementById('syncToast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=> t.classList.remove('show'), 3200);
 }
 
-/* ---------- tabs ---------- */
-document.querySelectorAll('.tab').forEach(tab=>{
-  tab.addEventListener('click', ()=>{
-    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
-    tab.classList.add('active');
-    document.getElementById('panel-'+tab.dataset.tab).classList.add('active');
+/* ---------------- STATS ---------------- */
+function renderStats(){
+  const total = DATA.registrations.length;
+  const paid = DATA.registrations.filter(r => (r.PaymentStatus||'').toLowerCase() === 'paid').length;
+  const awaiting = total - paid;
+  const revenue = DATA.registrations
+    .filter(r => (r.PaymentStatus||'').toLowerCase() === 'paid')
+    .reduce((sum, r) => sum + (parseFloat(r.Price) || 0), 0);
+
+  document.getElementById('statTotal').textContent = total;
+  document.getElementById('statPaid').textContent = paid;
+  document.getElementById('statAwaiting').textContent = awaiting;
+  document.getElementById('statRevenue').textContent = '₹' + revenue.toLocaleString('en-IN');
+}
+
+/* ---------------- BOOKINGS TAB ---------------- */
+let bookingsFilterState = 'all';
+function renderBookings(){
+  const list = document.getElementById('bookingsList');
+  const q = (document.getElementById('bookingsSearch').value || '').toLowerCase();
+
+  let rows = DATA.registrations.filter(r=>{
+    const paid = (r.PaymentStatus||'').toLowerCase() === 'paid';
+    if(bookingsFilterState === 'paid' && !paid) return false;
+    if(bookingsFilterState === 'awaiting' && paid) return false;
+    const hay = `${r.Name||''} ${r.Phone||''} ${r.Program||''} ${r.City||''}`.toLowerCase();
+    return hay.includes(q);
   });
-});
 
-/* ---------- Bookings (Registrations) ---------- */
-let regFilter = 'all';
-document.querySelectorAll('.chip[data-filter]').forEach(chip=>{
-  chip.addEventListener('click', ()=>{
-    document.querySelectorAll('.chip[data-filter]').forEach(c=>c.classList.remove('active'));
-    chip.classList.add('active');
-    regFilter = chip.dataset.filter;
-    renderRegistrations();
-  });
-});
-document.getElementById('regSearch').addEventListener('input', renderRegistrations);
-
-function renderRegistrations(){
-  const q = document.getElementById('regSearch').value.trim().toLowerCase();
-  let rows = DATA.registrations.slice().reverse(); // newest first
-  if (regFilter==='paid') rows = rows.filter(r=>r.PaymentStatus==='PAID');
-  if (regFilter==='pending') rows = rows.filter(r=>r.PaymentStatus!=='PAID');
-  if (q) rows = rows.filter(r =>
-    String(r.Name||'').toLowerCase().includes(q) ||
-    String(r.Phone||'').includes(q) ||
-    String(r.Program||'').toLowerCase().includes(q)
-  );
-
-  const list = document.getElementById('regList');
-  if (!rows.length){
-    list.innerHTML = `<div class="empty-state"><span class="emoji">📋</span>No bookings match here yet.<br>Once someone books a slot on your website, they'll show up in this list.</div>`;
+  if(rows.length === 0){
+    list.innerHTML = emptyState('No bookings yet', 'New registrations will show up here as soon as someone books.');
     return;
   }
-  list.innerHTML = rows.map(r=>{
-    const isPaid = r.PaymentStatus === 'PAID';
+
+  list.innerHTML = rows.map((r, i) => {
+    const paid = (r.PaymentStatus||'').toLowerCase() === 'paid';
     return `
     <div class="item-card">
       <div class="item-main">
-        <div class="item-name">${escapeHtml(r.Name||'—')}</div>
-        <div class="item-sub"><b>${escapeHtml(r.Program||'—')}</b> · ${escapeHtml(r.City||'')}</div>
-        <div class="item-sub">${escapeHtml(r.Phone||'')} ${r.Email ? '· '+escapeHtml(r.Email) : ''}</div>
-        <span class="badge ${isPaid?'paid':'pending'}">${isPaid?'Paid':'Awaiting Payment'}</span>
+        <h3>${esc(r.Name)}</h3>
+        <div class="item-meta">
+          <b>${esc(r.Program||'—')}</b> · ${esc(r.City||'—')}<br>
+          ${esc(r.Phone||'—')} · ${esc(r.Email||'—')}
+        </div>
       </div>
-      <div class="item-actions">
-        <div class="price-tag">${escapeHtml(r.Price||'')}</div>
-        <button class="btn btn-secondary btn-small" onclick="toggleRegStatus('${encodeURIComponent(r.Timestamp)}','${encodeURIComponent(r.Phone)}','${isPaid?'PAYMENT_LINK_OPENED_NOT_VERIFIED':'PAID'}')">
-          Mark as ${isPaid?'Pending':'Paid'}
-        </button>
+      <div class="item-side">
+        <div class="price-tag">₹${esc(r.Price||'0')}</div>
+        <span class="status-tag ${paid?'paid':'awaiting'}">${paid?'Paid':'Awaiting Payment'}</span>
+        <button class="mini-btn" onclick="toggleBookingStatus('${esc(r.Timestamp)}','${esc(r.Phone)}')">Mark as ${paid?'Awaiting':'Paid'}</button>
       </div>
     </div>`;
   }).join('');
 }
 
-async function toggleRegStatus(tsEnc, phoneEnc, newStatus){
-  const timestamp = decodeURIComponent(tsEnc);
-  const phone = decodeURIComponent(phoneEnc);
-  const r = await apiPost({ action:'setRegStatus', timestamp, phone, status: newStatus });
-  if (r.ok){
-    showToast(newStatus==='PAID' ? '✓ Marked as paid' : 'Marked as pending');
-    await loadAll();
-  } else {
-    showToast('Could not update — please try again');
+async function toggleBookingStatus(timestamp, phone){
+  try{
+    await fetch(`${SCRIPT_URL}?action=updateStatus&key=${encodeURIComponent(ACCESS_KEY)}&timestamp=${encodeURIComponent(timestamp)}&phone=${encodeURIComponent(phone)}`);
+    toast('Updated');
+    loadData();
+  } catch(err){
+    toast('Could not update — try again.');
   }
 }
 
-/* ---------- Payments ---------- */
-document.getElementById('paySearch').addEventListener('input', renderPayments);
+document.getElementById('bookingsSearch').addEventListener('input', renderBookings);
+document.getElementById('bookingsFilter').addEventListener('click', e=>{
+  if(e.target.classList.contains('pill')){
+    document.querySelectorAll('#bookingsFilter .pill').forEach(p=>p.classList.remove('active'));
+    e.target.classList.add('active');
+    bookingsFilterState = e.target.dataset.filter;
+    renderBookings();
+  }
+});
+
+/* ---------------- PAYMENTS TAB ---------------- */
 function renderPayments(){
-  const q = document.getElementById('paySearch').value.trim().toLowerCase();
-  let rows = DATA.payments.slice().reverse();
-  if (q) rows = rows.filter(p =>
-    String(p.Email||'').toLowerCase().includes(q) || String(p.Contact||'').includes(q)
-  );
-  const list = document.getElementById('payList');
-  if (!rows.length){
-    list.innerHTML = `<div class="empty-state"><span class="emoji">💳</span>No payments recorded yet.<br>Tap "Check for New Payments" above once someone has paid.</div>`;
+  const list = document.getElementById('paymentsList');
+  const q = (document.getElementById('paymentsSearch').value || '').toLowerCase();
+  let rows = DATA.payments.filter(p=>{
+    const hay = `${p.Email||''} ${p.Contact||''} ${p.PaymentId||''}`.toLowerCase();
+    return hay.includes(q);
+  });
+
+  if(rows.length === 0){
+    list.innerHTML = emptyState('No payments yet', 'Synced Razorpay payments will appear here.');
     return;
   }
-  list.innerHTML = rows.map(p=>`
+
+  list.innerHTML = rows.map(p=>{
+    const captured = (p.Status||'').toLowerCase() === 'captured';
+    return `
     <div class="item-card">
       <div class="item-main">
-        <div class="item-name">${fmtMoney(p.Amount)}</div>
-        <div class="item-sub">${escapeHtml(p.Method||'')} · ${new Date(p.Date).toLocaleDateString('en-IN', {day:'numeric', month:'short', year:'numeric'})}</div>
-        <div class="item-sub">${escapeHtml(p.Email||'')} ${p.Contact ? '· '+escapeHtml(p.Contact) : ''}</div>
+        <h3>${esc(p.PaymentId)}</h3>
+        <div class="item-meta">
+          ${esc(p.Email||'—')} · ${esc(p.Contact||'—')}<br>
+          ${esc(p.Method||'—')} · ${esc(p.Date||'—')}
+        </div>
       </div>
-      <span class="badge paid">${escapeHtml(p.Status||'captured')}</span>
-    </div>
-  `).join('');
+      <div class="item-side">
+        <div class="price-tag">₹${esc(p.Amount||'0')}</div>
+        <span class="status-tag ${captured?'paid':'awaiting'}">${esc(p.Status||'—')}</span>
+      </div>
+    </div>`;
+  }).join('');
 }
+document.getElementById('paymentsSearch').addEventListener('input', renderPayments);
 
-/* ---------- Contacts (CRM) ---------- */
-document.getElementById('crmSaveBtn').addEventListener('click', async ()=>{
-  const name = document.getElementById('crmName').value.trim();
-  const phone = document.getElementById('crmPhone').value.trim();
-  if (!phone){ showToast('Phone number is required'); return; }
-  const payload = {
-    action:'upsertCrm',
-    crmKey: phone,
-    name, phone,
-    email: document.getElementById('crmEmail').value.trim(),
-    status: document.getElementById('crmStatus').value,
-    notes: document.getElementById('crmNotes').value.trim(),
-    lastContact: new Date().toISOString().slice(0,10)
-  };
-  const r = await apiPost(payload);
-  if (r.ok){
-    showToast('✓ Contact saved');
-    ['crmName','crmPhone','crmEmail','crmNotes'].forEach(id=>document.getElementById(id).value='');
-    await loadAll();
-  } else { showToast('Could not save contact'); }
-});
-document.getElementById('crmSearch').addEventListener('input', renderCrm);
-function renderCrm(){
-  const q = document.getElementById('crmSearch').value.trim().toLowerCase();
-  let rows = DATA.crm.slice().reverse();
-  if (q) rows = rows.filter(c => String(c.Name||'').toLowerCase().includes(q) || String(c.Phone||'').includes(q));
-  const list = document.getElementById('crmList');
-  if (!rows.length){
-    list.innerHTML = `<div class="empty-state"><span class="emoji">👥</span>No contacts saved yet.</div>`;
+/* ---------------- CONTACTS TAB (CRM) ---------------- */
+function renderContacts(){
+  const list = document.getElementById('contactsList');
+  const q = (document.getElementById('contactsSearch').value || '').toLowerCase();
+  let rows = DATA.crm.filter(c=>{
+    const hay = `${c.Name||''} ${c.Phone||''} ${c.Email||''} ${c.Tags||''}`.toLowerCase();
+    return hay.includes(q);
+  });
+
+  if(rows.length === 0){
+    list.innerHTML = emptyState('No contacts yet', 'Contacts you add or that come in from registrations will show up here.');
     return;
   }
+
   list.innerHTML = rows.map(c=>`
     <div class="item-card">
       <div class="item-main">
-        <div class="item-name">${escapeHtml(c.Name||c.Phone||'—')}</div>
-        <div class="item-sub">${escapeHtml(c.Phone||'')} ${c.Email ? '· '+escapeHtml(c.Email):''}</div>
-        ${c.Notes ? `<div class="item-sub">${escapeHtml(c.Notes)}</div>` : ''}
+        <h3>${esc(c.Name)}</h3>
+        <div class="item-meta">
+          ${esc(c.Phone||'—')} · ${esc(c.Email||'—')}<br>
+          ${esc(c.Notes||'')}
+        </div>
       </div>
-      <span class="badge pending">${escapeHtml(c.Status||'Lead')}</span>
-    </div>
-  `).join('');
+      <div class="item-side">
+        <span class="status-tag paid">${esc(c.Status||'—')}</span>
+      </div>
+    </div>`).join('');
 }
+document.getElementById('contactsSearch').addEventListener('input', renderContacts);
 
-/* ---------- Planner ---------- */
-document.getElementById('planSaveBtn').addEventListener('click', async ()=>{
-  const idea = document.getElementById('planIdea').value.trim();
-  if (!idea){ showToast('Add an idea first'); return; }
-  const payload = {
-    action:'addPlan',
-    date: document.getElementById('planDate').value,
-    idea,
-    caption: document.getElementById('planCaption').value.trim()
-  };
-  const r = await apiPost(payload);
-  if (r.ok){
-    showToast('✓ Idea added');
-    ['planDate','planIdea','planCaption'].forEach(id=>document.getElementById(id).value='');
-    await loadAll();
-  } else { showToast('Could not add idea'); }
-});
-function renderPlanner(){
-  let rows = DATA.planner.slice().reverse();
-  const list = document.getElementById('planList');
-  if (!rows.length){
-    list.innerHTML = `<div class="empty-state"><span class="emoji">📅</span>No content ideas added yet.</div>`;
+/* ---------------- CONTENT IDEAS TAB (InstaPlanner) ---------------- */
+function renderContent(){
+  const list = document.getElementById('contentList');
+  const q = (document.getElementById('contentSearch').value || '').toLowerCase();
+  let rows = DATA.planner.filter(p=>{
+    const hay = `${p.Idea||''} ${p.Caption||''}`.toLowerCase();
+    return hay.includes(q);
+  });
+
+  if(rows.length === 0){
+    list.innerHTML = emptyState('No content ideas yet', 'Add rows to the InstaPlanner sheet and they will show up here.');
     return;
   }
+
   list.innerHTML = rows.map(p=>`
     <div class="item-card">
       <div class="item-main">
-        <div class="item-name">${escapeHtml(p.Idea||'—')}</div>
-        <div class="item-sub">${p.Date ? new Date(p.Date).toLocaleDateString('en-IN',{day:'numeric',month:'short'}) : ''}</div>
-        ${p.Caption ? `<div class="item-sub">${escapeHtml(p.Caption)}</div>` : ''}
+        <h3>${esc(p.Idea)}</h3>
+        <div class="item-meta">${esc(p.Caption||'')}</div>
       </div>
-      <div class="item-actions">
-        <span class="badge ${p.Status==='Posted'?'paid':'pending'}">${escapeHtml(p.Status||'Idea')}</span>
-        ${p.Status!=='Posted' ? `<button class="btn btn-secondary btn-small" onclick="markPosted('${p.Id}')">Mark Posted</button>` : ''}
+      <div class="item-side">
+        <span class="status-tag ${(p.Status||'').toLowerCase()==='posted'?'paid':'awaiting'}">${esc(p.Status||'Idea')}</span>
       </div>
-    </div>
-  `).join('');
+    </div>`).join('');
 }
-async function markPosted(id){
-  const r = await apiPost({ action:'updatePlan', id, status:'Posted' });
-  if (r.ok){ showToast('✓ Marked as posted'); await loadAll(); }
-}
+document.getElementById('contentSearch').addEventListener('input', renderContent);
 
-/* ---------- Sync ---------- */
-document.getElementById('syncBtn').addEventListener('click', async ()=>{
-  const btn = document.getElementById('syncBtn');
-  const statusEl = document.getElementById('syncStatus');
-  btn.classList.add('syncing');
-  btn.disabled = true;
-  statusEl.textContent = 'Checking with Razorpay...';
-  try{
-    const r = await apiGet('syncRazorpay');
-    if (r.ok){
-      const now = new Date().toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit'});
-      statusEl.textContent = 'Last checked at ' + now;
-      if (r.added > 0){
-        showToast(`✓ Found ${r.added} new payment${r.added>1?'s':''}`);
-      } else {
-        showToast('✓ All caught up — no new payments');
-      }
-      await loadAll();
-    } else {
-      showToast('Could not check payments right now');
-      statusEl.textContent = 'Last check failed';
-    }
-  } catch(err){
-    showToast("Couldn't reach the payment server");
-  } finally {
-    btn.classList.remove('syncing');
-    btn.disabled = false;
-  }
+/* ---------------- TABS ---------------- */
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+  });
 });
 
-/* ---------- utils ---------- */
-function escapeHtml(str){
-  return String(str||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+/* ---------------- HELPERS ---------------- */
+function esc(v){
+  if(v === undefined || v === null) return '';
+  return String(v).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
 }
+function emptyState(title, body){
+  return `<div class="empty-state"><h3>${title}</h3><p>${body}</p></div>`;
+}
+
+/* ---------------- AUTO LOGIN ---------------- */
+if(ACCESS_KEY){ showApp(); } else { loginScreen.style.display = 'flex'; }
 </script>
 </body>
 </html>
