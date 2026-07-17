@@ -384,20 +384,30 @@ async function apiGet(action, extraParams){
   url.searchParams.set('action', action);
   url.searchParams.set('key', ACCESS_KEY);
   if (extraParams) Object.entries(extraParams).forEach(([k,v])=>url.searchParams.set(k,v));
-  const res = await fetch(url.toString());
-  const text = await res.text();
-  try { return JSON.parse(text); }
-  catch(e){ throw new Error(`Server didn't return JSON (HTTP ${res.status}). First 200 chars: ${text.slice(0,200)}`); }
+  try {
+    const res = await fetch(url.toString(), { cache: 'no-store' });
+    const text = await res.text();
+    if (!res.ok) return { ok:false, error:`Server request failed (HTTP ${res.status})` };
+    try { return JSON.parse(text); }
+    catch(e){ return { ok:false, error:`Server returned an invalid response (HTTP ${res.status})` }; }
+  } catch (err) {
+    return { ok:false, error:'Could not reach the dashboard server. Check your connection and try again.' };
+  }
 }
 async function apiPost(payload){
-  const res = await fetch(SCRIPT_URL, {
-    method:'POST',
-    headers:{ 'Content-Type':'text/plain;charset=utf-8' },
-    body: JSON.stringify(Object.assign({ key: ACCESS_KEY }, payload))
-  });
-  const text = await res.text();
-  try { return JSON.parse(text); }
-  catch(e){ throw new Error(`Server didn't return JSON (HTTP ${res.status}). First 200 chars: ${text.slice(0,200)}`); }
+  try {
+    const res = await fetch(SCRIPT_URL, {
+      method:'POST',
+      headers:{ 'Content-Type':'text/plain;charset=utf-8' },
+      body: JSON.stringify(Object.assign({ key: ACCESS_KEY }, payload))
+    });
+    const text = await res.text();
+    if (!res.ok) return { ok:false, error:`Server request failed (HTTP ${res.status})` };
+    try { return JSON.parse(text); }
+    catch(e){ return { ok:false, error:`Server returned an invalid response (HTTP ${res.status})` }; }
+  } catch (err) {
+    return { ok:false, error:'Could not reach the dashboard server. Check your connection and try again.' };
+  }
 }
 function esc(v){ if (v === undefined || v === null) return ''; return String(v).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s])); }
 function fmtMoney(n){ n = Number(n)||0; return '₹' + n.toLocaleString('en-IN'); }
@@ -767,6 +777,8 @@ async function sendEnquiryReply(id){
 /* ---------------- INSTAGRAM: STATS ---------------- */
 async function loadIgStats(){
   const r = await apiGet('igStats');
+  const previousMedia = document.getElementById('igMediaList');
+  if (previousMedia) previousMedia.remove();
   if(!r.ok) return;
   const cards = document.getElementById('igStatsCards');
   cards.style.display = 'grid';
@@ -780,7 +792,7 @@ async function loadIgStats(){
       <div class="item-main"><h3>${esc((m.caption||'').slice(0,60) || m.type)}</h3><div class="item-meta">${esc(m.type)} · ${m.timestamp ? new Date(m.timestamp).toLocaleDateString('en-IN') : ''}</div></div>
       <div class="item-side"><div class="price-tag">${(m.likes||0)} ♥</div><div class="item-meta">${(m.comments||0)} comments</div></div>
     </div>`).join('');
-  document.getElementById('igStatsCards').insertAdjacentHTML('afterend', `<div class="card-list" id="igMediaList">${mediaHtml}</div>`);
+  if (mediaHtml) cards.insertAdjacentHTML('afterend', `<div class="card-list" id="igMediaList">${mediaHtml}</div>`);
 }
 
 /* ---------------- INSTAGRAM: CREATE / PUBLISH POST ---------------- */

@@ -17,6 +17,10 @@ that already captures website registrations. Total setup time: ~20 minutes.
    payment records automatically. Without them, everything else still works.
 4. **Deploy → Manage deployments → ✏️ Edit → Version: New version → Deploy.**
    Access must be: *Execute as Me, Anyone can access.*
+   When Google asks for permissions, approve both **Google Sheets** and
+   **Google Drive**. Drive is used only for the optional website-reels library;
+   without its authorization, reels stay unavailable but the dashboard itself
+   will continue to work.
 5. If the /exec URL changed, paste the new one into `SCRIPT_URL` near the bottom
    of `dashboard.html`. (If you redeployed the same deployment, the URL stays the same.)
 

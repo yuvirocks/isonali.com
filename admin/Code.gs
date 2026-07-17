@@ -235,7 +235,10 @@ function setRegStatus_(d) {
   var sh = sheet_(SHEETS.REG);
   var values = sh.getDataRange().getValues();
   for (var r = 1; r < values.length; r++) {
-    if (String(values[r][0]) === String(d.timestamp) && String(values[r][3]) === String(d.phone)) {
+    // Values read from Sheets are Date objects, while the dashboard receives
+    // JSON ISO timestamps. Comparing their string representations makes every
+    // manual status update miss its row.
+    if (timestampsMatch_(values[r][0], d.timestamp) && String(values[r][3]) === String(d.phone)) {
       sh.getRange(r + 1, 9).setValue(d.status);
       if (d.status === "PAID") {
         var row = values[r];
@@ -245,6 +248,14 @@ function setRegStatus_(d) {
     }
   }
   return { ok: false, error: "row not found" };
+}
+
+function timestampsMatch_(sheetValue, requestValue) {
+  if (String(sheetValue) === String(requestValue)) return true;
+  var sheetTime = sheetValue instanceof Date ? sheetValue.getTime() : new Date(sheetValue).getTime();
+  var requestTime = new Date(requestValue).getTime();
+  // Sheets preserves timestamps at second precision for this workflow.
+  return !isNaN(sheetTime) && !isNaN(requestTime) && Math.abs(sheetTime - requestTime) < 1000;
 }
 
 // Adds/updates a client in the Main Database once they're a paying customer.
@@ -530,22 +541,28 @@ function reelsFolder_() {
 }
 
 function websiteReels_() {
-  var cache = CacheService.getScriptCache();
-  var hit = cache.get("reels_v1");
-  if (hit) return JSON.parse(hit);
-  var folder = reelsFolder_();
-  var files = folder.getFiles();
-  var list = [];
-  while (files.hasNext()) {
-    var f = files.next();
-    if (String(f.getMimeType()).indexOf("video/") !== 0) continue;
-    try { f.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW); } catch (err) {}
-    list.push({ id: f.getId(), name: f.getName(), added: f.getDateCreated().toISOString() });
+  // Drive is optional. A missing Drive authorization must not stop the public
+  // website or the rest of the dashboard from loading.
+  try {
+    var cache = CacheService.getScriptCache();
+    var hit = cache.get("reels_v1");
+    if (hit) return JSON.parse(hit);
+    var folder = reelsFolder_();
+    var files = folder.getFiles();
+    var list = [];
+    while (files.hasNext()) {
+      var f = files.next();
+      if (String(f.getMimeType()).indexOf("video/") !== 0) continue;
+      try { f.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW); } catch (err) {}
+      list.push({ id: f.getId(), name: f.getName(), added: f.getDateCreated().toISOString() });
+    }
+    list.sort(function (a, b) { return a.added < b.added ? 1 : -1; });
+    var res = { ok: true, videos: list, folderUrl: folder.getUrl() };
+    cache.put("reels_v1", JSON.stringify(res), 300); // 5 min cache
+    return res;
+  } catch (err) {
+    return { ok: false, videos: [], folderUrl: "", error: "Drive access has not been authorized" };
   }
-  list.sort(function (a, b) { return a.added < b.added ? 1 : -1; });
-  var res = { ok: true, videos: list, folderUrl: folder.getUrl() };
-  cache.put("reels_v1", JSON.stringify(res), 300); // 5 min cache
-  return res;
 }
 
 function removeReel_(d) {
