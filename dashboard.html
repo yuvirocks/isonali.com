@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>iSonali — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#FBF6EC;
+    --cream-2:#F3EBDA;
+    --card:#FFFFFF;
+    --ink:#2B2419;
+    --ink-soft:#6B5F4C;
+    --gold:#C9982F;
+    --gold-deep:#A87A1E;
+    --gold-light:#F1DFAF;
+    --line:#E7DCC2;
+    --green:#3F7A4E;
+    --green-bg:#E7F3E9;
+    --amber:#B4791C;
+    --amber-bg:#FBEED9;
+    --red:#B04A3C;
+    --shadow: 0 10px 30px rgba(60,45,10,0.08);
+    --radius: 16px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    font-family:'DM Sans', sans-serif;
+    background: radial-gradient(circle at 10% 0%, var(--gold-light) 0%, transparent 45%), var(--cream);
+    color:var(--ink);
+    min-height:100vh;
+  }
+  h1,h2,h3{ font-family:'Playfair Display', serif; }
+  ::selection{ background:var(--gold-light); }
+
+  /* ---------- LOGIN ---------- */
+  #loginScreen{ min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px; }
+  .login-card{
+    width:100%; max-width:380px; background:var(--card); border-radius:20px;
+    padding:40px 32px; box-shadow:var(--shadow); border:1px solid var(--line); text-align:center;
+  }
+  .login-mark{
+    width:56px; height:56px; border-radius:50%; margin:0 auto 18px;
+    background:linear-gradient(135deg, var(--gold), var(--gold-deep));
+    display:flex; align-items:center; justify-content:center;
+    color:#fff; font-family:'Playfair Display',serif; font-weight:700; font-size:22px;
+    box-shadow:0 8px 20px rgba(169,122,20,0.35);
+  }
+  .login-card h1{ font-size:24px; margin-bottom:6px;}
+  .login-card p{ color:var(--ink-soft); font-size:14px; margin-bottom:26px;}
+  #loginKey{
+    width:100%; padding:14px 16px; border-radius:12px; border:1.5px solid var(--line);
+    background:var(--cream); font-size:15px; font-family:'DM Sans',sans-serif; color:var(--ink); outline:none;
+    transition:.2s border-color;
+  }
+  #loginKey:focus{ border-color:var(--gold); }
+  #loginError{ color:var(--red); font-size:13px; margin-top:12px; min-height:16px; }
+
+  /* ---------- BUTTONS ---------- */
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    border:none; cursor:pointer; font-family:'DM Sans', sans-serif; font-weight:700; font-size:14.5px;
+    border-radius:12px; padding:12px 18px; transition:.18s transform ease, .18s box-shadow ease, .18s opacity ease;
+  }
+  .btn:active{ transform:scale(.98); }
+  .btn-gold{
+    background:linear-gradient(135deg, var(--gold), var(--gold-deep)); color:#fff;
+    box-shadow:0 10px 22px rgba(169,122,20,0.30);
+  }
+  .btn-gold:hover{ box-shadow:0 12px 26px rgba(169,122,20,0.4); }
+  .btn-gold.block{ width:100%; margin-top:14px; }
+  .btn-ghost{
+    background:transparent; color:var(--ink-soft); border:1.5px solid var(--line);
+  }
+  .btn-ghost:hover{ border-color:var(--gold); color:var(--gold-deep); }
+  .btn-small{ padding:8px 14px; font-size:12.5px; }
+
+  /* ---------- APP SHELL ---------- */
+  #app{ display:none; }
+  header.topbar{
+    background:var(--card); border-bottom:1px solid var(--line); padding:16px 24px;
+    display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;
+    position:sticky; top:0; z-index:20;
+  }
+  .brand{ display:flex; align-items:center; gap:12px; }
+  .brand-mark{
+    width:38px; height:38px; border-radius:50%;
+    background:linear-gradient(135deg, var(--gold), var(--gold-deep));
+    display:flex; align-items:center; justify-content:center;
+    color:#fff; font-family:'Playfair Display',serif; font-weight:700;
+  }
+  .brand-text h1{ font-size:18px; line-height:1.1; }
+  .brand-text span{ font-size:12px; color:var(--ink-soft); }
+  #logoutBtn{ padding:10px 16px; }
+  #syncToast{
+    position:fixed; top:18px; left:50%; transform:translateX(-50%) translateY(-140%);
+    background:var(--ink); color:var(--cream); padding:12px 22px; border-radius:12px;
+    font-size:14px; font-weight:600; box-shadow:var(--shadow); transition:.3s transform ease; z-index:100;
+  }
+  #syncToast.show{ transform:translateX(-50%) translateY(0); }
+
+  main{ max-width:1100px; margin:0 auto; padding:24px; }
+
+  /* ---------- STAT CARDS ---------- */
+  .stats{ display:grid; grid-template-columns:repeat(4, 1fr); gap:16px; margin-bottom:28px; }
+  .stat-card{ background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:20px; box-shadow:var(--shadow); }
+  .stat-card .label{ font-size:12.5px; color:var(--ink-soft); font-weight:600; letter-spacing:.02em; text-transform:uppercase;}
+  .stat-card .value{ font-family:'Playfair Display', serif; font-size:28px; margin-top:8px; }
+  .stat-card.gold .value{ color:var(--gold-deep); }
+  .stat-card.green .value{ color:var(--green); }
+  .stat-card.amber .value{ color:var(--amber); }
+
+  /* ---------- TABS ---------- */
+  .tabs{ display:flex; gap:8px; margin-bottom:20px; border-bottom:1.5px solid var(--line); overflow-x:auto; }
+  .tab-btn{
+    background:none; border:none; cursor:pointer; font-family:'DM Sans',sans-serif; font-weight:600; font-size:14px;
+    color:var(--ink-soft); padding:12px 6px; margin-right:20px; border-bottom:2.5px solid transparent; white-space:nowrap;
+  }
+  .tab-btn.active{ color:var(--gold-deep); border-color:var(--gold); }
+  .tab-panel{ display:none; }
+  .tab-panel.active{ display:block; }
+
+  .section-title{ font-size:17px; margin:26px 0 12px; }
+  .section-title:first-child{ margin-top:0; }
+  .section-sub{ font-size:13px; color:var(--ink-soft); margin-top:-8px; margin-bottom:14px; }
+
+  .panel-toolbar{ display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; gap:12px; flex-wrap:wrap; }
+  .search-input{
+    padding:10px 14px; border-radius:10px; border:1.5px solid var(--line); background:var(--card);
+    font-family:'DM Sans',sans-serif; font-size:14px; min-width:220px; outline:none;
+  }
+  .search-input:focus{ border-color:var(--gold); }
+  .filter-pills{ display:flex; gap:8px; flex-wrap:wrap; }
+  .pill{
+    padding:7px 14px; border-radius:999px; font-size:13px; font-weight:600;
+    border:1.5px solid var(--line); background:var(--card); color:var(--ink-soft); cursor:pointer;
+  }
+  .pill.active{ background:var(--gold-light); border-color:var(--gold); color:var(--gold-deep); }
+
+  /* ---------- CARDS LIST ---------- */
+  .card-list{ display:flex; flex-direction:column; gap:12px; }
+  .item-card{
+    background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
+    padding:16px 20px; box-shadow:var(--shadow); display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap;
+  }
+  .item-main{ flex:1; min-width:220px; }
+  .item-main h3{ font-size:16px; margin-bottom:4px; }
+  .item-meta{ font-size:13.5px; color:var(--ink-soft); line-height:1.6; }
+  .item-meta b{ color:var(--ink); font-weight:600; }
+  .item-side{ display:flex; flex-direction:column; align-items:flex-end; gap:8px; justify-content:space-between; }
+  .price-tag{ font-family:'Playfair Display', serif; font-size:18px; }
+  .status-tag{ padding:5px 12px; border-radius:999px; font-size:12px; font-weight:700; }
+  .status-tag.paid{ background:var(--green-bg); color:var(--green); }
+  .status-tag.awaiting{ background:var(--amber-bg); color:var(--amber); }
+  .mini-btn{
+    background:none; border:1.5px solid var(--line); color:var(--ink-soft);
+    padding:7px 12px; border-radius:9px; font-size:12.5px; font-weight:600; cursor:pointer;
+  }
+  .mini-btn:hover{ border-color:var(--gold); color:var(--gold-deep); }
+  .empty-state{ text-align:center; padding:50px 20px; color:var(--ink-soft); }
+  .empty-state h3{ color:var(--ink); font-size:16px; margin-bottom:6px; }
+
+  /* ---------- FORMS ---------- */
+  .form-card{ background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:20px; box-shadow:var(--shadow); margin-bottom:20px; }
+  .form-card h3{ font-size:15.5px; margin-bottom:14px; }
+  .form-row{ display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px; }
+  .form-row.full{ grid-template-columns:1fr; }
+  .field-label{ display:block; font-size:12px; font-weight:600; color:var(--ink-soft); margin-bottom:6px; text-transform:uppercase; letter-spacing:.02em; }
+  .form-row input, .form-row select, .form-row textarea{
+    width:100%; padding:11px 13px; border-radius:10px; border:1.5px solid var(--line);
+    background:var(--cream); font-size:14px; color:var(--ink); outline:none; resize:vertical; font-family:'DM Sans',sans-serif;
+  }
+  .form-row input:focus, .form-row select:focus, .form-row textarea:focus{ border-color:var(--gold); }
+
+  /* ---------- MISC ---------- */
+  .badge{ display:inline-block; padding:5px 12px; border-radius:999px; font-size:12px; font-weight:700; background:var(--amber-bg); color:var(--amber); }
+  .badge.hot{ background:var(--red); color:#fff; }
+  .link-row{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px; }
+  .whatsapp-link{ color:var(--green); font-weight:700; text-decoration:none; font-size:13px; }
+  .whatsapp-link:hover{ text-decoration:underline; }
+  .result-box{
+    background:var(--cream-2); border:1px solid var(--line); border-radius:10px; padding:12px 14px;
+    font-size:13px; word-break:break-all; margin-top:10px;
+  }
+  code.small{ background:var(--cream-2); padding:2px 6px; border-radius:6px; font-size:12.5px; }
+
+  @media (max-width:720px){
+    .stats{ grid-template-columns:repeat(2, 1fr); }
+    header.topbar{ padding:14px 16px; }
+    main{ padding:16px; }
+    .form-row{ grid-template-columns:1fr; }
+    .item-card{ flex-direction:column; }
+    .item-side{ align-items:flex-start; flex-direction:row; width:100%; justify-content:space-between; flex-wrap:wrap; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- ===================== LOGIN ===================== -->
+  <div id="loginScreen">
+    <div class="login-card">
+      <div class="login-mark">iS</div>
+      <h1>iSonali Dashboard</h1>
+      <p>Enter your access key to continue</p>
+      <input type="password" id="loginKey" placeholder="Access key" autocomplete="off">
+      <button class="btn btn-gold block" id="loginBtn">Unlock Dashboard</button>
+      <div id="loginError"></div>
+    </div>
+  </div>
+
+  <!-- ===================== APP ===================== -->
+  <div id="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark">iS</div>
+        <div class="brand-text">
+          <h1>iSonali Dashboard</h1>
+          <span id="lastSynced">Not synced yet</span>
+        </div>
+      </div>
+      <button class="btn btn-ghost" id="logoutBtn">Log out</button>
+    </header>
+
+    <div id="syncToast"></div>
+
+    <main>
+      <section class="stats">
+        <div class="stat-card"><div class="label">Total Bookings</div><div class="value" id="statTotal">0</div></div>
+        <div class="stat-card green"><div class="label">Paid</div><div class="value" id="statPaid">0</div></div>
+        <div class="stat-card amber"><div class="label">Awaiting Payment</div><div class="value" id="statAwaiting">0</div></div>
+        <div class="stat-card gold"><div class="label">Revenue Collected</div><div class="value" id="statRevenue">₹0</div></div>
+      </section>
+
+      <nav class="tabs">
+        <button class="tab-btn active" data-tab="overview">Overview</button>
+        <button class="tab-btn" data-tab="registrations">Registrations</button>
+        <button class="tab-btn" data-tab="students">Students</button>
+        <button class="tab-btn" data-tab="enquiries">Enquiries</button>
+        <button class="tab-btn" data-tab="instagram">Instagram</button>
+        <button class="tab-btn" data-tab="seo">SEO &amp; Traffic</button>
+      </nav>
+
+      <!-- ============ OVERVIEW ============ -->
+      <section class="tab-panel active" id="tab-overview">
+        <button class="btn btn-gold" id="syncBtn"><span class="dot">🪙</span> Check for New Payments</button>
+        <span id="syncStatus" style="font-size:12px;color:var(--ink-soft);margin-left:10px;">Not checked yet</span>
+
+        <h3 class="section-title">Needs attention</h3>
+        <p class="section-sub">People who registered but haven't been marked paid yet.</p>
+        <div class="card-list" id="needsAttentionList"></div>
+      </section>
+
+      <!-- ============ REGISTRATIONS ============ -->
+      <section class="tab-panel" id="tab-registrations">
+        <div class="panel-toolbar">
+          <input class="search-input" id="regSearch" placeholder="Search by name, phone, or program...">
+          <div class="filter-pills" id="regFilter">
+            <button class="pill active" data-filter="all">All</button>
+            <button class="pill" data-filter="paid">Paid</button>
+            <button class="pill" data-filter="awaiting">Awaiting</button>
+          </div>
+          <button class="btn btn-ghost btn-small" id="exportCsvBtn">Export CSV</button>
+        </div>
+        <div class="card-list" id="regList"></div>
+      </section>
+
+      <!-- ============ STUDENTS (CRM) ============ -->
+      <section class="tab-panel" id="tab-students">
+        <div class="form-card">
+          <h3>Add or update a contact</h3>
+          <div class="form-row">
+            <div><label class="field-label">Name</label><input type="text" id="crmName"></div>
+            <div><label class="field-label">Phone (used as ID)</label><input type="text" id="crmPhone"></div>
+          </div>
+          <div class="form-row">
+            <div><label class="field-label">Email</label><input type="text" id="crmEmail"></div>
+            <div><label class="field-label">Status</label>
+              <select id="crmStatus"><option>Lead</option><option>Student</option><option>Alumni</option></select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div><label class="field-label">Tags</label><input type="text" id="crmTags" placeholder="e.g. kids, webinar"></div>
+            <div><label class="field-label">Notes</label><input type="text" id="crmNotes"></div>
+          </div>
+          <button class="btn btn-gold" id="crmSaveBtn">Save Contact</button>
+        </div>
+
+        <div class="form-card">
+          <h3>Broadcast a message</h3>
+          <div class="form-row">
+            <div><label class="field-label">Send to</label>
+              <select id="broadcastFilter"><option value="all">Everyone</option><option value="Lead">Leads</option><option value="Student">Students</option><option value="Alumni">Alumni</option></select>
+            </div>
+            <div></div>
+          </div>
+          <div class="form-row full">
+            <div><label class="field-label">Message</label><textarea id="broadcastMsg" rows="3" placeholder="Type your message..."></textarea></div>
+          </div>
+          <button class="btn btn-gold" id="broadcastGenerateBtn">Generate WhatsApp Links</button>
+          <div id="broadcastResults" class="card-list" style="margin-top:14px;"></div>
+        </div>
+
+        <div class="panel-toolbar">
+          <input class="search-input" id="crmSearch" placeholder="Search contacts...">
+        </div>
+        <div class="card-list" id="crmList"></div>
+      </section>
+
+      <!-- ============ ENQUIRIES ============ -->
+      <section class="tab-panel" id="tab-enquiries">
+        <p class="section-sub">Messages from the contact form on isonali.com.</p>
+        <div class="card-list" id="enqList"></div>
+      </section>
+
+      <!-- ============ INSTAGRAM ============ -->
+      <section class="tab-panel" id="tab-instagram">
+        <h3 class="section-title">Content planner</h3>
+        <div class="form-card">
+          <div class="form-row">
+            <div><label class="field-label">Platform</label>
+              <select id="planPlatform"><option>Instagram</option><option>YouTube</option><option>Facebook</option></select>
+            </div>
+            <div><label class="field-label">Type</label>
+              <select id="planType"><option>Post</option><option>Reel</option><option>Story</option></select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div><label class="field-label">Date</label><input type="date" id="planDate"></div>
+            <div><label class="field-label">Idea</label><input type="text" id="planIdea" placeholder="e.g. Reel: 3 tips for confident intros"></div>
+          </div>
+          <div class="form-row full">
+            <div><label class="field-label">Caption (optional)</label><textarea id="planCaption" rows="2"></textarea></div>
+          </div>
+          <button class="btn btn-gold" id="planSaveBtn">Add Idea</button>
+        </div>
+        <div class="card-list" id="planList"></div>
+
+        <h3 class="section-title">Weekly numbers</h3>
+        <div class="form-card">
+          <div class="form-row">
+            <div><label class="field-label">Week of</label><input type="date" id="metricsDate"></div>
+            <div><label class="field-label">Followers</label><input type="number" id="metricsFollowers"></div>
+          </div>
+          <div class="form-row">
+            <div><label class="field-label">Reach</label><input type="number" id="metricsReach"></div>
+            <div><label class="field-label">Profile Views</label><input type="number" id="metricsProfileViews"></div>
+          </div>
+          <div class="form-row">
+            <div><label class="field-label">Link Clicks</label><input type="number" id="metricsLinkClicks"></div>
+            <div><label class="field-label">Notes</label><input type="text" id="metricsNotes"></div>
+          </div>
+          <button class="btn btn-gold" id="metricsSaveBtn">Log This Week</button>
+        </div>
+        <div class="card-list" id="metricsList"></div>
+
+        <h3 class="section-title">Website reels</h3>
+        <p class="section-sub">Videos in the "iSonali Website Reels" Drive folder — these play on isonali.com.</p>
+        <div class="card-list" id="reelsList"></div>
+
+        <div id="youtubeSection" style="display:none;">
+          <h3 class="section-title">YouTube</h3>
+          <div class="stats" id="ytStats" style="grid-template-columns:repeat(3,1fr); margin-bottom:16px;"></div>
+          <div class="card-list" id="ytVideoList"></div>
+        </div>
+      </section>
+
+      <!-- ============ SEO & TRAFFIC ============ -->
+      <section class="tab-panel" id="tab-seo">
+        <h3 class="section-title">Quick links</h3>
+        <div class="link-row">
+          <a class="btn btn-ghost" href="https://analytics.google.com/" target="_blank" rel="noopener">Google Analytics</a>
+          <a class="btn btn-ghost" href="https://search.google.com/search-console" target="_blank" rel="noopener">Search Console</a>
+          <a class="btn btn-ghost" href="https://vercel.com/dashboard" target="_blank" rel="noopener">Vercel Analytics</a>
+        </div>
+
+        <h3 class="section-title">UTM link builder</h3>
+        <p class="section-sub">Tag your Instagram/WhatsApp links so you know which post brought each registration.</p>
+        <div class="form-card">
+          <div class="form-row full">
+            <div><label class="field-label">Page URL</label><input type="text" id="utmBase" value="https://isonali.com"></div>
+          </div>
+          <div class="form-row">
+            <div><label class="field-label">Source (e.g. instagram)</label><input type="text" id="utmSource"></div>
+            <div><label class="field-label">Medium (e.g. bio_link, story)</label><input type="text" id="utmMedium"></div>
+          </div>
+          <div class="form-row">
+            <div><label class="field-label">Campaign (e.g. july_webinar)</label><input type="text" id="utmCampaign"></div>
+            <div><label class="field-label">Content (optional)</label><input type="text" id="utmContent"></div>
+          </div>
+          <button class="btn btn-gold" id="utmGenerateBtn">Generate Link</button>
+          <div class="result-box" id="utmResult" style="display:none;"></div>
+        </div>
+      </section>
+    </main>
+
+    <footer style="text-align:center;padding:30px;color:var(--ink-soft);font-size:12.5px;">iSonali.com · Internal dashboard</footer>
+  </div>
+
+<script>
+/* =========================================================
+   CONFIG — paste your Apps Script /exec URL below
+   ========================================================= */
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbynFJ4Bei8sg7a30WlFmqLE8M536R1pOgNNeIxyFIJGmTlzEFozopNIuPWzdYgQ0oLNMQ/exec";
+
+const DATA = { registrations: [], crm: [], planner: [], metrics: [], payments: [], webinars: [], enquiries: [], reels: [] };
+let ACCESS_KEY = localStorage.getItem('isonali_dash_key') || '';
+
+/* ---------------- API HELPERS (match Code.gs exactly) ---------------- */
+async function apiGet(action, extraParams){
+  const url = new URL(SCRIPT_URL);
+  url.searchParams.set('action', action);
+  url.searchParams.set('key', ACCESS_KEY);
+  if (extraParams) Object.entries(extraParams).forEach(([k,v])=>url.searchParams.set(k,v));
+  const res = await fetch(url.toString());
+  return res.json();
+}
+async function apiPost(payload){
+  const res = await fetch(SCRIPT_URL, {
+    method:'POST',
+    headers:{ 'Content-Type':'text/plain;charset=utf-8' }, // avoids CORS preflight against Apps Script
+    body: JSON.stringify(Object.assign({ key: ACCESS_KEY }, payload))
+  });
+  return res.json();
+}
+function esc(v){
+  if (v === undefined || v === null) return '';
+  return String(v).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
+}
+function fmtMoney(n){ n = Number(n)||0; return '₹' + n.toLocaleString('en-IN'); }
+function emptyState(title, body){ return `<div class="empty-state"><h3>${title}</h3><p>${body}</p></div>`; }
+function toast(msg){
+  const t = document.getElementById('syncToast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(()=> t.classList.remove('show'), 3200);
+}
+function waLink(phone, text){
+  const digits = String(phone||'').replace(/\D/g,'').slice(-10);
+  if (!digits) return '#';
+  return `https://wa.me/91${digits}` + (text ? `?text=${encodeURIComponent(text)}` : '');
+}
+
+/* ---------------- LOGIN ---------------- */
+const loginScreen = document.getElementById('loginScreen');
+const appEl = document.getElementById('app');
+const loginError = document.getElementById('loginError');
+
+async function tryLogin(key){
+  loginError.textContent = '';
+  if(!key){ loginError.textContent = 'Enter your access key.'; return; }
+  try{
+    const res = await fetch(`${SCRIPT_URL}?action=login&key=${encodeURIComponent(key)}`);
+    const json = await res.json();
+    if(json.ok){
+      ACCESS_KEY = key;
+      localStorage.setItem('isonali_dash_key', key);
+      showApp();
+    } else {
+      loginError.textContent = 'That key was not recognized. Try again.';
+    }
+  } catch(err){
+    loginError.textContent = 'Could not reach the dashboard. Check SCRIPT_URL and your connection.';
+  }
+}
+document.getElementById('loginBtn').addEventListener('click', ()=> tryLogin(document.getElementById('loginKey').value.trim()));
+document.getElementById('loginKey').addEventListener('keydown', e=>{ if(e.key==='Enter') tryLogin(e.target.value.trim()); });
+document.getElementById('logoutBtn').addEventListener('click', ()=>{
+  localStorage.removeItem('isonali_dash_key');
+  location.reload();
+});
+
+function showApp(){
+  loginScreen.style.display = 'none';
+  appEl.style.display = 'block';
+  loadData();
+}
+if (ACCESS_KEY){ showApp(); } else { loginScreen.style.display = 'flex'; }
+
+/* ---------------- LOAD DATA ---------------- */
+async function loadData(){
+  try{
+    const json = await apiGet('data');
+    if(!json.ok){ toast('Session expired — please log in again.'); return; }
+    DATA.registrations = json.registrations || [];
+    DATA.crm = json.crm || [];
+    DATA.planner = json.planner || [];
+    DATA.metrics = json.metrics || [];
+    DATA.payments = json.payments || [];
+    DATA.webinars = json.webinars || [];
+    DATA.enquiries = json.enquiries || [];
+    DATA.reels = (json.reels && json.reels.videos) || [];
+
+    renderStats(); renderOverview(); renderRegistrations(); renderCrm();
+    renderEnquiries(); renderPlanner(); renderMetrics(); renderReels();
+
+    if (json.youtubeConfigured){
+      document.getElementById('youtubeSection').style.display = 'block';
+      loadYoutube();
+    }
+    document.getElementById('lastSynced').textContent = 'Updated ' + new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+  } catch(err){
+    toast('Could not load data. Check SCRIPT_URL and try again.');
+  }
+}
+
+/* ---------------- SYNC ---------------- */
+document.getElementById('syncBtn').addEventListener('click', async ()=>{
+  const btn = document.getElementById('syncBtn');
+  const statusEl = document.getElementById('syncStatus');
+  btn.disabled = true; btn.style.opacity = '.7';
+  statusEl.textContent = 'Checking with Razorpay...';
+  try{
+    const r = await apiGet('syncRazorpay');
+    if (r.ok){
+      statusEl.textContent = 'Last checked at ' + new Date().toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit'});
+      toast(r.added > 0 ? `✓ Found ${r.added} new payment${r.added===1?'':'s'}` : '✓ You are all caught up');
+      await loadData();
+    } else {
+      statusEl.textContent = r.error || 'Sync failed';
+      toast(r.error || 'Could not sync — check your Razorpay keys');
+    }
+  } catch(err){
+    statusEl.textContent = 'Sync failed — try again';
+    toast('Could not reach the dashboard server.');
+  } finally {
+    btn.disabled = false; btn.style.opacity = '1';
+  }
+});
+
+/* ---------------- STATS ---------------- */
+function renderStats(){
+  const total = DATA.registrations.length;
+  const paid = DATA.registrations.filter(r => r.PaymentStatus === 'PAID').length;
+  const awaiting = total - paid;
+  const revenue = DATA.payments.reduce((sum,p)=> sum + (Number(p.Amount)||0), 0);
+  document.getElementById('statTotal').textContent = total;
+  document.getElementById('statPaid').textContent = paid;
+  document.getElementById('statAwaiting').textContent = awaiting;
+  document.getElementById('statRevenue').textContent = fmtMoney(revenue);
+}
+
+/* ---------------- OVERVIEW / NEEDS ATTENTION ---------------- */
+function renderOverview(){
+  const list = document.getElementById('needsAttentionList');
+  const rows = DATA.registrations.filter(r => r.PaymentStatus !== 'PAID').slice().reverse();
+  if(!rows.length){
+    list.innerHTML = emptyState('All caught up', 'Everyone who registered has been marked paid.');
+    return;
+  }
+  list.innerHTML = rows.map(r=>{
+    const msg = `Hi ${r.Name||''}, following up on your ${r.Program||'session'} booking with iSonali — let us know if you need any help completing payment!`;
+    return `
+    <div class="item-card">
+      <div class="item-main">
+        <h3>${esc(r.Name)}</h3>
+        <div class="item-meta"><b>${esc(r.Program||'—')}</b> · ${esc(r.City||'—')}<br>${esc(r.Phone||'—')}</div>
+      </div>
+      <div class="item-side">
+        <span class="status-tag awaiting">Awaiting Payment</span>
+        <a class="mini-btn whatsapp-link" href="${waLink(r.Phone, msg)}" target="_blank" rel="noopener">Nudge on WhatsApp</a>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ---------------- REGISTRATIONS ---------------- */
+let regFilterState = 'all';
+function renderRegistrations(){
+  const list = document.getElementById('regList');
+  const q = (document.getElementById('regSearch').value || '').toLowerCase();
+  let rows = DATA.registrations.filter(r=>{
+    const paid = r.PaymentStatus === 'PAID';
+    if(regFilterState === 'paid' && !paid) return false;
+    if(regFilterState === 'awaiting' && paid) return false;
+    const hay = `${r.Name||''} ${r.Phone||''} ${r.Program||''} ${r.City||''}`.toLowerCase();
+    return hay.includes(q);
+  }).slice().reverse();
+
+  if(!rows.length){ list.innerHTML = emptyState('No bookings yet', 'New registrations will show up here as soon as someone books.'); return; }
+
+  list.innerHTML = rows.map(r=>{
+    const paid = r.PaymentStatus === 'PAID';
+    return `
+    <div class="item-card">
+      <div class="item-main">
+        <h3>${esc(r.Name)}</h3>
+        <div class="item-meta"><b>${esc(r.Program||'—')}</b> · ${esc(r.City||'—')}<br>${esc(r.Phone||'—')} · ${esc(r.Email||'—')}</div>
+      </div>
+      <div class="item-side">
+        <div class="price-tag">₹${esc(r.Price||'0')}</div>
+        <span class="status-tag ${paid?'paid':'awaiting'}">${paid?'Paid':'Awaiting Payment'}</span>
+        <button class="mini-btn" onclick="toggleRegStatus('${encodeURIComponent(r.Timestamp)}','${encodeURIComponent(r.Phone)}','${paid?'PAYMENT_LINK_OPENED_NOT_VERIFIED':'PAID'}')">Mark as ${paid?'Awaiting':'Paid'}</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+async function toggleRegStatus(tsEnc, phoneEnc, newStatus){
+  const timestamp = decodeURIComponent(tsEnc), phone = decodeURIComponent(phoneEnc);
+  const r = await apiPost({ action:'setRegStatus', timestamp, phone, status:newStatus });
+  if (r.ok){ toast(newStatus==='PAID' ? '✓ Marked as paid' : 'Marked as awaiting'); await loadData(); }
+  else { toast('Could not update — try again.'); }
+}
+document.getElementById('regSearch').addEventListener('input', renderRegistrations);
+document.getElementById('regFilter').addEventListener('click', e=>{
+  if(e.target.classList.contains('pill')){
+    document.querySelectorAll('#regFilter .pill').forEach(p=>p.classList.remove('active'));
+    e.target.classList.add('active');
+    regFilterState = e.target.dataset.filter;
+    renderRegistrations();
+  }
+});
+document.getElementById('exportCsvBtn').addEventListener('click', ()=>{
+  const headers = ['Timestamp','Name','Email','Phone','City','Role','Program','Price','PaymentStatus'];
+  const rows = DATA.registrations.map(r => headers.map(h => `"${String(r[h]??'').replace(/"/g,'""')}"`).join(','));
+  const csv = [headers.join(','), ...rows].join('\n');
+  const blob = new Blob([csv], {type:'text/csv'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `isonali-registrations-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+});
+
+/* ---------------- STUDENTS (CRM) ---------------- */
+document.getElementById('crmSaveBtn').addEventListener('click', async ()=>{
+  const phone = document.getElementById('crmPhone').value.trim();
+  if(!phone){ toast('Phone number is required'); return; }
+  const payload = {
+    action:'upsertCrm', crmKey:phone,
+    name: document.getElementById('crmName').value.trim(),
+    phone,
+    email: document.getElementById('crmEmail').value.trim(),
+    status: document.getElementById('crmStatus').value,
+    tags: document.getElementById('crmTags').value.trim(),
+    notes: document.getElementById('crmNotes').value.trim(),
+    lastContact: new Date().toISOString().slice(0,10)
+  };
+  const r = await apiPost(payload);
+  if(r.ok){
+    toast('✓ Contact saved');
+    ['crmName','crmPhone','crmEmail','crmTags','crmNotes'].forEach(id=>document.getElementById(id).value='');
+    await loadData();
+  } else { toast('Could not save contact'); }
+});
+function renderCrm(){
+  const list = document.getElementById('crmList');
+  const q = (document.getElementById('crmSearch').value || '').toLowerCase();
+  let rows = DATA.crm.filter(c => `${c.Name||''} ${c.Phone||''} ${c.Email||''} ${c.Tags||''}`.toLowerCase().includes(q)).slice().reverse();
+  if(!rows.length){ list.innerHTML = emptyState('No contacts yet', 'Contacts you add will show up here.'); return; }
+  list.innerHTML = rows.map(c=>`
+    <div class="item-card">
+      <div class="item-main">
+        <h3>${esc(c.Name||c.Phone||'—')}</h3>
+        <div class="item-meta">${esc(c.Phone||'—')} · ${esc(c.Email||'—')}${c.Notes?`<br>${esc(c.Notes)}`:''}</div>
+      </div>
+      <div class="item-side">
+        <span class="status-tag ${c.Status==='Alumni'||c.Status==='Student'?'paid':'awaiting'}">${esc(c.Status||'Lead')}</span>
+        <a class="mini-btn whatsapp-link" href="${waLink(c.Phone,'')}" target="_blank" rel="noopener">WhatsApp</a>
+      </div>
+    </div>`).join('');
+}
+document.getElementById('crmSearch').addEventListener('input', renderCrm);
+
+document.getElementById('broadcastGenerateBtn').addEventListener('click', ()=>{
+  const filter = document.getElementById('broadcastFilter').value;
+  const msg = document.getElementById('broadcastMsg').value.trim();
+  if(!msg){ toast('Write a message first'); return; }
+  let rows = DATA.crm.filter(c => filter==='all' || c.Status===filter);
+  const box = document.getElementById('broadcastResults');
+  if(!rows.length){ box.innerHTML = emptyState('No matching contacts', 'Try a different filter.'); return; }
+  box.innerHTML = rows.map(c=>`
+    <div class="item-card">
+      <div class="item-main"><h3>${esc(c.Name||c.Phone)}</h3><div class="item-meta">${esc(c.Phone||'')}</div></div>
+      <div class="item-side"><a class="mini-btn whatsapp-link" href="${waLink(c.Phone, msg)}" target="_blank" rel="noopener">Send</a></div>
+    </div>`).join('');
+  toast(`${rows.length} link${rows.length===1?'':'s'} ready — click each to send`);
+});
+
+/* ---------------- ENQUIRIES ---------------- */
+function renderEnquiries(){
+  const list = document.getElementById('enqList');
+  let rows = DATA.enquiries.slice().reverse();
+  if(!rows.length){ list.innerHTML = emptyState('No enquiries yet', 'Messages from the website contact form will show up here.'); return; }
+  list.innerHTML = rows.map(e=>`
+    <div class="item-card" style="flex-direction:column;align-items:stretch;">
+      <div class="item-main">
+        <h3>${esc(e.Name)} <span class="badge ${e.Status==='New'?'hot':''}">${esc(e.Status||'New')}</span></h3>
+        <div class="item-meta">${esc(e.Email||'—')} · ${esc(e.Phone||'—')} · ${esc(e.Course||'—')}<br>${esc(e.Message||'')}</div>
+        ${e.Reply ? `<div class="item-meta" style="margin-top:6px;"><b>Your reply:</b> ${esc(e.Reply)}</div>` : ''}
+      </div>
+      <div class="form-row full" style="margin-top:12px;">
+        <textarea rows="2" placeholder="Write a reply..." id="enqReply-${esc(e.Id)}">${esc(e.Reply||'')}</textarea>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+        <label style="font-size:13px;color:var(--ink-soft);display:flex;align-items:center;gap:6px;">
+          <input type="checkbox" id="enqSendEmail-${esc(e.Id)}" checked> Also email this reply
+        </label>
+        <button class="btn btn-gold btn-small" onclick="sendEnquiryReply('${esc(e.Id)}')">Save &amp; Reply</button>
+      </div>
+    </div>`).join('');
+}
+async function sendEnquiryReply(id){
+  const reply = document.getElementById(`enqReply-${id}`).value.trim();
+  const sendEmail = document.getElementById(`enqSendEmail-${id}`).checked;
+  const r = await apiPost({ action:'replyEnquiry', id, reply, status:'Replied', sendEmail });
+  if(r.ok){ toast(r.emailSent ? '✓ Reply saved and emailed' : '✓ Reply saved'); await loadData(); }
+  else { toast('Could not save reply'); }
+}
+
+/* ---------------- INSTAGRAM: PLANNER ---------------- */
+document.getElementById('planSaveBtn').addEventListener('click', async ()=>{
+  const idea = document.getElementById('planIdea').value.trim();
+  if(!idea){ toast('Add an idea first'); return; }
+  const payload = {
+    action:'addPlan',
+    platform: document.getElementById('planPlatform').value,
+    type: document.getElementById('planType').value,
+    date: document.getElementById('planDate').value,
+    idea, caption: document.getElementById('planCaption').value.trim()
+  };
+  const r = await apiPost(payload);
+  if(r.ok){
+    toast('✓ Idea added');
+    ['planDate','planIdea','planCaption'].forEach(id=>document.getElementById(id).value='');
+    await loadData();
+  } else { toast('Could not add idea'); }
+});
+const PLAN_PIPELINE = ['Idea','Drafted','Scheduled','Posted'];
+function renderPlanner(){
+  const list = document.getElementById('planList');
+  let rows = DATA.planner.slice().reverse();
+  if(!rows.length){ list.innerHTML = emptyState('No content ideas yet', 'Add your first idea above.'); return; }
+  list.innerHTML = rows.map(p=>{
+    const idx = PLAN_PIPELINE.indexOf(p.Status);
+    const next = idx>=0 && idx<PLAN_PIPELINE.length-1 ? PLAN_PIPELINE[idx+1] : null;
+    return `
+    <div class="item-card">
+      <div class="item-main">
+        <h3>${esc(p.Idea)}</h3>
+        <div class="item-meta">${esc(p.Platform||'')} · ${esc(p.Type||'')} ${p.Date?'· '+esc(p.Date):''}${p.Caption?`<br>${esc(p.Caption)}`:''}</div>
+      </div>
+      <div class="item-side">
+        <span class="status-tag ${p.Status==='Posted'?'paid':'awaiting'}">${esc(p.Status||'Idea')}</span>
+        ${next ? `<button class="mini-btn" onclick="advancePlan('${esc(p.Id)}','${next}')">Mark as ${next}</button>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+async function advancePlan(id, status){
+  const r = await apiPost({ action:'updatePlan', id, status });
+  if(r.ok){ toast(`✓ Marked as ${status}`); await loadData(); }
+}
+
+/* ---------------- INSTAGRAM: WEEKLY METRICS ---------------- */
+document.getElementById('metricsSaveBtn').addEventListener('click', async ()=>{
+  const payload = {
+    action:'addMetrics',
+    date: document.getElementById('metricsDate').value,
+    followers: document.getElementById('metricsFollowers').value,
+    reach: document.getElementById('metricsReach').value,
+    profileViews: document.getElementById('metricsProfileViews').value,
+    linkClicks: document.getElementById('metricsLinkClicks').value,
+    notes: document.getElementById('metricsNotes').value.trim()
+  };
+  const r = await apiPost(payload);
+  if(r.ok){
+    toast("✓ Logged this week's numbers");
+    ['metricsDate','metricsFollowers','metricsReach','metricsProfileViews','metricsLinkClicks','metricsNotes'].forEach(id=>document.getElementById(id).value='');
+    await loadData();
+  } else { toast('Could not log numbers'); }
+});
+function renderMetrics(){
+  const list = document.getElementById('metricsList');
+  let rows = DATA.metrics.slice().reverse();
+  if(!rows.length){ list.innerHTML = emptyState('No weekly numbers logged yet', "Log this week's Instagram Insights above."); return; }
+  list.innerHTML = rows.slice(0,12).map((m,i)=>{
+    const prev = rows[i+1];
+    const delta = prev ? (Number(m.Followers)||0) - (Number(prev.Followers)||0) : null;
+    return `
+    <div class="item-card">
+      <div class="item-main">
+        <h3>${esc(m.Date)}</h3>
+        <div class="item-meta">Followers: ${esc(m.Followers)}${delta!==null?` (${delta>=0?'+':''}${delta})`:''} · Reach: ${esc(m.Reach)} · Profile views: ${esc(m.ProfileViews)} · Link clicks: ${esc(m.LinkClicks)}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ---------------- INSTAGRAM: REELS ---------------- */
+function renderReels(){
+  const list = document.getElementById('reelsList');
+  if(!DATA.reels.length){ list.innerHTML = emptyState('No reels uploaded yet', 'Drop video files into the "iSonali Website Reels" Drive folder.'); return; }
+  list.innerHTML = DATA.reels.map(v=>`
+    <div class="item-card">
+      <div class="item-main"><h3>${esc(v.name)}</h3><div class="item-meta">Added ${v.added ? new Date(v.added).toLocaleDateString('en-IN') : ''}</div></div>
+      <div class="item-side"><button class="mini-btn" onclick="removeReel('${esc(v.id)}')">Remove</button></div>
+    </div>`).join('');
+}
+async function removeReel(id){
+  const r = await apiPost({ action:'removeReel', id });
+  if(r.ok){ toast('✓ Removed'); await loadData(); } else { toast('Could not remove'); }
+}
+
+/* ---------------- INSTAGRAM: YOUTUBE ---------------- */
+async function loadYoutube(){
+  try{
+    const r = await apiGet('youtube');
+    if(!r.ok){ return; }
+    const c = r.channel || {};
+    document.getElementById('ytStats').innerHTML = `
+      <div class="stat-card"><div class="label">Subscribers</div><div class="value">${(c.subscribers||0).toLocaleString('en-IN')}</div></div>
+      <div class="stat-card"><div class="label">Total Views</div><div class="value">${(c.totalViews||0).toLocaleString('en-IN')}</div></div>
+      <div class="stat-card"><div class="label">Videos</div><div class="value">${c.videoCount||0}</div></div>`;
+    const list = document.getElementById('ytVideoList');
+    list.innerHTML = (r.videos||[]).map(v=>`
+      <div class="item-card">
+        <div class="item-main"><h3>${esc(v.title)}</h3><div class="item-meta">${v.isShort?'Short':'Video'} · ${new Date(v.publishedAt).toLocaleDateString('en-IN')}</div></div>
+        <div class="item-side"><div class="price-tag">${(v.views||0).toLocaleString('en-IN')} views</div></div>
+      </div>`).join('');
+  } catch(err){}
+}
+
+/* ---------------- SEO: UTM BUILDER ---------------- */
+document.getElementById('utmGenerateBtn').addEventListener('click', ()=>{
+  const base = document.getElementById('utmBase').value.trim() || 'https://isonali.com';
+  const source = document.getElementById('utmSource').value.trim();
+  const medium = document.getElementById('utmMedium').value.trim();
+  const campaign = document.getElementById('utmCampaign').value.trim();
+  const content = document.getElementById('utmContent').value.trim();
+  if(!source || !medium || !campaign){ toast('Fill in source, medium, and campaign'); return; }
+  const url = new URL(base);
+  url.searchParams.set('utm_source', source);
+  url.searchParams.set('utm_medium', medium);
+  url.searchParams.set('utm_campaign', campaign);
+  if(content) url.searchParams.set('utm_content', content);
+  const box = document.getElementById('utmResult');
+  box.style.display = 'block';
+  box.innerHTML = `<code class="small">${esc(url.toString())}</code> <button class="mini-btn" style="margin-left:10px;" onclick="navigator.clipboard.writeText('${url.toString()}');toast('Copied!')">Copy</button>`;
+});
+
+/* ---------------- TABS ---------------- */
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+  });
+});
+</script>
+</body>
+</html>
