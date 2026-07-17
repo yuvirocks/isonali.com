@@ -223,6 +223,7 @@ function doPostInner_(e) {
     case "replyEnquiry":   return ok_(replyEnquiry_(data));
     case "removeReel":     return ok_(removeReel_(data));
     case "upsertClient":   return ok_(upsertClient_(data));
+    case "bulkAddToGroup": return ok_(bulkAddToGroup_(data));
     case "sendGroupEmail": return ok_(sendGroupEmail_(data));
     case "igCreateContainer": return ok_(igCreateContainer_(data));
     case "igPublishContainer": return ok_(igPublishContainer_(data));
@@ -235,10 +236,7 @@ function setRegStatus_(d) {
   var sh = sheet_(SHEETS.REG);
   var values = sh.getDataRange().getValues();
   for (var r = 1; r < values.length; r++) {
-    // Values read from Sheets are Date objects, while the dashboard receives
-    // JSON ISO timestamps. Comparing their string representations makes every
-    // manual status update miss its row.
-    if (timestampsMatch_(values[r][0], d.timestamp) && String(values[r][3]) === String(d.phone)) {
+    if (String(values[r][0]) === String(d.timestamp) && String(values[r][3]) === String(d.phone)) {
       sh.getRange(r + 1, 9).setValue(d.status);
       if (d.status === "PAID") {
         var row = values[r];
@@ -248,14 +246,6 @@ function setRegStatus_(d) {
     }
   }
   return { ok: false, error: "row not found" };
-}
-
-function timestampsMatch_(sheetValue, requestValue) {
-  if (String(sheetValue) === String(requestValue)) return true;
-  var sheetTime = sheetValue instanceof Date ? sheetValue.getTime() : new Date(sheetValue).getTime();
-  var requestTime = new Date(requestValue).getTime();
-  // Sheets preserves timestamps at second precision for this workflow.
-  return !isNaN(sheetTime) && !isNaN(requestTime) && Math.abs(sheetTime - requestTime) < 1000;
 }
 
 // Adds/updates a client in the Main Database once they're a paying customer.
@@ -292,6 +282,23 @@ function upsertClient_(d) {
   sh.appendRow([key, d.name || "", d.email || "", d.phone || "", d.city || "", d.groups || "",
     d.source || "Manual", new Date().toISOString().slice(0, 10)]);
   return { ok: true };
+}
+
+// Adds a group tag to several selected clients at once, without wiping their existing groups.
+function bulkAddToGroup_(d) {
+  if (!d.group || !d.keys || !d.keys.length) return { ok: false, error: "group and keys[] required" };
+  var sh = sheet_(SHEETS.CLIENTS);
+  var values = sh.getDataRange().getValues();
+  var keys = d.keys.map(String);
+  var updated = 0;
+  for (var r = 1; r < values.length; r++) {
+    if (keys.indexOf(String(values[r][0])) === -1) continue;
+    var groups = String(values[r][5] || "").split(",").map(function (g) { return g.trim(); }).filter(Boolean);
+    if (groups.indexOf(d.group) === -1) groups.push(d.group);
+    sh.getRange(r + 1, 6).setValue(groups.join(", "));
+    updated++;
+  }
+  return { ok: true, updated: updated };
 }
 
 // Email everyone in a given group (Groups column contains a comma-separated list).
@@ -541,28 +548,22 @@ function reelsFolder_() {
 }
 
 function websiteReels_() {
-  // Drive is optional. A missing Drive authorization must not stop the public
-  // website or the rest of the dashboard from loading.
-  try {
-    var cache = CacheService.getScriptCache();
-    var hit = cache.get("reels_v1");
-    if (hit) return JSON.parse(hit);
-    var folder = reelsFolder_();
-    var files = folder.getFiles();
-    var list = [];
-    while (files.hasNext()) {
-      var f = files.next();
-      if (String(f.getMimeType()).indexOf("video/") !== 0) continue;
-      try { f.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW); } catch (err) {}
-      list.push({ id: f.getId(), name: f.getName(), added: f.getDateCreated().toISOString() });
-    }
-    list.sort(function (a, b) { return a.added < b.added ? 1 : -1; });
-    var res = { ok: true, videos: list, folderUrl: folder.getUrl() };
-    cache.put("reels_v1", JSON.stringify(res), 300); // 5 min cache
-    return res;
-  } catch (err) {
-    return { ok: false, videos: [], folderUrl: "", error: "Drive access has not been authorized" };
+  var cache = CacheService.getScriptCache();
+  var hit = cache.get("reels_v1");
+  if (hit) return JSON.parse(hit);
+  var folder = reelsFolder_();
+  var files = folder.getFiles();
+  var list = [];
+  while (files.hasNext()) {
+    var f = files.next();
+    if (String(f.getMimeType()).indexOf("video/") !== 0) continue;
+    try { f.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW); } catch (err) {}
+    list.push({ id: f.getId(), name: f.getName(), added: f.getDateCreated().toISOString() });
   }
+  list.sort(function (a, b) { return a.added < b.added ? 1 : -1; });
+  var res = { ok: true, videos: list, folderUrl: folder.getUrl() };
+  cache.put("reels_v1", JSON.stringify(res), 300); // 5 min cache
+  return res;
 }
 
 function removeReel_(d) {
@@ -588,11 +589,26 @@ function igStats_() {
   var base = "https://graph.facebook.com/v19.0/";
   var account = fetchJson_(base + creds.igId + "?fields=username,followers_count,media_count&access_token=" + creds.token);
   var media = fetchJson_(base + creds.igId + "/media?fields=id,caption,media_type,media_url,thumbnail_url,permalink,timestamp,like_count,comments_count&limit=25&access_token=" + creds.token);
+
+  var totalViews = 0;
   var items = (media.data || []).map(function (m) {
+    var views = null, reach = null;
+    // "views" is the current unified metric for video/reels/image insights (Graph API v20+).
+    try {
+      var metric = (m.media_type === "IMAGE") ? "views,reach" : "views,reach,saved,shares";
+      var insights = fetchJson_(base + m.id + "/insights?metric=" + metric + "&access_token=" + creds.token);
+      (insights.data || []).forEach(function (row) {
+        var val = row.values && row.values[0] ? row.values[0].value : (row.total_value ? row.total_value.value : null);
+        if (row.name === "views") views = val;
+        if (row.name === "reach") reach = val;
+      });
+    } catch (err) { /* older media or unsupported metric for this type - skip insights */ }
+    if (typeof views === "number") totalViews += views;
     return { id: m.id, caption: m.caption || "", type: m.media_type, thumbnail: m.thumbnail_url || m.media_url,
-      permalink: m.permalink, timestamp: m.timestamp, likes: m.like_count || 0, comments: m.comments_count || 0 };
+      permalink: m.permalink, timestamp: m.timestamp, likes: m.like_count || 0, comments: m.comments_count || 0,
+      views: views, reach: reach };
   });
-  return { ok: true, account: account, media: items };
+  return { ok: true, account: account, media: items, totalViews: totalViews };
 }
 
 // Step 1 of publishing: create a media container (Instagram then needs a few

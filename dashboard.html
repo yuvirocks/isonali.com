@@ -109,6 +109,25 @@
   .banner b{ color:var(--ink); }
   code.small{ background:var(--cream-2); padding:2px 6px; border-radius:6px; font-size:12.5px; }
 
+  /* ---------- INSTAGRAM GRID ---------- */
+  .ig-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(160px, 1fr)); gap:12px; margin-top:16px; }
+  .ig-tile{ background:var(--card); border:1px solid var(--line); border-radius:12px; overflow:hidden; box-shadow:var(--shadow); }
+  .ig-tile a{ display:block; position:relative; aspect-ratio:1/1; background:var(--cream-2); }
+  .ig-tile img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .ig-tile-type{ position:absolute; top:8px; right:8px; font-size:16px; filter:drop-shadow(0 1px 2px rgba(0,0,0,.5)); }
+  .ig-tile-overlay{
+    position:absolute; left:0; right:0; bottom:0; padding:8px;
+    background:linear-gradient(to top, rgba(0,0,0,.65), transparent);
+    display:flex; gap:10px; opacity:0; transition:.15s opacity ease;
+  }
+  .ig-tile a:hover .ig-tile-overlay{ opacity:1; }
+  .ig-tile-stat{ color:#fff; font-size:12px; font-weight:700; }
+  .ig-tile-caption{ padding:8px 10px; font-size:12px; color:var(--ink-soft); line-height:1.4; }
+
+  @media (max-width:720px){
+    .ig-tile-overlay{ opacity:1; }
+  }
+
   @media (max-width:720px){
     .stats{ grid-template-columns:repeat(2, 1fr); }
     header.topbar{ padding:14px 16px; }
@@ -189,20 +208,14 @@
         <p class="section-sub">Everyone who has registered and paid — this fills in automatically. Group them (Kids, Corporate, College, or your own) to send targeted updates.</p>
 
         <div class="form-card">
-          <h3>Add or update a client</h3>
+          <h3>Build a group from selected clients</h3>
+          <p class="section-sub" style="margin-top:-4px;">Tick clients in the list below, then add them all to a group at once — for a specific webinar, or Kids/Corporate/College.</p>
           <div class="form-row">
-            <div><label class="field-label">Name</label><input type="text" id="clientName"></div>
-            <div><label class="field-label">Phone (used as ID)</label><input type="text" id="clientPhone"></div>
+            <div><label class="field-label">Group name</label><input type="text" id="newGroupName" list="groupOptions" placeholder="e.g. Kids or July2026Webinar"></div>
+            <div style="display:flex; align-items:flex-end;">
+              <button class="btn btn-gold" id="addSelectedToGroupBtn" style="width:100%;">Add <span id="selectedCount">0</span> Selected to Group</button>
+            </div>
           </div>
-          <div class="form-row">
-            <div><label class="field-label">Email</label><input type="text" id="clientEmail"></div>
-            <div><label class="field-label">City</label><input type="text" id="clientCity"></div>
-          </div>
-          <div class="form-row full">
-            <div><label class="field-label">Groups (comma-separated)</label><input type="text" id="clientGroups" list="groupOptions" placeholder="e.g. Kids, July2026Webinar"></div>
-          </div>
-          <datalist id="groupOptions"></datalist>
-          <button class="btn btn-gold" id="clientSaveBtn">Save Client</button>
         </div>
 
         <div class="form-card">
@@ -219,6 +232,23 @@
             <button class="btn btn-ghost" id="groupWhatsappBtn">Generate WhatsApp Links</button>
           </div>
           <div id="groupResults" class="card-list" style="margin-top:14px;"></div>
+        </div>
+
+        <div class="form-card">
+          <h3>Add a client manually</h3>
+          <div class="form-row">
+            <div><label class="field-label">Name</label><input type="text" id="clientName"></div>
+            <div><label class="field-label">Phone (used as ID)</label><input type="text" id="clientPhone"></div>
+          </div>
+          <div class="form-row">
+            <div><label class="field-label">Email</label><input type="text" id="clientEmail"></div>
+            <div><label class="field-label">City</label><input type="text" id="clientCity"></div>
+          </div>
+          <div class="form-row full">
+            <div><label class="field-label">Groups (comma-separated)</label><input type="text" id="clientGroups" list="groupOptions" placeholder="e.g. Kids, July2026Webinar"></div>
+          </div>
+          <datalist id="groupOptions"></datalist>
+          <button class="btn btn-gold" id="clientSaveBtn">Save Client</button>
         </div>
 
         <div class="panel-toolbar">
@@ -294,7 +324,9 @@
       <!-- ============ INSTAGRAM ============ -->
       <section class="tab-panel" id="tab-instagram">
         <div id="igBanner" class="banner" style="display:none;"></div>
-        <div class="stats" id="igStatsCards" style="grid-template-columns:repeat(3,1fr); display:none; margin-bottom:20px;"></div>
+        <h3 class="section-title">Instagram dashboard</h3>
+        <p class="section-sub">Live stats for @isonalidotcom — followers, and views/reach per post and reel.</p>
+        <div class="stats" id="igStatsCards" style="grid-template-columns:repeat(4,1fr); display:none; margin-bottom:20px;"></div>
 
         <h3 class="section-title">Create a post</h3>
         <p class="section-sub">Posts to @isonalidotcom. Media must be a public link (pick from your website reels, or paste your own).</p>
@@ -371,7 +403,7 @@
   </div>
 
 <script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxNOzUTorvBl8xksKQ-wQsorpN59bsR2VskFQIcWgd41A6BWXYVPX6bhKKQT3S2bY9BOQ/exec";
+const SCRIPT_URL = "PASTE_YOUR_EXEC_URL_HERE";
 const RAZORPAY_LINK = "https://razorpay.me/@sonalimohankshirsagar";
 
 const DATA = { registrations:[], crm:[], clients:[], planner:[], metrics:[], payments:[], webinars:[], enquiries:[], reels:[] };
@@ -384,30 +416,20 @@ async function apiGet(action, extraParams){
   url.searchParams.set('action', action);
   url.searchParams.set('key', ACCESS_KEY);
   if (extraParams) Object.entries(extraParams).forEach(([k,v])=>url.searchParams.set(k,v));
-  try {
-    const res = await fetch(url.toString(), { cache: 'no-store' });
-    const text = await res.text();
-    if (!res.ok) return { ok:false, error:`Server request failed (HTTP ${res.status})` };
-    try { return JSON.parse(text); }
-    catch(e){ return { ok:false, error:`Server returned an invalid response (HTTP ${res.status})` }; }
-  } catch (err) {
-    return { ok:false, error:'Could not reach the dashboard server. Check your connection and try again.' };
-  }
+  const res = await fetch(url.toString());
+  const text = await res.text();
+  try { return JSON.parse(text); }
+  catch(e){ throw new Error(`Server didn't return JSON (HTTP ${res.status}). First 200 chars: ${text.slice(0,200)}`); }
 }
 async function apiPost(payload){
-  try {
-    const res = await fetch(SCRIPT_URL, {
-      method:'POST',
-      headers:{ 'Content-Type':'text/plain;charset=utf-8' },
-      body: JSON.stringify(Object.assign({ key: ACCESS_KEY }, payload))
-    });
-    const text = await res.text();
-    if (!res.ok) return { ok:false, error:`Server request failed (HTTP ${res.status})` };
-    try { return JSON.parse(text); }
-    catch(e){ return { ok:false, error:`Server returned an invalid response (HTTP ${res.status})` }; }
-  } catch (err) {
-    return { ok:false, error:'Could not reach the dashboard server. Check your connection and try again.' };
-  }
+  const res = await fetch(SCRIPT_URL, {
+    method:'POST',
+    headers:{ 'Content-Type':'text/plain;charset=utf-8' },
+    body: JSON.stringify(Object.assign({ key: ACCESS_KEY }, payload))
+  });
+  const text = await res.text();
+  try { return JSON.parse(text); }
+  catch(e){ throw new Error(`Server didn't return JSON (HTTP ${res.status}). First 200 chars: ${text.slice(0,200)}`); }
 }
 function esc(v){ if (v === undefined || v === null) return ''; return String(v).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s])); }
 function fmtMoney(n){ n = Number(n)||0; return '₹' + n.toLocaleString('en-IN'); }
@@ -578,6 +600,7 @@ document.getElementById('exportCsvBtn').addEventListener('click', ()=>{
 
 /* ---------------- CLIENTS (MAIN DATABASE) ---------------- */
 let clientFilterState = 'all';
+let selectedClients = new Set();
 document.getElementById('clientSaveBtn').addEventListener('click', async ()=>{
   const phone = document.getElementById('clientPhone').value.trim();
   if(!phone){ toast('Phone number is required'); return; }
@@ -594,6 +617,23 @@ document.getElementById('clientSaveBtn').addEventListener('click', async ()=>{
     await loadData();
   } else { toast('Could not save client'); }
 });
+function updateSelectedCount(){ document.getElementById('selectedCount').textContent = selectedClients.size; }
+function toggleClientSelect(key, checked){
+  if(checked) selectedClients.add(key); else selectedClients.delete(key);
+  updateSelectedCount();
+}
+document.getElementById('addSelectedToGroupBtn').addEventListener('click', async ()=>{
+  const group = document.getElementById('newGroupName').value.trim();
+  if(!group){ toast('Name the group first'); return; }
+  if(!selectedClients.size){ toast('Tick at least one client below'); return; }
+  const r = await apiPost({ action:'bulkAddToGroup', group, keys: Array.from(selectedClients) });
+  if(r.ok){
+    toast(`✓ Added ${r.updated} client${r.updated===1?'':'s'} to "${group}"`);
+    selectedClients.clear(); updateSelectedCount();
+    document.getElementById('newGroupName').value = '';
+    await loadData();
+  } else { toast(r.error || 'Could not update group'); }
+});
 function renderClients(){
   const list = document.getElementById('clientList');
   const q = (document.getElementById('clientSearch').value || '').toLowerCase();
@@ -604,9 +644,13 @@ function renderClients(){
   if(!rows.length){ list.innerHTML = emptyState('No clients yet', 'Clients are added automatically once a registration is marked paid.'); return; }
   list.innerHTML = rows.map(c=>`
     <div class="item-card">
-      <div class="item-main"><h3>${esc(c.Name||c.Phone)}</h3>
-        <div class="item-meta">${esc(c.Phone||'—')} · ${esc(c.Email||'—')} · ${esc(c.City||'—')}</div>
-        <div>${groupList(c.Groups).map(g=>`<span class="tag-chip">${esc(g)}</span>`).join('') || '<span class="tag-chip">Ungrouped</span>'}</div>
+      <div class="item-main" style="display:flex; gap:12px; align-items:flex-start;">
+        <input type="checkbox" style="margin-top:4px; width:18px; height:18px;" ${selectedClients.has(c.Key)?'checked':''} onchange="toggleClientSelect('${esc(c.Key)}', this.checked)">
+        <div>
+          <h3>${esc(c.Name||c.Phone)}</h3>
+          <div class="item-meta">${esc(c.Phone||'—')} · ${esc(c.Email||'—')} · ${esc(c.City||'—')}</div>
+          <div>${groupList(c.Groups).map(g=>`<span class="tag-chip">${esc(g)}</span>`).join('') || '<span class="tag-chip">Ungrouped</span>'}</div>
+        </div>
       </div>
       <div class="item-side"><a class="mini-btn whatsapp-link" href="${waLink(c.Phone,'')}" target="_blank" rel="noopener">WhatsApp</a></div>
     </div>`).join('');
@@ -777,22 +821,37 @@ async function sendEnquiryReply(id){
 /* ---------------- INSTAGRAM: STATS ---------------- */
 async function loadIgStats(){
   const r = await apiGet('igStats');
-  const previousMedia = document.getElementById('igMediaList');
-  if (previousMedia) previousMedia.remove();
   if(!r.ok) return;
   const cards = document.getElementById('igStatsCards');
   cards.style.display = 'grid';
+  cards.style.gridTemplateColumns = 'repeat(4,1fr)';
   cards.innerHTML = `
     <div class="stat-card"><div class="label">Account</div><div class="value" style="font-size:18px;">@${esc(r.account.username||'')}</div></div>
     <div class="stat-card gold"><div class="label">Followers</div><div class="value">${(r.account.followers_count||0).toLocaleString('en-IN')}</div></div>
-    <div class="stat-card"><div class="label">Posts</div><div class="value">${r.account.media_count||0}</div></div>`;
-  const list = document.getElementById('igStatsCards');
+    <div class="stat-card"><div class="label">Posts</div><div class="value">${r.account.media_count||0}</div></div>
+    <div class="stat-card green"><div class="label">Views (last 25 posts)</div><div class="value">${(r.totalViews||0).toLocaleString('en-IN')}</div></div>`;
   const mediaHtml = (r.media||[]).map(m=>`
-    <div class="item-card">
-      <div class="item-main"><h3>${esc((m.caption||'').slice(0,60) || m.type)}</h3><div class="item-meta">${esc(m.type)} · ${m.timestamp ? new Date(m.timestamp).toLocaleDateString('en-IN') : ''}</div></div>
-      <div class="item-side"><div class="price-tag">${(m.likes||0)} ♥</div><div class="item-meta">${(m.comments||0)} comments</div></div>
+    <div class="ig-tile">
+      <a href="${esc(m.permalink||'#')}" target="_blank" rel="noopener">
+        <img src="${esc(m.thumbnail||'')}" alt="" loading="lazy" onerror="this.style.background='var(--cream-2)'">
+        <div class="ig-tile-type">${m.type==='REELS'?'🎬':(m.type==='VIDEO'?'▶️':'')}</div>
+        <div class="ig-tile-overlay">
+          <div class="ig-tile-stat">${m.views!=null ? '👁 '+compactNum_(m.views) : ''}</div>
+          <div class="ig-tile-stat">♥ ${compactNum_(m.likes||0)}</div>
+          <div class="ig-tile-stat">💬 ${compactNum_(m.comments||0)}</div>
+        </div>
+      </a>
+      <div class="ig-tile-caption">${esc((m.caption||'').slice(0,70))}${(m.caption||'').length>70?'…':''}</div>
     </div>`).join('');
-  if (mediaHtml) cards.insertAdjacentHTML('afterend', `<div class="card-list" id="igMediaList">${mediaHtml}</div>`);
+  const existing = document.getElementById('igMediaList');
+  if (existing) existing.remove();
+  cards.insertAdjacentHTML('afterend', `<div class="ig-grid" id="igMediaList">${mediaHtml || emptyState('No posts yet', 'Published posts and reels will show their views and reach here.')}</div>`);
+}
+function compactNum_(n){
+  n = Number(n)||0;
+  if (n >= 1000000) return (n/1000000).toFixed(1).replace(/\.0$/,'') + 'M';
+  if (n >= 1000) return (n/1000).toFixed(1).replace(/\.0$/,'') + 'K';
+  return String(n);
 }
 
 /* ---------------- INSTAGRAM: CREATE / PUBLISH POST ---------------- */
