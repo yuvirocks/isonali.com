@@ -35,9 +35,30 @@ var YT_CHANNEL = ""; // example: "@isonalidotcom"
 var REELS_FOLDER = "iSonali Website Reels";
 /* ======================================================== */
 
+/* ==== OPTIONAL: Instagram publishing + stats (Meta Graph API) ====
+   1. developers.facebook.com -> create an App (type: Business).
+   2. Add the "Instagram Graph API" product, connect the @isonalidotcom
+      Instagram professional account (must be linked to a Facebook Page).
+   3. Generate a long-lived Page access token (Graph API Explorer, then
+      the token debugger -> "Extend Access Token").
+   4. Project Settings -> Script Properties, add:
+        IG_BUSINESS_ID   = Instagram Business Account id
+                            (Graph API /me/accounts -> instagram_business_account.id)
+        IG_ACCESS_TOKEN  = the long-lived token from step 3
+   Without these, the Instagram tab still works for planning content —
+   posting/stats just won't be available until connected.                */
+
+/* ==== OPTIONAL: Google Meet auto-link generation ====
+   In the Apps Script editor: Services (+) -> add "Google Calendar API"
+   (advanced service), and enable the Calendar API in the linked Google
+   Cloud project (a link appears when you add the service). Without this
+   you can still add webinars — just paste the Meet/Zoom/Teams link
+   yourself instead of using "Generate Meet Link".                        */
+
 var SHEETS = {
   REG: "Registrations",
   CRM: "CRM",
+  CLIENTS: "Clients",
   PLAN: "ContentPlanner",
   METRICS: "InstaMetrics",
   PAY: "Payments",
@@ -48,10 +69,11 @@ var SHEETS = {
 var HEADERS = {
   Registrations: ["Timestamp","Name","Email","Phone","City","Role","Program","Price","PaymentStatus"],
   CRM: ["Key","Name","Email","Phone","Status","Tags","Notes","LastContact"],
+  Clients: ["Key","Name","Email","Phone","City","Groups","Source","JoinedDate"],
   ContentPlanner: ["Id","Platform","Type","Date","Idea","Caption","Status","Link","Views","Likes","Notes"],
   InstaMetrics: ["Date","Followers","Reach","ProfileViews","LinkClicks","Notes"],
   Payments: ["PaymentId","Date","Amount","Currency","Status","Method","Email","Contact","Description"],
-  Webinars: ["Id","Title","DateTime","Platform","JoinLink","Price","Status","Notes"],
+  Webinars: ["Id","Title","DateTime","Platform","JoinLink","Price","Status","Notes","Group"],
   Enquiries: ["Id","Timestamp","Name","Email","Phone","Course","Message","Status","Reply","RepliedAt"]
 };
 
@@ -91,6 +113,14 @@ function authed_(key) {
 /* ---------------- READS (dashboard) ---------------- */
 
 function doGet(e) {
+  try {
+    return doGetInner_(e);
+  } catch (err) {
+    return ok_({ ok: false, error: "Server error: " + err.message });
+  }
+}
+
+function doGetInner_(e) {
   var p = e.parameter || {};
   if (p.action === "login") {
     return ok_({ ok: authed_(p.key) });
@@ -102,18 +132,21 @@ function doGet(e) {
   if (!authed_(p.key)) return ok_({ ok: false, error: "unauthorized" });
 
   if (p.action === "data") {
+    var props = PropertiesService.getScriptProperties();
     return ok_({
       ok: true,
       registrations: readSheet_(SHEETS.REG),
       crm: readSheet_(SHEETS.CRM),
+      clients: readSheet_(SHEETS.CLIENTS),
       planner: readSheet_(SHEETS.PLAN),
       metrics: readSheet_(SHEETS.METRICS),
       payments: readSheet_(SHEETS.PAY),
       webinars: readSheet_(SHEETS.WEB),
       enquiries: readSheet_(SHEETS.ENQ),
       reels: websiteReels_(),
-      razorpayConfigured: !!PropertiesService.getScriptProperties().getProperty("RZP_KEY_ID"),
-      youtubeConfigured: !!YT_API_KEY
+      razorpayConfigured: !!props.getProperty("RZP_KEY_ID"),
+      youtubeConfigured: !!YT_API_KEY,
+      instagramConfigured: !!(props.getProperty("IG_BUSINESS_ID") && props.getProperty("IG_ACCESS_TOKEN"))
     });
   }
   if (p.action === "syncRazorpay") {
@@ -121,6 +154,9 @@ function doGet(e) {
   }
   if (p.action === "youtube") {
     return ok_(youtubeStats_());
+  }
+  if (p.action === "igStats") {
+    return ok_(igStats_());
   }
   return ok_({ ok: false, error: "unknown action" });
 }
@@ -139,6 +175,14 @@ function readSheet_(name) {
 /* ---------------- WRITES ---------------- */
 
 function doPost(e) {
+  try {
+    return doPostInner_(e);
+  } catch (err) {
+    return ok_({ ok: false, error: "Server error: " + err.message });
+  }
+}
+
+function doPostInner_(e) {
   var data = {};
   try { data = JSON.parse(e.postData.contents); } catch (err) { return ok_({ ok: false, error: "bad json" }); }
 
@@ -166,15 +210,22 @@ function doPost(e) {
   if (!authed_(data.key)) return ok_({ ok: false, error: "unauthorized" });
 
   switch (data.action) {
-    case "setRegStatus": return ok_(setRegStatus_(data));
-    case "upsertCrm":    return ok_(upsertCrm_(data));
-    case "addPlan":      return ok_(addPlan_(data));
-    case "updatePlan":   return ok_(updatePlan_(data));
-    case "addMetrics":   return ok_(addMetrics_(data));
-    case "addWebinar":   return ok_(addWebinar_(data));
-    case "updateWebinar":return ok_(updateWebinar_(data));
-    case "replyEnquiry": return ok_(replyEnquiry_(data));
-    case "removeReel":   return ok_(removeReel_(data));
+    case "setRegStatus":   return ok_(setRegStatus_(data));
+    case "upsertCrm":      return ok_(upsertCrm_(data));
+    case "addPlan":        return ok_(addPlan_(data));
+    case "updatePlan":     return ok_(updatePlan_(data));
+    case "deletePlan":     return ok_(deletePlan_(data));
+    case "addMetrics":     return ok_(addMetrics_(data));
+    case "addWebinar":     return ok_(addWebinar_(data));
+    case "updateWebinar":  return ok_(updateWebinar_(data));
+    case "generateMeetLink": return ok_(generateMeetLink_(data));
+    case "notifyWebinarGroup": return ok_(notifyWebinarGroup_(data));
+    case "replyEnquiry":   return ok_(replyEnquiry_(data));
+    case "removeReel":     return ok_(removeReel_(data));
+    case "upsertClient":   return ok_(upsertClient_(data));
+    case "sendGroupEmail": return ok_(sendGroupEmail_(data));
+    case "igCreateContainer": return ok_(igCreateContainer_(data));
+    case "igPublishContainer": return ok_(igPublishContainer_(data));
     default:             return ok_({ ok: false, error: "unknown action" });
   }
 }
@@ -186,10 +237,74 @@ function setRegStatus_(d) {
   for (var r = 1; r < values.length; r++) {
     if (String(values[r][0]) === String(d.timestamp) && String(values[r][3]) === String(d.phone)) {
       sh.getRange(r + 1, 9).setValue(d.status);
+      if (d.status === "PAID") {
+        var row = values[r];
+        addToClients_({ name: row[1], email: row[2], phone: row[3], city: row[4], program: row[6] });
+      }
       return { ok: true };
     }
   }
   return { ok: false, error: "row not found" };
+}
+
+// Adds/updates a client in the Main Database once they're a paying customer.
+// Keyed by phone. Starting Group = their program name (rename/regroup anytime from the dashboard).
+function addToClients_(info) {
+  var sh = sheet_(SHEETS.CLIENTS);
+  var key = String(info.phone || info.email || "");
+  if (!key) return;
+  var values = sh.getDataRange().getValues();
+  for (var r = 1; r < values.length; r++) {
+    if (String(values[r][0]) === key) {
+      // already a client - keep their existing Groups, just refresh contact details
+      sh.getRange(r + 1, 2, 1, 4).setValues([[info.name || values[r][1], info.email || values[r][2],
+        info.phone || values[r][3], info.city || values[r][4]]]);
+      return;
+    }
+  }
+  sh.appendRow([key, info.name || "", info.email || "", info.phone || "", info.city || "",
+    info.program || "", "Registration", new Date().toISOString().slice(0, 10)]);
+}
+
+function upsertClient_(d) {
+  var sh = sheet_(SHEETS.CLIENTS);
+  var key = d.key || d.phone;
+  if (!key) return { ok: false, error: "phone/key required" };
+  var values = sh.getDataRange().getValues();
+  for (var r = 1; r < values.length; r++) {
+    if (String(values[r][0]) === String(key)) {
+      sh.getRange(r + 1, 1, 1, 6).setValues([[key, d.name || values[r][1], d.email || values[r][2],
+        d.phone || values[r][3], d.city || values[r][4], d.groups != null ? d.groups : values[r][5]]]);
+      return { ok: true };
+    }
+  }
+  sh.appendRow([key, d.name || "", d.email || "", d.phone || "", d.city || "", d.groups || "",
+    d.source || "Manual", new Date().toISOString().slice(0, 10)]);
+  return { ok: true };
+}
+
+// Email everyone in a given group (Groups column contains a comma-separated list).
+function sendGroupEmail_(d) {
+  if (!d.group || !d.subject || !d.message) return { ok: false, error: "group, subject, and message are required" };
+  var rows = readSheet_(SHEETS.CLIENTS);
+  var target = rows.filter(function (c) {
+    return String(c.Groups || "").split(",").map(function (g) { return g.trim(); }).indexOf(d.group) !== -1;
+  });
+  var sent = 0;
+  target.forEach(function (c) {
+    if (!c.Email) return;
+    try {
+      MailApp.sendEmail({
+        to: c.Email,
+        subject: d.subject,
+        body: "Hi " + (c.Name || "") + ",\n\n" + d.message +
+          "\n\nWarm regards,\nSonali\nisonali.com | WhatsApp: +91 94213 57124",
+        name: "Sonali - isonali.com"
+      });
+      sent++;
+    } catch (err) { /* quota or bad address - skip */ }
+  });
+  return { ok: true, sent: sent, total: target.length };
 }
 
 // CRM keyed by phone (fallback email)
@@ -233,19 +348,31 @@ function updatePlan_(d) {
   return { ok: false, error: "plan not found" };
 }
 
-// Webinars: Id, Title, DateTime, Platform, JoinLink, Price, Status, Notes
+function deletePlan_(d) {
+  var sh = sheet_(SHEETS.PLAN);
+  var values = sh.getDataRange().getValues();
+  for (var r = 1; r < values.length; r++) {
+    if (String(values[r][0]) === String(d.id)) {
+      sh.deleteRow(r + 1);
+      return { ok: true };
+    }
+  }
+  return { ok: false, error: "idea not found" };
+}
+
+// Webinars: Id, Title, DateTime, Platform, JoinLink, Price, Status, Notes, Group
 function addWebinar_(d) {
   var id = Utilities.getUuid();
   sheet_(SHEETS.WEB).appendRow([id, d.title || "", d.dateTime || "",
     d.platform || "Google Meet", d.joinLink || "", d.price || "",
-    d.status || "Planned", d.notes || ""]);
+    d.status || "Planned", d.notes || "", d.group || ""]);
   return { ok: true, id: id };
 }
 
 function updateWebinar_(d) {
   var sh = sheet_(SHEETS.WEB);
   var values = sh.getDataRange().getValues();
-  var cols = { title:2, dateTime:3, platform:4, joinLink:5, price:6, status:7, notes:8 };
+  var cols = { title:2, dateTime:3, platform:4, joinLink:5, price:6, status:7, notes:8, group:9 };
   for (var r = 1; r < values.length; r++) {
     if (String(values[r][0]) === String(d.id)) {
       for (var k in cols) {
@@ -255,6 +382,59 @@ function updateWebinar_(d) {
     }
   }
   return { ok: false, error: "webinar not found" };
+}
+
+// Requires the "Google Calendar API" advanced service to be enabled (see setup note at top).
+function generateMeetLink_(d) {
+  try {
+    var start = new Date(d.dateTime);
+    var end = new Date(start.getTime() + 60 * 60 * 1000);
+    var event = {
+      summary: d.title || "iSonali Webinar",
+      start: { dateTime: start.toISOString() },
+      end: { dateTime: end.toISOString() },
+      conferenceData: { createRequest: { requestId: Utilities.getUuid(), conferenceSolutionKey: { type: "hangoutsMeet" } } }
+    };
+    var created = Calendar.Events.insert(event, "primary", { conferenceDataVersion: 1 });
+    return { ok: true, joinLink: created.hangoutLink, eventId: created.id };
+  } catch (err) {
+    return { ok: false, error: "Enable the Google Calendar API advanced service first (Services + in the Apps Script editor). " + err.message };
+  }
+}
+
+// Emails + generates WhatsApp links for a group of clients about a specific webinar.
+function notifyWebinarGroup_(d) {
+  var webinars = readSheet_(SHEETS.WEB);
+  var webinar = webinars.filter(function (w) { return String(w.Id) === String(d.webinarId); })[0];
+  if (!webinar) return { ok: false, error: "webinar not found" };
+
+  var clients = readSheet_(SHEETS.CLIENTS).filter(function (c) {
+    return String(c.Groups || "").split(",").map(function (g) { return g.trim(); }).indexOf(d.group) !== -1;
+  });
+
+  var subject = "New webinar: " + webinar.Title;
+  var body = "Hi {name},\n\nSonali is hosting a new session: \"" + webinar.Title + "\"\n" +
+    "When: " + webinar.DateTime + "\nPlatform: " + webinar.Platform +
+    (webinar.JoinLink ? "\nJoin link: " + webinar.JoinLink : "") +
+    (webinar.Price ? "\nPrice: " + webinar.Price : "") +
+    "\n\nSee you there!\nSonali";
+
+  var emailed = 0;
+  clients.forEach(function (c) {
+    if (!c.Email) return;
+    try {
+      MailApp.sendEmail({ to: c.Email, subject: subject, body: body.replace("{name}", c.Name || ""), name: "Sonali - isonali.com" });
+      emailed++;
+    } catch (err) {}
+  });
+
+  var whatsappLinks = clients.filter(function (c) { return c.Phone; }).map(function (c) {
+    var last10 = String(c.Phone).replace(/\D/g, "").slice(-10);
+    var msg = body.replace("{name}", c.Name || "").replace(/\n/g, " ");
+    return { name: c.Name, link: "https://wa.me/91" + last10 + "?text=" + encodeURIComponent(msg) };
+  });
+
+  return { ok: true, emailed: emailed, total: clients.length, whatsappLinks: whatsappLinks };
 }
 
 function addMetrics_(d) {
@@ -311,15 +491,35 @@ function syncRazorpay_() {
   var existing = {};
   sh.getDataRange().getValues().slice(1).forEach(function (row) { existing[row[0]] = true; });
 
-  var added = 0;
+  var added = 0, reconciled = 0;
+  var regSheet = sheet_(SHEETS.REG);
+  var regValues = regSheet.getDataRange().getValues();
+
   items.forEach(function (pmt) {
     if (existing[pmt.id]) return;
     sh.appendRow([pmt.id, new Date(pmt.created_at * 1000).toISOString(),
       pmt.amount / 100, pmt.currency, pmt.status, pmt.method || "",
       pmt.email || "", pmt.contact || "", pmt.description || ""]);
     added++;
+
+    if (pmt.status !== "captured") return;
+    var last10 = String(pmt.contact || "").replace(/\D/g, "").slice(-10);
+    for (var r = 1; r < regValues.length; r++) {
+      var regPhone = String(regValues[r][3] || "").replace(/\D/g, "").slice(-10);
+      var regEmail = String(regValues[r][2] || "").toLowerCase();
+      var alreadyPaid = regValues[r][8] === "PAID";
+      var matches = (last10 && regPhone === last10) || (pmt.email && regEmail === String(pmt.email).toLowerCase());
+      if (matches && !alreadyPaid) {
+        regSheet.getRange(r + 1, 9).setValue("PAID");
+        regValues[r][8] = "PAID";
+        addToClients_({ name: regValues[r][1], email: regValues[r][2], phone: regValues[r][3],
+          city: regValues[r][4], program: regValues[r][6] });
+        reconciled++;
+        break;
+      }
+    }
   });
-  return { ok: true, added: added, total: items.length };
+  return { ok: true, added: added, total: items.length, reconciled: reconciled };
 }
 
 // Website reels: served from a Drive folder so videos play natively on the
@@ -356,6 +556,65 @@ function removeReel_(d) {
   } catch (err) {
     return { ok: false, error: "could not remove video" };
   }
+}
+
+/* ---------------- INSTAGRAM (optional, needs Meta app - see setup note at top) ---------------- */
+
+function igCreds_() {
+  var props = PropertiesService.getScriptProperties();
+  return { igId: props.getProperty("IG_BUSINESS_ID"), token: props.getProperty("IG_ACCESS_TOKEN") };
+}
+
+function igStats_() {
+  var creds = igCreds_();
+  if (!creds.igId || !creds.token) return { ok: false, error: "Instagram not connected yet" };
+  var base = "https://graph.facebook.com/v19.0/";
+  var account = fetchJson_(base + creds.igId + "?fields=username,followers_count,media_count&access_token=" + creds.token);
+  var media = fetchJson_(base + creds.igId + "/media?fields=id,caption,media_type,media_url,thumbnail_url,permalink,timestamp,like_count,comments_count&limit=25&access_token=" + creds.token);
+  var items = (media.data || []).map(function (m) {
+    return { id: m.id, caption: m.caption || "", type: m.media_type, thumbnail: m.thumbnail_url || m.media_url,
+      permalink: m.permalink, timestamp: m.timestamp, likes: m.like_count || 0, comments: m.comments_count || 0 };
+  });
+  return { ok: true, account: account, media: items };
+}
+
+// Step 1 of publishing: create a media container (Instagram then needs a few
+// seconds - longer for video/reels - to process it before it can be published).
+function igCreateContainer_(d) {
+  var creds = igCreds_();
+  if (!creds.igId || !creds.token) return { ok: false, error: "Instagram not connected yet" };
+  if (!d.mediaUrl) return { ok: false, error: "mediaUrl (a public https link to the image/video) is required" };
+
+  var params = { caption: d.caption || "", access_token: creds.token };
+  var isVideo = d.mediaType === "VIDEO" || d.mediaType === "REELS";
+  params[isVideo ? "video_url" : "image_url"] = d.mediaUrl;
+  if (d.mediaType === "REELS") params.media_type = "REELS";
+
+  var resp = UrlFetchApp.fetch("https://graph.facebook.com/v19.0/" + creds.igId + "/media", {
+    method: "post", payload: params, muteHttpExceptions: true
+  });
+  var json = JSON.parse(resp.getContentText());
+  if (!json.id) return { ok: false, error: "Could not create post: " + resp.getContentText() };
+  return { ok: true, containerId: json.id, isVideo: isVideo };
+}
+
+// Step 2: publish a container created above. For video/reels, call this again
+// (a few seconds later) if it returns "still processing".
+function igPublishContainer_(d) {
+  var creds = igCreds_();
+  if (!creds.igId || !creds.token) return { ok: false, error: "Instagram not connected yet" };
+  if (!d.containerId) return { ok: false, error: "containerId required" };
+
+  var statusResp = fetchJson_("https://graph.facebook.com/v19.0/" + d.containerId + "?fields=status_code&access_token=" + creds.token);
+  if (statusResp.status_code === "IN_PROGRESS") return { ok: false, error: "Instagram is still processing this media - try Publish again in a moment", stillProcessing: true };
+  if (statusResp.status_code === "ERROR") return { ok: false, error: "Instagram could not process this media" };
+
+  var resp = UrlFetchApp.fetch("https://graph.facebook.com/v19.0/" + creds.igId + "/media_publish", {
+    method: "post", payload: { creation_id: d.containerId, access_token: creds.token }, muteHttpExceptions: true
+  });
+  var json = JSON.parse(resp.getContentText());
+  if (!json.id) return { ok: false, error: "Publish failed: " + resp.getContentText() };
+  return { ok: true, postId: json.id };
 }
 
 /* ---------------- YOUTUBE STATS (optional) ---------------- */

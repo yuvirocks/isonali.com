@@ -8,102 +8,47 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --cream:#FBF6EC;
-    --cream-2:#F3EBDA;
-    --card:#FFFFFF;
-    --ink:#2B2419;
-    --ink-soft:#6B5F4C;
-    --gold:#C9982F;
-    --gold-deep:#A87A1E;
-    --gold-light:#F1DFAF;
-    --line:#E7DCC2;
-    --green:#3F7A4E;
-    --green-bg:#E7F3E9;
-    --amber:#B4791C;
-    --amber-bg:#FBEED9;
-    --red:#B04A3C;
-    --shadow: 0 10px 30px rgba(60,45,10,0.08);
-    --radius: 16px;
+    --cream:#FBF6EC; --cream-2:#F3EBDA; --card:#FFFFFF; --ink:#2B2419; --ink-soft:#6B5F4C;
+    --gold:#C9982F; --gold-deep:#A87A1E; --gold-light:#F1DFAF; --line:#E7DCC2;
+    --green:#3F7A4E; --green-bg:#E7F3E9; --amber:#B4791C; --amber-bg:#FBEED9; --red:#B04A3C;
+    --shadow: 0 10px 30px rgba(60,45,10,0.08); --radius: 16px;
   }
   *{box-sizing:border-box; margin:0; padding:0;}
-  body{
-    font-family:'DM Sans', sans-serif;
-    background: radial-gradient(circle at 10% 0%, var(--gold-light) 0%, transparent 45%), var(--cream);
-    color:var(--ink);
-    min-height:100vh;
-  }
+  body{ font-family:'DM Sans', sans-serif; background: radial-gradient(circle at 10% 0%, var(--gold-light) 0%, transparent 45%), var(--cream); color:var(--ink); min-height:100vh; }
   h1,h2,h3{ font-family:'Playfair Display', serif; }
   ::selection{ background:var(--gold-light); }
 
-  /* ---------- LOGIN ---------- */
   #loginScreen{ min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px; }
-  .login-card{
-    width:100%; max-width:380px; background:var(--card); border-radius:20px;
-    padding:40px 32px; box-shadow:var(--shadow); border:1px solid var(--line); text-align:center;
-  }
-  .login-mark{
-    width:56px; height:56px; border-radius:50%; margin:0 auto 18px;
-    background:linear-gradient(135deg, var(--gold), var(--gold-deep));
-    display:flex; align-items:center; justify-content:center;
-    color:#fff; font-family:'Playfair Display',serif; font-weight:700; font-size:22px;
-    box-shadow:0 8px 20px rgba(169,122,20,0.35);
-  }
+  .login-card{ width:100%; max-width:380px; background:var(--card); border-radius:20px; padding:40px 32px; box-shadow:var(--shadow); border:1px solid var(--line); text-align:center; }
+  .login-mark{ width:56px; height:56px; border-radius:50%; margin:0 auto 18px; background:linear-gradient(135deg, var(--gold), var(--gold-deep)); display:flex; align-items:center; justify-content:center; color:#fff; font-family:'Playfair Display',serif; font-weight:700; font-size:22px; box-shadow:0 8px 20px rgba(169,122,20,0.35); }
   .login-card h1{ font-size:24px; margin-bottom:6px;}
   .login-card p{ color:var(--ink-soft); font-size:14px; margin-bottom:26px;}
-  #loginKey{
-    width:100%; padding:14px 16px; border-radius:12px; border:1.5px solid var(--line);
-    background:var(--cream); font-size:15px; font-family:'DM Sans',sans-serif; color:var(--ink); outline:none;
-    transition:.2s border-color;
-  }
+  #loginKey{ width:100%; padding:14px 16px; border-radius:12px; border:1.5px solid var(--line); background:var(--cream); font-size:15px; font-family:'DM Sans',sans-serif; color:var(--ink); outline:none; transition:.2s border-color; }
   #loginKey:focus{ border-color:var(--gold); }
   #loginError{ color:var(--red); font-size:13px; margin-top:12px; min-height:16px; }
 
-  /* ---------- BUTTONS ---------- */
-  .btn{
-    display:inline-flex; align-items:center; justify-content:center; gap:8px;
-    border:none; cursor:pointer; font-family:'DM Sans', sans-serif; font-weight:700; font-size:14.5px;
-    border-radius:12px; padding:12px 18px; transition:.18s transform ease, .18s box-shadow ease, .18s opacity ease;
-  }
+  .btn{ display:inline-flex; align-items:center; justify-content:center; gap:8px; border:none; cursor:pointer; font-family:'DM Sans', sans-serif; font-weight:700; font-size:14.5px; border-radius:12px; padding:12px 18px; transition:.18s transform ease, .18s box-shadow ease, .18s opacity ease; }
   .btn:active{ transform:scale(.98); }
-  .btn-gold{
-    background:linear-gradient(135deg, var(--gold), var(--gold-deep)); color:#fff;
-    box-shadow:0 10px 22px rgba(169,122,20,0.30);
-  }
+  .btn-gold{ background:linear-gradient(135deg, var(--gold), var(--gold-deep)); color:#fff; box-shadow:0 10px 22px rgba(169,122,20,0.30); }
   .btn-gold:hover{ box-shadow:0 12px 26px rgba(169,122,20,0.4); }
   .btn-gold.block{ width:100%; margin-top:14px; }
-  .btn-ghost{
-    background:transparent; color:var(--ink-soft); border:1.5px solid var(--line);
-  }
+  .btn-ghost{ background:transparent; color:var(--ink-soft); border:1.5px solid var(--line); }
   .btn-ghost:hover{ border-color:var(--gold); color:var(--gold-deep); }
+  .btn-danger{ background:transparent; color:var(--red); border:1.5px solid var(--red); }
+  .btn-danger:hover{ background:var(--red); color:#fff; }
   .btn-small{ padding:8px 14px; font-size:12.5px; }
 
-  /* ---------- APP SHELL ---------- */
   #app{ display:none; }
-  header.topbar{
-    background:var(--card); border-bottom:1px solid var(--line); padding:16px 24px;
-    display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;
-    position:sticky; top:0; z-index:20;
-  }
+  header.topbar{ background:var(--card); border-bottom:1px solid var(--line); padding:16px 24px; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; position:sticky; top:0; z-index:20; }
   .brand{ display:flex; align-items:center; gap:12px; }
-  .brand-mark{
-    width:38px; height:38px; border-radius:50%;
-    background:linear-gradient(135deg, var(--gold), var(--gold-deep));
-    display:flex; align-items:center; justify-content:center;
-    color:#fff; font-family:'Playfair Display',serif; font-weight:700;
-  }
+  .brand-mark{ width:38px; height:38px; border-radius:50%; background:linear-gradient(135deg, var(--gold), var(--gold-deep)); display:flex; align-items:center; justify-content:center; color:#fff; font-family:'Playfair Display',serif; font-weight:700; }
   .brand-text h1{ font-size:18px; line-height:1.1; }
   .brand-text span{ font-size:12px; color:var(--ink-soft); }
-  #logoutBtn{ padding:10px 16px; }
-  #syncToast{
-    position:fixed; top:18px; left:50%; transform:translateX(-50%) translateY(-140%);
-    background:var(--ink); color:var(--cream); padding:12px 22px; border-radius:12px;
-    font-size:14px; font-weight:600; box-shadow:var(--shadow); transition:.3s transform ease; z-index:100;
-  }
+  #syncToast{ position:fixed; top:18px; left:50%; transform:translateX(-50%) translateY(-140%); background:var(--ink); color:var(--cream); padding:12px 22px; border-radius:12px; font-size:14px; font-weight:600; box-shadow:var(--shadow); transition:.3s transform ease; z-index:100; }
   #syncToast.show{ transform:translateX(-50%) translateY(0); }
 
   main{ max-width:1100px; margin:0 auto; padding:24px; }
 
-  /* ---------- STAT CARDS ---------- */
   .stats{ display:grid; grid-template-columns:repeat(4, 1fr); gap:16px; margin-bottom:28px; }
   .stat-card{ background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:20px; box-shadow:var(--shadow); }
   .stat-card .label{ font-size:12.5px; color:var(--ink-soft); font-weight:600; letter-spacing:.02em; text-transform:uppercase;}
@@ -112,12 +57,8 @@
   .stat-card.green .value{ color:var(--green); }
   .stat-card.amber .value{ color:var(--amber); }
 
-  /* ---------- TABS ---------- */
   .tabs{ display:flex; gap:8px; margin-bottom:20px; border-bottom:1.5px solid var(--line); overflow-x:auto; }
-  .tab-btn{
-    background:none; border:none; cursor:pointer; font-family:'DM Sans',sans-serif; font-weight:600; font-size:14px;
-    color:var(--ink-soft); padding:12px 6px; margin-right:20px; border-bottom:2.5px solid transparent; white-space:nowrap;
-  }
+  .tab-btn{ background:none; border:none; cursor:pointer; font-family:'DM Sans',sans-serif; font-weight:600; font-size:14px; color:var(--ink-soft); padding:12px 6px; margin-right:18px; border-bottom:2.5px solid transparent; white-space:nowrap; }
   .tab-btn.active{ color:var(--gold-deep); border-color:var(--gold); }
   .tab-panel{ display:none; }
   .tab-panel.active{ display:block; }
@@ -127,24 +68,14 @@
   .section-sub{ font-size:13px; color:var(--ink-soft); margin-top:-8px; margin-bottom:14px; }
 
   .panel-toolbar{ display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; gap:12px; flex-wrap:wrap; }
-  .search-input{
-    padding:10px 14px; border-radius:10px; border:1.5px solid var(--line); background:var(--card);
-    font-family:'DM Sans',sans-serif; font-size:14px; min-width:220px; outline:none;
-  }
+  .search-input{ padding:10px 14px; border-radius:10px; border:1.5px solid var(--line); background:var(--card); font-family:'DM Sans',sans-serif; font-size:14px; min-width:220px; outline:none; }
   .search-input:focus{ border-color:var(--gold); }
   .filter-pills{ display:flex; gap:8px; flex-wrap:wrap; }
-  .pill{
-    padding:7px 14px; border-radius:999px; font-size:13px; font-weight:600;
-    border:1.5px solid var(--line); background:var(--card); color:var(--ink-soft); cursor:pointer;
-  }
+  .pill{ padding:7px 14px; border-radius:999px; font-size:13px; font-weight:600; border:1.5px solid var(--line); background:var(--card); color:var(--ink-soft); cursor:pointer; }
   .pill.active{ background:var(--gold-light); border-color:var(--gold); color:var(--gold-deep); }
 
-  /* ---------- CARDS LIST ---------- */
   .card-list{ display:flex; flex-direction:column; gap:12px; }
-  .item-card{
-    background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
-    padding:16px 20px; box-shadow:var(--shadow); display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap;
-  }
+  .item-card{ background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:16px 20px; box-shadow:var(--shadow); display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap; }
   .item-main{ flex:1; min-width:220px; }
   .item-main h3{ font-size:16px; margin-bottom:4px; }
   .item-meta{ font-size:13.5px; color:var(--ink-soft); line-height:1.6; }
@@ -154,36 +85,28 @@
   .status-tag{ padding:5px 12px; border-radius:999px; font-size:12px; font-weight:700; }
   .status-tag.paid{ background:var(--green-bg); color:var(--green); }
   .status-tag.awaiting{ background:var(--amber-bg); color:var(--amber); }
-  .mini-btn{
-    background:none; border:1.5px solid var(--line); color:var(--ink-soft);
-    padding:7px 12px; border-radius:9px; font-size:12.5px; font-weight:600; cursor:pointer;
-  }
+  .mini-btn{ background:none; border:1.5px solid var(--line); color:var(--ink-soft); padding:7px 12px; border-radius:9px; font-size:12.5px; font-weight:600; cursor:pointer; }
   .mini-btn:hover{ border-color:var(--gold); color:var(--gold-deep); }
+  .mini-btn.danger{ border-color:var(--red); color:var(--red); }
+  .mini-btn.danger:hover{ background:var(--red); color:#fff; }
   .empty-state{ text-align:center; padding:50px 20px; color:var(--ink-soft); }
   .empty-state h3{ color:var(--ink); font-size:16px; margin-bottom:6px; }
+  .tag-chip{ display:inline-block; background:var(--cream-2); color:var(--ink-soft); font-size:11.5px; font-weight:600; padding:3px 9px; border-radius:999px; margin:2px 4px 0 0; }
 
-  /* ---------- FORMS ---------- */
   .form-card{ background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:20px; box-shadow:var(--shadow); margin-bottom:20px; }
   .form-card h3{ font-size:15.5px; margin-bottom:14px; }
   .form-row{ display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px; }
   .form-row.full{ grid-template-columns:1fr; }
   .field-label{ display:block; font-size:12px; font-weight:600; color:var(--ink-soft); margin-bottom:6px; text-transform:uppercase; letter-spacing:.02em; }
-  .form-row input, .form-row select, .form-row textarea{
-    width:100%; padding:11px 13px; border-radius:10px; border:1.5px solid var(--line);
-    background:var(--cream); font-size:14px; color:var(--ink); outline:none; resize:vertical; font-family:'DM Sans',sans-serif;
-  }
+  .form-row input, .form-row select, .form-row textarea{ width:100%; padding:11px 13px; border-radius:10px; border:1.5px solid var(--line); background:var(--cream); font-size:14px; color:var(--ink); outline:none; resize:vertical; font-family:'DM Sans',sans-serif; }
   .form-row input:focus, .form-row select:focus, .form-row textarea:focus{ border-color:var(--gold); }
 
-  /* ---------- MISC ---------- */
   .badge{ display:inline-block; padding:5px 12px; border-radius:999px; font-size:12px; font-weight:700; background:var(--amber-bg); color:var(--amber); }
   .badge.hot{ background:var(--red); color:#fff; }
-  .link-row{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px; }
   .whatsapp-link{ color:var(--green); font-weight:700; text-decoration:none; font-size:13px; }
   .whatsapp-link:hover{ text-decoration:underline; }
-  .result-box{
-    background:var(--cream-2); border:1px solid var(--line); border-radius:10px; padding:12px 14px;
-    font-size:13px; word-break:break-all; margin-top:10px;
-  }
+  .banner{ background:var(--cream-2); border:1px solid var(--line); border-radius:12px; padding:14px 16px; font-size:13.5px; color:var(--ink-soft); margin-bottom:18px; }
+  .banner b{ color:var(--ink); }
   code.small{ background:var(--cream-2); padding:2px 6px; border-radius:6px; font-size:12.5px; }
 
   @media (max-width:720px){
@@ -198,7 +121,6 @@
 </head>
 <body>
 
-  <!-- ===================== LOGIN ===================== -->
   <div id="loginScreen">
     <div class="login-card">
       <div class="login-mark">iS</div>
@@ -210,15 +132,11 @@
     </div>
   </div>
 
-  <!-- ===================== APP ===================== -->
   <div id="app">
     <header class="topbar">
       <div class="brand">
         <div class="brand-mark">iS</div>
-        <div class="brand-text">
-          <h1>iSonali Dashboard</h1>
-          <span id="lastSynced">Not synced yet</span>
-        </div>
+        <div class="brand-text"><h1>iSonali Dashboard</h1><span id="lastSynced">Not synced yet</span></div>
       </div>
       <button class="btn btn-ghost" id="logoutBtn">Log out</button>
     </header>
@@ -236,17 +154,17 @@
       <nav class="tabs">
         <button class="tab-btn active" data-tab="overview">Overview</button>
         <button class="tab-btn" data-tab="registrations">Registrations</button>
-        <button class="tab-btn" data-tab="students">Students</button>
+        <button class="tab-btn" data-tab="clients">Clients</button>
+        <button class="tab-btn" data-tab="students">Leads</button>
+        <button class="tab-btn" data-tab="webinars">Webinars</button>
         <button class="tab-btn" data-tab="enquiries">Enquiries</button>
         <button class="tab-btn" data-tab="instagram">Instagram</button>
-        <button class="tab-btn" data-tab="seo">SEO &amp; Traffic</button>
       </nav>
 
       <!-- ============ OVERVIEW ============ -->
       <section class="tab-panel active" id="tab-overview">
-        <button class="btn btn-gold" id="syncBtn"><span class="dot">🪙</span> Check for New Payments</button>
+        <button class="btn btn-gold" id="syncBtn"><span>🪙</span> Check for New Payments</button>
         <span id="syncStatus" style="font-size:12px;color:var(--ink-soft);margin-left:10px;">Not checked yet</span>
-
         <h3 class="section-title">Needs attention</h3>
         <p class="section-sub">People who registered but haven't been marked paid yet.</p>
         <div class="card-list" id="needsAttentionList"></div>
@@ -266,46 +184,105 @@
         <div class="card-list" id="regList"></div>
       </section>
 
-      <!-- ============ STUDENTS (CRM) ============ -->
-      <section class="tab-panel" id="tab-students">
+      <!-- ============ CLIENTS (MAIN DATABASE) ============ -->
+      <section class="tab-panel" id="tab-clients">
+        <p class="section-sub">Everyone who has registered and paid — this fills in automatically. Group them (Kids, Corporate, College, or your own) to send targeted updates.</p>
+
         <div class="form-card">
-          <h3>Add or update a contact</h3>
+          <h3>Add or update a client</h3>
+          <div class="form-row">
+            <div><label class="field-label">Name</label><input type="text" id="clientName"></div>
+            <div><label class="field-label">Phone (used as ID)</label><input type="text" id="clientPhone"></div>
+          </div>
+          <div class="form-row">
+            <div><label class="field-label">Email</label><input type="text" id="clientEmail"></div>
+            <div><label class="field-label">City</label><input type="text" id="clientCity"></div>
+          </div>
+          <div class="form-row full">
+            <div><label class="field-label">Groups (comma-separated)</label><input type="text" id="clientGroups" list="groupOptions" placeholder="e.g. Kids, July2026Webinar"></div>
+          </div>
+          <datalist id="groupOptions"></datalist>
+          <button class="btn btn-gold" id="clientSaveBtn">Save Client</button>
+        </div>
+
+        <div class="form-card">
+          <h3>Send an update to a group</h3>
+          <div class="form-row">
+            <div><label class="field-label">Group</label><input type="text" id="groupTarget" list="groupOptions" placeholder="e.g. Kids"></div>
+            <div><label class="field-label">Email subject</label><input type="text" id="groupSubject" placeholder="e.g. New webinar this Saturday"></div>
+          </div>
+          <div class="form-row full">
+            <div><label class="field-label">Message</label><textarea id="groupMessage" rows="3" placeholder="Type your update..."></textarea></div>
+          </div>
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <button class="btn btn-gold" id="groupEmailBtn">Send Email to Group</button>
+            <button class="btn btn-ghost" id="groupWhatsappBtn">Generate WhatsApp Links</button>
+          </div>
+          <div id="groupResults" class="card-list" style="margin-top:14px;"></div>
+        </div>
+
+        <div class="panel-toolbar">
+          <input class="search-input" id="clientSearch" placeholder="Search clients...">
+          <div class="filter-pills" id="clientFilter"><button class="pill active" data-filter="all">All</button></div>
+        </div>
+        <div class="card-list" id="clientList"></div>
+      </section>
+
+      <!-- ============ LEADS (CRM) ============ -->
+      <section class="tab-panel" id="tab-students">
+        <p class="section-sub">People who've shown interest but haven't paid yet — track them until they become a client.</p>
+        <div class="form-card">
+          <h3>Add or update a lead</h3>
           <div class="form-row">
             <div><label class="field-label">Name</label><input type="text" id="crmName"></div>
             <div><label class="field-label">Phone (used as ID)</label><input type="text" id="crmPhone"></div>
           </div>
           <div class="form-row">
             <div><label class="field-label">Email</label><input type="text" id="crmEmail"></div>
-            <div><label class="field-label">Status</label>
-              <select id="crmStatus"><option>Lead</option><option>Student</option><option>Alumni</option></select>
-            </div>
+            <div><label class="field-label">Status</label><select id="crmStatus"><option>Lead</option><option>Contacted</option><option>Student</option><option>Alumni</option></select></div>
           </div>
           <div class="form-row">
-            <div><label class="field-label">Tags</label><input type="text" id="crmTags" placeholder="e.g. kids, webinar"></div>
+            <div><label class="field-label">Tags</label><input type="text" id="crmTags" placeholder="e.g. kids, corporate"></div>
             <div><label class="field-label">Notes</label><input type="text" id="crmNotes"></div>
           </div>
-          <button class="btn btn-gold" id="crmSaveBtn">Save Contact</button>
+          <button class="btn btn-gold" id="crmSaveBtn">Save Lead</button>
         </div>
-
-        <div class="form-card">
-          <h3>Broadcast a message</h3>
-          <div class="form-row">
-            <div><label class="field-label">Send to</label>
-              <select id="broadcastFilter"><option value="all">Everyone</option><option value="Lead">Leads</option><option value="Student">Students</option><option value="Alumni">Alumni</option></select>
-            </div>
-            <div></div>
-          </div>
-          <div class="form-row full">
-            <div><label class="field-label">Message</label><textarea id="broadcastMsg" rows="3" placeholder="Type your message..."></textarea></div>
-          </div>
-          <button class="btn btn-gold" id="broadcastGenerateBtn">Generate WhatsApp Links</button>
-          <div id="broadcastResults" class="card-list" style="margin-top:14px;"></div>
-        </div>
-
-        <div class="panel-toolbar">
-          <input class="search-input" id="crmSearch" placeholder="Search contacts...">
-        </div>
+        <div class="panel-toolbar"><input class="search-input" id="crmSearch" placeholder="Search leads..."></div>
         <div class="card-list" id="crmList"></div>
+      </section>
+
+      <!-- ============ WEBINARS ============ -->
+      <section class="tab-panel" id="tab-webinars">
+        <p class="section-sub">Plan and run sessions on Zoom, Microsoft Teams, or Google Meet.</p>
+        <div class="form-card">
+          <h3>Create a webinar</h3>
+          <div class="form-row">
+            <div><label class="field-label">Title</label><input type="text" id="webTitle" placeholder="e.g. Speak with Confidence — July batch"></div>
+            <div><label class="field-label">Date &amp; time</label><input type="datetime-local" id="webDateTime"></div>
+          </div>
+          <div class="form-row">
+            <div><label class="field-label">Platform</label>
+              <select id="webPlatform"><option>Google Meet</option><option>Zoom</option><option>Microsoft Teams</option></select>
+            </div>
+            <div><label class="field-label">Price</label><input type="text" id="webPrice" placeholder="e.g. ₹199"></div>
+          </div>
+          <div class="form-row">
+            <div>
+              <label class="field-label">Join link</label>
+              <input type="text" id="webJoinLink" placeholder="Paste your Zoom/Teams link, or generate a Meet link →">
+            </div>
+            <div style="display:flex; align-items:flex-end;">
+              <button class="btn btn-ghost" id="webGenerateMeetBtn" style="width:100%;">Generate Meet Link</button>
+            </div>
+          </div>
+          <div class="form-row">
+            <div><label class="field-label">Audience group</label><input type="text" id="webGroup" list="groupOptions" placeholder="e.g. Corporate"></div>
+            <div><label class="field-label">Status</label><select id="webStatus"><option>Planned</option><option>Live</option><option>Completed</option><option>Cancelled</option></select></div>
+          </div>
+          <div class="form-row full"><div><label class="field-label">Notes</label><textarea id="webNotes" rows="2"></textarea></div></div>
+          <button class="btn btn-gold" id="webSaveBtn">Save Webinar</button>
+        </div>
+        <div class="card-list" id="webList"></div>
       </section>
 
       <!-- ============ ENQUIRIES ============ -->
@@ -316,23 +293,47 @@
 
       <!-- ============ INSTAGRAM ============ -->
       <section class="tab-panel" id="tab-instagram">
+        <div id="igBanner" class="banner" style="display:none;"></div>
+        <div class="stats" id="igStatsCards" style="grid-template-columns:repeat(3,1fr); display:none; margin-bottom:20px;"></div>
+
+        <h3 class="section-title">Create a post</h3>
+        <p class="section-sub">Posts to @isonalidotcom. Media must be a public link (pick from your website reels, or paste your own).</p>
+        <div class="form-card">
+          <div class="form-row">
+            <div><label class="field-label">Use a website reel</label>
+              <select id="igReelPicker"><option value="">— choose a reel, or paste a link below —</option></select>
+            </div>
+            <div><label class="field-label">Media type</label>
+              <select id="igMediaType"><option value="IMAGE">Image</option><option value="VIDEO">Video</option><option value="REELS">Reel</option></select>
+            </div>
+          </div>
+          <div class="form-row full">
+            <div><label class="field-label">Media URL</label><input type="text" id="igMediaUrl" placeholder="https://..."></div>
+          </div>
+          <div class="form-row full">
+            <div><label class="field-label">Caption</label><textarea id="igCaption" rows="3" placeholder="Write your caption..."></textarea></div>
+          </div>
+          <label style="font-size:13px;color:var(--ink-soft);display:flex;align-items:center;gap:6px;margin-bottom:14px;">
+            <input type="checkbox" id="igIncludeLink" checked> Add booking link to caption
+          </label>
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <button class="btn btn-gold" id="igCreateBtn">Create Post</button>
+            <button class="btn btn-ghost" id="igPublishBtn" style="display:none;">Publish Now</button>
+          </div>
+          <div id="igCreateResult" class="section-sub" style="margin-top:10px;"></div>
+        </div>
+
         <h3 class="section-title">Content planner</h3>
         <div class="form-card">
           <div class="form-row">
-            <div><label class="field-label">Platform</label>
-              <select id="planPlatform"><option>Instagram</option><option>YouTube</option><option>Facebook</option></select>
-            </div>
-            <div><label class="field-label">Type</label>
-              <select id="planType"><option>Post</option><option>Reel</option><option>Story</option></select>
-            </div>
+            <div><label class="field-label">Platform</label><select id="planPlatform"><option>Instagram</option><option>YouTube</option><option>Facebook</option></select></div>
+            <div><label class="field-label">Type</label><select id="planType"><option>Post</option><option>Reel</option><option>Story</option></select></div>
           </div>
           <div class="form-row">
             <div><label class="field-label">Date</label><input type="date" id="planDate"></div>
             <div><label class="field-label">Idea</label><input type="text" id="planIdea" placeholder="e.g. Reel: 3 tips for confident intros"></div>
           </div>
-          <div class="form-row full">
-            <div><label class="field-label">Caption (optional)</label><textarea id="planCaption" rows="2"></textarea></div>
-          </div>
+          <div class="form-row full"><div><label class="field-label">Caption (optional)</label><textarea id="planCaption" rows="2"></textarea></div></div>
           <button class="btn btn-gold" id="planSaveBtn">Add Idea</button>
         </div>
         <div class="card-list" id="planList"></div>
@@ -356,7 +357,6 @@
         <div class="card-list" id="metricsList"></div>
 
         <h3 class="section-title">Website reels</h3>
-        <p class="section-sub">Videos in the "iSonali Website Reels" Drive folder — these play on isonali.com.</p>
         <div class="card-list" id="reelsList"></div>
 
         <div id="youtubeSection" style="display:none;">
@@ -365,125 +365,90 @@
           <div class="card-list" id="ytVideoList"></div>
         </div>
       </section>
-
-      <!-- ============ SEO & TRAFFIC ============ -->
-      <section class="tab-panel" id="tab-seo">
-        <h3 class="section-title">Quick links</h3>
-        <div class="link-row">
-          <a class="btn btn-ghost" href="https://analytics.google.com/" target="_blank" rel="noopener">Google Analytics</a>
-          <a class="btn btn-ghost" href="https://search.google.com/search-console" target="_blank" rel="noopener">Search Console</a>
-          <a class="btn btn-ghost" href="https://vercel.com/dashboard" target="_blank" rel="noopener">Vercel Analytics</a>
-        </div>
-
-        <h3 class="section-title">UTM link builder</h3>
-        <p class="section-sub">Tag your Instagram/WhatsApp links so you know which post brought each registration.</p>
-        <div class="form-card">
-          <div class="form-row full">
-            <div><label class="field-label">Page URL</label><input type="text" id="utmBase" value="https://isonali.com"></div>
-          </div>
-          <div class="form-row">
-            <div><label class="field-label">Source (e.g. instagram)</label><input type="text" id="utmSource"></div>
-            <div><label class="field-label">Medium (e.g. bio_link, story)</label><input type="text" id="utmMedium"></div>
-          </div>
-          <div class="form-row">
-            <div><label class="field-label">Campaign (e.g. july_webinar)</label><input type="text" id="utmCampaign"></div>
-            <div><label class="field-label">Content (optional)</label><input type="text" id="utmContent"></div>
-          </div>
-          <button class="btn btn-gold" id="utmGenerateBtn">Generate Link</button>
-          <div class="result-box" id="utmResult" style="display:none;"></div>
-        </div>
-      </section>
     </main>
 
     <footer style="text-align:center;padding:30px;color:var(--ink-soft);font-size:12.5px;">iSonali.com · Internal dashboard</footer>
   </div>
 
 <script>
-/* =========================================================
-   CONFIG — paste your Apps Script /exec URL below
-   ========================================================= */
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbynFJ4Bei8sg7a30WlFmqLE8M536R1pOgNNeIxyFIJGmTlzEFozopNIuPWzdYgQ0oLNMQ/exec";
+const SCRIPT_URL = "PASTE_YOUR_EXEC_URL_HERE";
+const RAZORPAY_LINK = "https://razorpay.me/@sonalimohankshirsagar";
 
-const DATA = { registrations: [], crm: [], planner: [], metrics: [], payments: [], webinars: [], enquiries: [], reels: [] };
+const DATA = { registrations:[], crm:[], clients:[], planner:[], metrics:[], payments:[], webinars:[], enquiries:[], reels:[] };
 let ACCESS_KEY = localStorage.getItem('isonali_dash_key') || '';
+let pendingIgContainer = null;
 
-/* ---------------- API HELPERS (match Code.gs exactly) ---------------- */
+/* ---------------- API HELPERS ---------------- */
 async function apiGet(action, extraParams){
   const url = new URL(SCRIPT_URL);
   url.searchParams.set('action', action);
   url.searchParams.set('key', ACCESS_KEY);
   if (extraParams) Object.entries(extraParams).forEach(([k,v])=>url.searchParams.set(k,v));
   const res = await fetch(url.toString());
-  return res.json();
+  const text = await res.text();
+  try { return JSON.parse(text); }
+  catch(e){ throw new Error(`Server didn't return JSON (HTTP ${res.status}). First 200 chars: ${text.slice(0,200)}`); }
 }
 async function apiPost(payload){
   const res = await fetch(SCRIPT_URL, {
     method:'POST',
-    headers:{ 'Content-Type':'text/plain;charset=utf-8' }, // avoids CORS preflight against Apps Script
+    headers:{ 'Content-Type':'text/plain;charset=utf-8' },
     body: JSON.stringify(Object.assign({ key: ACCESS_KEY }, payload))
   });
-  return res.json();
+  const text = await res.text();
+  try { return JSON.parse(text); }
+  catch(e){ throw new Error(`Server didn't return JSON (HTTP ${res.status}). First 200 chars: ${text.slice(0,200)}`); }
 }
-function esc(v){
-  if (v === undefined || v === null) return '';
-  return String(v).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
-}
+function esc(v){ if (v === undefined || v === null) return ''; return String(v).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s])); }
 function fmtMoney(n){ n = Number(n)||0; return '₹' + n.toLocaleString('en-IN'); }
 function emptyState(title, body){ return `<div class="empty-state"><h3>${title}</h3><p>${body}</p></div>`; }
-function toast(msg){
-  const t = document.getElementById('syncToast');
-  t.textContent = msg; t.classList.add('show');
-  setTimeout(()=> t.classList.remove('show'), 3200);
+function toast(msg){ const t = document.getElementById('syncToast'); t.textContent = msg; t.classList.add('show'); setTimeout(()=> t.classList.remove('show'), 3200); }
+function waLink(phone, text){ const digits = String(phone||'').replace(/\D/g,'').slice(-10); if (!digits) return '#'; return `https://wa.me/91${digits}` + (text ? `?text=${encodeURIComponent(text)}` : ''); }
+function groupList(str){ return String(str||'').split(',').map(g=>g.trim()).filter(Boolean); }
+function allGroups(){
+  const set = new Set();
+  DATA.clients.forEach(c => groupList(c.Groups).forEach(g=>set.add(g)));
+  ['Kids','Corporate','College'].forEach(g=>set.add(g));
+  return Array.from(set).sort();
 }
-function waLink(phone, text){
-  const digits = String(phone||'').replace(/\D/g,'').slice(-10);
-  if (!digits) return '#';
-  return `https://wa.me/91${digits}` + (text ? `?text=${encodeURIComponent(text)}` : '');
+function refreshGroupOptions(){
+  document.getElementById('groupOptions').innerHTML = allGroups().map(g=>`<option value="${esc(g)}">`).join('');
+  const filterWrap = document.getElementById('clientFilter');
+  filterWrap.innerHTML = '<button class="pill active" data-filter="all">All</button>' +
+    allGroups().map(g=>`<button class="pill" data-filter="${esc(g)}">${esc(g)}</button>`).join('');
 }
 
 /* ---------------- LOGIN ---------------- */
 const loginScreen = document.getElementById('loginScreen');
 const appEl = document.getElementById('app');
 const loginError = document.getElementById('loginError');
-
 async function tryLogin(key){
   loginError.textContent = '';
   if(!key){ loginError.textContent = 'Enter your access key.'; return; }
   try{
     const res = await fetch(`${SCRIPT_URL}?action=login&key=${encodeURIComponent(key)}`);
-    const json = await res.json();
-    if(json.ok){
-      ACCESS_KEY = key;
-      localStorage.setItem('isonali_dash_key', key);
-      showApp();
-    } else {
-      loginError.textContent = 'That key was not recognized. Try again.';
-    }
-  } catch(err){
-    loginError.textContent = 'Could not reach the dashboard. Check SCRIPT_URL and your connection.';
-  }
+    const text = await res.text();
+    let json;
+    try { json = JSON.parse(text); }
+    catch(e){ loginError.textContent = `Server didn't return JSON (HTTP ${res.status}). Check SCRIPT_URL is your real /exec link and the deployment access is "Anyone." Raw response: ${text.slice(0,150)}`; return; }
+    if(json.ok){ ACCESS_KEY = key; localStorage.setItem('isonali_dash_key', key); showApp(); }
+    else { loginError.textContent = json.error ? `Server said: ${json.error}` : 'That key was not recognized. Try again.'; }
+  } catch(err){ loginError.textContent = `Network error: ${err.message}. Check SCRIPT_URL is correct.`; }
 }
 document.getElementById('loginBtn').addEventListener('click', ()=> tryLogin(document.getElementById('loginKey').value.trim()));
 document.getElementById('loginKey').addEventListener('keydown', e=>{ if(e.key==='Enter') tryLogin(e.target.value.trim()); });
-document.getElementById('logoutBtn').addEventListener('click', ()=>{
-  localStorage.removeItem('isonali_dash_key');
-  location.reload();
-});
-
-function showApp(){
-  loginScreen.style.display = 'none';
-  appEl.style.display = 'block';
-  loadData();
-}
+document.getElementById('logoutBtn').addEventListener('click', ()=>{ localStorage.removeItem('isonali_dash_key'); location.reload(); });
+function showApp(){ loginScreen.style.display = 'none'; appEl.style.display = 'block'; loadData(); }
 if (ACCESS_KEY){ showApp(); } else { loginScreen.style.display = 'flex'; }
 
 /* ---------------- LOAD DATA ---------------- */
 async function loadData(){
   try{
     const json = await apiGet('data');
-    if(!json.ok){ toast('Session expired — please log in again.'); return; }
+    if(!json.ok){ toast(json.error ? `Server error: ${json.error}` : 'Session expired — please log in again.'); return; }
     DATA.registrations = json.registrations || [];
     DATA.crm = json.crm || [];
+    DATA.clients = json.clients || [];
     DATA.planner = json.planner || [];
     DATA.metrics = json.metrics || [];
     DATA.payments = json.payments || [];
@@ -493,73 +458,63 @@ async function loadData(){
 
     renderStats(); renderOverview(); renderRegistrations(); renderCrm();
     renderEnquiries(); renderPlanner(); renderMetrics(); renderReels();
+    refreshGroupOptions(); renderClients(); renderWebinars(); renderIgReelPicker();
 
-    if (json.youtubeConfigured){
-      document.getElementById('youtubeSection').style.display = 'block';
-      loadYoutube();
+    if (json.youtubeConfigured){ document.getElementById('youtubeSection').style.display = 'block'; loadYoutube(); }
+
+    const igBanner = document.getElementById('igBanner');
+    if (json.instagramConfigured){
+      igBanner.style.display = 'none';
+      loadIgStats();
+    } else {
+      igBanner.style.display = 'block';
+      igBanner.innerHTML = '<b>@isonalidotcom isn\u2019t connected yet.</b> Add IG_BUSINESS_ID and IG_ACCESS_TOKEN as Script Properties in Code.gs to enable posting and stats here — see the setup note at the top of Code.gs. Content planning below works either way.';
     }
+
     document.getElementById('lastSynced').textContent = 'Updated ' + new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-  } catch(err){
-    toast('Could not load data. Check SCRIPT_URL and try again.');
-  }
+  } catch(err){ toast(err.message); }
 }
 
 /* ---------------- SYNC ---------------- */
 document.getElementById('syncBtn').addEventListener('click', async ()=>{
-  const btn = document.getElementById('syncBtn');
-  const statusEl = document.getElementById('syncStatus');
+  const btn = document.getElementById('syncBtn'), statusEl = document.getElementById('syncStatus');
   btn.disabled = true; btn.style.opacity = '.7';
   statusEl.textContent = 'Checking with Razorpay...';
   try{
     const r = await apiGet('syncRazorpay');
     if (r.ok){
       statusEl.textContent = 'Last checked at ' + new Date().toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit'});
-      toast(r.added > 0 ? `✓ Found ${r.added} new payment${r.added===1?'':'s'}` : '✓ You are all caught up');
+      let msg = r.added > 0 ? `✓ Found ${r.added} new payment${r.added===1?'':'s'}` : '✓ You are all caught up';
+      if (r.reconciled > 0) msg += ` — ${r.reconciled} registration${r.reconciled===1?'':'s'} marked paid and added to Clients`;
+      toast(msg);
       await loadData();
-    } else {
-      statusEl.textContent = r.error || 'Sync failed';
-      toast(r.error || 'Could not sync — check your Razorpay keys');
-    }
-  } catch(err){
-    statusEl.textContent = 'Sync failed — try again';
-    toast('Could not reach the dashboard server.');
-  } finally {
-    btn.disabled = false; btn.style.opacity = '1';
-  }
+    } else { statusEl.textContent = r.error || 'Sync failed'; toast(r.error || 'Could not sync — check your Razorpay keys'); }
+  } catch(err){ statusEl.textContent = 'Sync failed — try again'; toast('Could not reach the dashboard server.'); }
+  finally { btn.disabled = false; btn.style.opacity = '1'; }
 });
 
 /* ---------------- STATS ---------------- */
 function renderStats(){
   const total = DATA.registrations.length;
   const paid = DATA.registrations.filter(r => r.PaymentStatus === 'PAID').length;
-  const awaiting = total - paid;
   const revenue = DATA.payments.reduce((sum,p)=> sum + (Number(p.Amount)||0), 0);
   document.getElementById('statTotal').textContent = total;
   document.getElementById('statPaid').textContent = paid;
-  document.getElementById('statAwaiting').textContent = awaiting;
+  document.getElementById('statAwaiting').textContent = total - paid;
   document.getElementById('statRevenue').textContent = fmtMoney(revenue);
 }
 
-/* ---------------- OVERVIEW / NEEDS ATTENTION ---------------- */
+/* ---------------- OVERVIEW ---------------- */
 function renderOverview(){
   const list = document.getElementById('needsAttentionList');
   const rows = DATA.registrations.filter(r => r.PaymentStatus !== 'PAID').slice().reverse();
-  if(!rows.length){
-    list.innerHTML = emptyState('All caught up', 'Everyone who registered has been marked paid.');
-    return;
-  }
+  if(!rows.length){ list.innerHTML = emptyState('All caught up', 'Everyone who registered has been marked paid.'); return; }
   list.innerHTML = rows.map(r=>{
     const msg = `Hi ${r.Name||''}, following up on your ${r.Program||'session'} booking with iSonali — let us know if you need any help completing payment!`;
-    return `
-    <div class="item-card">
-      <div class="item-main">
-        <h3>${esc(r.Name)}</h3>
-        <div class="item-meta"><b>${esc(r.Program||'—')}</b> · ${esc(r.City||'—')}<br>${esc(r.Phone||'—')}</div>
-      </div>
-      <div class="item-side">
-        <span class="status-tag awaiting">Awaiting Payment</span>
-        <a class="mini-btn whatsapp-link" href="${waLink(r.Phone, msg)}" target="_blank" rel="noopener">Nudge on WhatsApp</a>
-      </div>
+    return `<div class="item-card">
+      <div class="item-main"><h3>${esc(r.Name)}</h3><div class="item-meta"><b>${esc(r.Program||'—')}</b> · ${esc(r.City||'—')}<br>${esc(r.Phone||'—')}</div></div>
+      <div class="item-side"><span class="status-tag awaiting">Awaiting Payment</span>
+        <a class="mini-btn whatsapp-link" href="${waLink(r.Phone, msg)}" target="_blank" rel="noopener">Nudge on WhatsApp</a></div>
     </div>`;
   }).join('');
 }
@@ -573,22 +528,14 @@ function renderRegistrations(){
     const paid = r.PaymentStatus === 'PAID';
     if(regFilterState === 'paid' && !paid) return false;
     if(regFilterState === 'awaiting' && paid) return false;
-    const hay = `${r.Name||''} ${r.Phone||''} ${r.Program||''} ${r.City||''}`.toLowerCase();
-    return hay.includes(q);
+    return `${r.Name||''} ${r.Phone||''} ${r.Program||''} ${r.City||''}`.toLowerCase().includes(q);
   }).slice().reverse();
-
   if(!rows.length){ list.innerHTML = emptyState('No bookings yet', 'New registrations will show up here as soon as someone books.'); return; }
-
   list.innerHTML = rows.map(r=>{
     const paid = r.PaymentStatus === 'PAID';
-    return `
-    <div class="item-card">
-      <div class="item-main">
-        <h3>${esc(r.Name)}</h3>
-        <div class="item-meta"><b>${esc(r.Program||'—')}</b> · ${esc(r.City||'—')}<br>${esc(r.Phone||'—')} · ${esc(r.Email||'—')}</div>
-      </div>
-      <div class="item-side">
-        <div class="price-tag">₹${esc(r.Price||'0')}</div>
+    return `<div class="item-card">
+      <div class="item-main"><h3>${esc(r.Name)}</h3><div class="item-meta"><b>${esc(r.Program||'—')}</b> · ${esc(r.City||'—')}<br>${esc(r.Phone||'—')} · ${esc(r.Email||'—')}</div></div>
+      <div class="item-side"><div class="price-tag">₹${esc(r.Price||'0')}</div>
         <span class="status-tag ${paid?'paid':'awaiting'}">${paid?'Paid':'Awaiting Payment'}</span>
         <button class="mini-btn" onclick="toggleRegStatus('${encodeURIComponent(r.Timestamp)}','${encodeURIComponent(r.Phone)}','${paid?'PAYMENT_LINK_OPENED_NOT_VERIFIED':'PAID'}')">Mark as ${paid?'Awaiting':'Paid'}</button>
       </div>
@@ -598,16 +545,14 @@ function renderRegistrations(){
 async function toggleRegStatus(tsEnc, phoneEnc, newStatus){
   const timestamp = decodeURIComponent(tsEnc), phone = decodeURIComponent(phoneEnc);
   const r = await apiPost({ action:'setRegStatus', timestamp, phone, status:newStatus });
-  if (r.ok){ toast(newStatus==='PAID' ? '✓ Marked as paid' : 'Marked as awaiting'); await loadData(); }
+  if (r.ok){ toast(newStatus==='PAID' ? '✓ Marked as paid and added to Clients' : 'Marked as awaiting'); await loadData(); }
   else { toast('Could not update — try again.'); }
 }
 document.getElementById('regSearch').addEventListener('input', renderRegistrations);
 document.getElementById('regFilter').addEventListener('click', e=>{
   if(e.target.classList.contains('pill')){
     document.querySelectorAll('#regFilter .pill').forEach(p=>p.classList.remove('active'));
-    e.target.classList.add('active');
-    regFilterState = e.target.dataset.filter;
-    renderRegistrations();
+    e.target.classList.add('active'); regFilterState = e.target.dataset.filter; renderRegistrations();
   }
 });
 document.getElementById('exportCsvBtn').addEventListener('click', ()=>{
@@ -621,60 +566,174 @@ document.getElementById('exportCsvBtn').addEventListener('click', ()=>{
   a.click();
 });
 
-/* ---------------- STUDENTS (CRM) ---------------- */
+/* ---------------- CLIENTS (MAIN DATABASE) ---------------- */
+let clientFilterState = 'all';
+document.getElementById('clientSaveBtn').addEventListener('click', async ()=>{
+  const phone = document.getElementById('clientPhone').value.trim();
+  if(!phone){ toast('Phone number is required'); return; }
+  const r = await apiPost({
+    action:'upsertClient', key:phone, phone,
+    name: document.getElementById('clientName').value.trim(),
+    email: document.getElementById('clientEmail').value.trim(),
+    city: document.getElementById('clientCity').value.trim(),
+    groups: document.getElementById('clientGroups').value.trim()
+  });
+  if(r.ok){
+    toast('✓ Client saved');
+    ['clientName','clientPhone','clientEmail','clientCity','clientGroups'].forEach(id=>document.getElementById(id).value='');
+    await loadData();
+  } else { toast('Could not save client'); }
+});
+function renderClients(){
+  const list = document.getElementById('clientList');
+  const q = (document.getElementById('clientSearch').value || '').toLowerCase();
+  let rows = DATA.clients.filter(c=>{
+    if (clientFilterState !== 'all' && groupList(c.Groups).indexOf(clientFilterState) === -1) return false;
+    return `${c.Name||''} ${c.Phone||''} ${c.Email||''} ${c.City||''}`.toLowerCase().includes(q);
+  }).slice().reverse();
+  if(!rows.length){ list.innerHTML = emptyState('No clients yet', 'Clients are added automatically once a registration is marked paid.'); return; }
+  list.innerHTML = rows.map(c=>`
+    <div class="item-card">
+      <div class="item-main"><h3>${esc(c.Name||c.Phone)}</h3>
+        <div class="item-meta">${esc(c.Phone||'—')} · ${esc(c.Email||'—')} · ${esc(c.City||'—')}</div>
+        <div>${groupList(c.Groups).map(g=>`<span class="tag-chip">${esc(g)}</span>`).join('') || '<span class="tag-chip">Ungrouped</span>'}</div>
+      </div>
+      <div class="item-side"><a class="mini-btn whatsapp-link" href="${waLink(c.Phone,'')}" target="_blank" rel="noopener">WhatsApp</a></div>
+    </div>`).join('');
+}
+document.getElementById('clientSearch').addEventListener('input', renderClients);
+document.getElementById('clientFilter').addEventListener('click', e=>{
+  if(e.target.classList.contains('pill')){
+    document.querySelectorAll('#clientFilter .pill').forEach(p=>p.classList.remove('active'));
+    e.target.classList.add('active'); clientFilterState = e.target.dataset.filter; renderClients();
+  }
+});
+document.getElementById('groupEmailBtn').addEventListener('click', async ()=>{
+  const group = document.getElementById('groupTarget').value.trim();
+  const subject = document.getElementById('groupSubject').value.trim();
+  const message = document.getElementById('groupMessage').value.trim();
+  if(!group || !subject || !message){ toast('Fill in group, subject, and message'); return; }
+  const r = await apiPost({ action:'sendGroupEmail', group, subject, message });
+  if(r.ok){ toast(`✓ Emailed ${r.sent} of ${r.total} in "${group}"`); }
+  else { toast(r.error || 'Could not send emails'); }
+});
+document.getElementById('groupWhatsappBtn').addEventListener('click', ()=>{
+  const group = document.getElementById('groupTarget').value.trim();
+  const message = document.getElementById('groupMessage').value.trim();
+  if(!group || !message){ toast('Fill in group and message'); return; }
+  const rows = DATA.clients.filter(c => groupList(c.Groups).indexOf(group) !== -1);
+  const box = document.getElementById('groupResults');
+  if(!rows.length){ box.innerHTML = emptyState('No clients in that group', 'Try a different group name.'); return; }
+  box.innerHTML = rows.map(c=>`
+    <div class="item-card"><div class="item-main"><h3>${esc(c.Name||c.Phone)}</h3></div>
+      <div class="item-side"><a class="mini-btn whatsapp-link" href="${waLink(c.Phone, message)}" target="_blank" rel="noopener">Send</a></div>
+    </div>`).join('');
+  toast(`${rows.length} link${rows.length===1?'':'s'} ready — click each to send`);
+});
+
+/* ---------------- LEADS (CRM) ---------------- */
 document.getElementById('crmSaveBtn').addEventListener('click', async ()=>{
   const phone = document.getElementById('crmPhone').value.trim();
   if(!phone){ toast('Phone number is required'); return; }
-  const payload = {
-    action:'upsertCrm', crmKey:phone,
+  const r = await apiPost({
+    action:'upsertCrm', crmKey:phone, phone,
     name: document.getElementById('crmName').value.trim(),
-    phone,
     email: document.getElementById('crmEmail').value.trim(),
     status: document.getElementById('crmStatus').value,
     tags: document.getElementById('crmTags').value.trim(),
     notes: document.getElementById('crmNotes').value.trim(),
     lastContact: new Date().toISOString().slice(0,10)
-  };
-  const r = await apiPost(payload);
+  });
   if(r.ok){
-    toast('✓ Contact saved');
+    toast('✓ Lead saved');
     ['crmName','crmPhone','crmEmail','crmTags','crmNotes'].forEach(id=>document.getElementById(id).value='');
     await loadData();
-  } else { toast('Could not save contact'); }
+  } else { toast('Could not save lead'); }
 });
 function renderCrm(){
   const list = document.getElementById('crmList');
   const q = (document.getElementById('crmSearch').value || '').toLowerCase();
   let rows = DATA.crm.filter(c => `${c.Name||''} ${c.Phone||''} ${c.Email||''} ${c.Tags||''}`.toLowerCase().includes(q)).slice().reverse();
-  if(!rows.length){ list.innerHTML = emptyState('No contacts yet', 'Contacts you add will show up here.'); return; }
+  if(!rows.length){ list.innerHTML = emptyState('No leads yet', 'Add contacts you\u2019re following up with.'); return; }
   list.innerHTML = rows.map(c=>`
     <div class="item-card">
-      <div class="item-main">
-        <h3>${esc(c.Name||c.Phone||'—')}</h3>
-        <div class="item-meta">${esc(c.Phone||'—')} · ${esc(c.Email||'—')}${c.Notes?`<br>${esc(c.Notes)}`:''}</div>
-      </div>
-      <div class="item-side">
-        <span class="status-tag ${c.Status==='Alumni'||c.Status==='Student'?'paid':'awaiting'}">${esc(c.Status||'Lead')}</span>
-        <a class="mini-btn whatsapp-link" href="${waLink(c.Phone,'')}" target="_blank" rel="noopener">WhatsApp</a>
-      </div>
+      <div class="item-main"><h3>${esc(c.Name||c.Phone||'—')}</h3><div class="item-meta">${esc(c.Phone||'—')} · ${esc(c.Email||'—')}${c.Notes?`<br>${esc(c.Notes)}`:''}</div></div>
+      <div class="item-side"><span class="status-tag ${c.Status==='Alumni'||c.Status==='Student'?'paid':'awaiting'}">${esc(c.Status||'Lead')}</span>
+        <a class="mini-btn whatsapp-link" href="${waLink(c.Phone,'')}" target="_blank" rel="noopener">WhatsApp</a></div>
     </div>`).join('');
 }
 document.getElementById('crmSearch').addEventListener('input', renderCrm);
 
-document.getElementById('broadcastGenerateBtn').addEventListener('click', ()=>{
-  const filter = document.getElementById('broadcastFilter').value;
-  const msg = document.getElementById('broadcastMsg').value.trim();
-  if(!msg){ toast('Write a message first'); return; }
-  let rows = DATA.crm.filter(c => filter==='all' || c.Status===filter);
-  const box = document.getElementById('broadcastResults');
-  if(!rows.length){ box.innerHTML = emptyState('No matching contacts', 'Try a different filter.'); return; }
-  box.innerHTML = rows.map(c=>`
-    <div class="item-card">
-      <div class="item-main"><h3>${esc(c.Name||c.Phone)}</h3><div class="item-meta">${esc(c.Phone||'')}</div></div>
-      <div class="item-side"><a class="mini-btn whatsapp-link" href="${waLink(c.Phone, msg)}" target="_blank" rel="noopener">Send</a></div>
-    </div>`).join('');
-  toast(`${rows.length} link${rows.length===1?'':'s'} ready — click each to send`);
+/* ---------------- WEBINARS ---------------- */
+document.getElementById('webPlatform').addEventListener('change', e=>{
+  document.getElementById('webGenerateMeetBtn').style.display = e.target.value === 'Google Meet' ? 'inline-flex' : 'none';
 });
+document.getElementById('webGenerateMeetBtn').addEventListener('click', async ()=>{
+  const title = document.getElementById('webTitle').value.trim();
+  const dateTime = document.getElementById('webDateTime').value;
+  if(!title || !dateTime){ toast('Add a title and date/time first'); return; }
+  const r = await apiPost({ action:'generateMeetLink', title, dateTime });
+  if(r.ok){ document.getElementById('webJoinLink').value = r.joinLink; toast('✓ Meet link generated'); }
+  else { toast(r.error || 'Could not generate a Meet link'); }
+});
+document.getElementById('webSaveBtn').addEventListener('click', async ()=>{
+  const title = document.getElementById('webTitle').value.trim();
+  if(!title){ toast('Add a title'); return; }
+  const r = await apiPost({
+    action:'addWebinar', title,
+    dateTime: document.getElementById('webDateTime').value,
+    platform: document.getElementById('webPlatform').value,
+    joinLink: document.getElementById('webJoinLink').value.trim(),
+    price: document.getElementById('webPrice').value.trim(),
+    status: document.getElementById('webStatus').value,
+    group: document.getElementById('webGroup').value.trim(),
+    notes: document.getElementById('webNotes').value.trim()
+  });
+  if(r.ok){
+    toast('✓ Webinar saved');
+    ['webTitle','webDateTime','webJoinLink','webPrice','webGroup','webNotes'].forEach(id=>document.getElementById(id).value='');
+    await loadData();
+  } else { toast('Could not save webinar'); }
+});
+function renderWebinars(){
+  const list = document.getElementById('webList');
+  let rows = DATA.webinars.slice().reverse();
+  if(!rows.length){ list.innerHTML = emptyState('No webinars yet', 'Create your first session above.'); return; }
+  list.innerHTML = rows.map(w=>`
+    <div class="item-card">
+      <div class="item-main">
+        <h3>${esc(w.Title)}</h3>
+        <div class="item-meta">${esc(w.Platform||'')} · ${w.DateTime ? new Date(w.DateTime).toLocaleString('en-IN',{dateStyle:'medium',timeStyle:'short'}) : ''} ${w.Price?'· '+esc(w.Price):''}<br>
+          ${w.JoinLink ? `<a href="${esc(w.JoinLink)}" target="_blank" rel="noopener">${esc(w.JoinLink)}</a>` : 'No join link yet'}
+          ${w.Group ? `<br>Audience: <span class="tag-chip">${esc(w.Group)}</span>` : ''}
+        </div>
+      </div>
+      <div class="item-side">
+        <select class="mini-btn" onchange="updateWebinarStatus('${esc(w.Id)}', this.value)">
+          ${['Planned','Live','Completed','Cancelled'].map(s=>`<option ${w.Status===s?'selected':''}>${s}</option>`).join('')}
+        </select>
+        ${w.Group ? `<button class="mini-btn" onclick="notifyWebinar('${esc(w.Id)}','${esc(w.Group)}')">Notify "${esc(w.Group)}"</button>` : ''}
+      </div>
+    </div>`).join('');
+}
+async function updateWebinarStatus(id, status){
+  const r = await apiPost({ action:'updateWebinar', id, status });
+  if(r.ok){ toast('✓ Status updated'); await loadData(); }
+}
+async function notifyWebinar(id, group){
+  toast('Sending...');
+  const r = await apiPost({ action:'notifyWebinarGroup', webinarId:id, group });
+  if(!r.ok){ toast(r.error || 'Could not notify group'); return; }
+  toast(`✓ Emailed ${r.emailed} of ${r.total} in "${group}"`);
+  const box = document.getElementById('groupResults');
+  if(r.whatsappLinks && r.whatsappLinks.length){
+    document.querySelector('[data-tab="clients"]').click();
+    box.innerHTML = r.whatsappLinks.map(w=>`
+      <div class="item-card"><div class="item-main"><h3>${esc(w.name)}</h3></div>
+        <div class="item-side"><a class="mini-btn whatsapp-link" href="${esc(w.link)}" target="_blank" rel="noopener">Send</a></div>
+      </div>`).join('');
+  }
+}
 
 /* ---------------- ENQUIRIES ---------------- */
 function renderEnquiries(){
@@ -688,9 +747,7 @@ function renderEnquiries(){
         <div class="item-meta">${esc(e.Email||'—')} · ${esc(e.Phone||'—')} · ${esc(e.Course||'—')}<br>${esc(e.Message||'')}</div>
         ${e.Reply ? `<div class="item-meta" style="margin-top:6px;"><b>Your reply:</b> ${esc(e.Reply)}</div>` : ''}
       </div>
-      <div class="form-row full" style="margin-top:12px;">
-        <textarea rows="2" placeholder="Write a reply..." id="enqReply-${esc(e.Id)}">${esc(e.Reply||'')}</textarea>
-      </div>
+      <div class="form-row full" style="margin-top:12px;"><textarea rows="2" placeholder="Write a reply..." id="enqReply-${esc(e.Id)}">${esc(e.Reply||'')}</textarea></div>
       <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
         <label style="font-size:13px;color:var(--ink-soft);display:flex;align-items:center;gap:6px;">
           <input type="checkbox" id="enqSendEmail-${esc(e.Id)}" checked> Also email this reply
@@ -707,23 +764,75 @@ async function sendEnquiryReply(id){
   else { toast('Could not save reply'); }
 }
 
+/* ---------------- INSTAGRAM: STATS ---------------- */
+async function loadIgStats(){
+  const r = await apiGet('igStats');
+  if(!r.ok) return;
+  const cards = document.getElementById('igStatsCards');
+  cards.style.display = 'grid';
+  cards.innerHTML = `
+    <div class="stat-card"><div class="label">Account</div><div class="value" style="font-size:18px;">@${esc(r.account.username||'')}</div></div>
+    <div class="stat-card gold"><div class="label">Followers</div><div class="value">${(r.account.followers_count||0).toLocaleString('en-IN')}</div></div>
+    <div class="stat-card"><div class="label">Posts</div><div class="value">${r.account.media_count||0}</div></div>`;
+  const list = document.getElementById('igStatsCards');
+  const mediaHtml = (r.media||[]).map(m=>`
+    <div class="item-card">
+      <div class="item-main"><h3>${esc((m.caption||'').slice(0,60) || m.type)}</h3><div class="item-meta">${esc(m.type)} · ${m.timestamp ? new Date(m.timestamp).toLocaleDateString('en-IN') : ''}</div></div>
+      <div class="item-side"><div class="price-tag">${(m.likes||0)} ♥</div><div class="item-meta">${(m.comments||0)} comments</div></div>
+    </div>`).join('');
+  document.getElementById('igStatsCards').insertAdjacentHTML('afterend', `<div class="card-list" id="igMediaList">${mediaHtml}</div>`);
+}
+
+/* ---------------- INSTAGRAM: CREATE / PUBLISH POST ---------------- */
+function renderIgReelPicker(){
+  const sel = document.getElementById('igReelPicker');
+  sel.innerHTML = '<option value="">— choose a reel, or paste a link below —</option>' +
+    DATA.reels.map(v=>`<option value="https://drive.google.com/uc?export=download&id=${esc(v.id)}">${esc(v.name)}</option>`).join('');
+}
+document.getElementById('igReelPicker').addEventListener('change', e=>{
+  if(e.target.value){ document.getElementById('igMediaUrl').value = e.target.value; document.getElementById('igMediaType').value = 'REELS'; }
+});
+document.getElementById('igCreateBtn').addEventListener('click', async ()=>{
+  let caption = document.getElementById('igCaption').value.trim();
+  if(document.getElementById('igIncludeLink').checked) caption += `\n\nBook your slot: ${RAZORPAY_LINK}`;
+  const mediaUrl = document.getElementById('igMediaUrl').value.trim();
+  const mediaType = document.getElementById('igMediaType').value;
+  if(!mediaUrl){ toast('Add a media URL first'); return; }
+  const resultEl = document.getElementById('igCreateResult');
+  resultEl.textContent = 'Creating post on Instagram...';
+  const r = await apiPost({ action:'igCreateContainer', mediaUrl, mediaType, caption });
+  if(!r.ok){ resultEl.textContent = r.error || 'Could not create post'; return; }
+  pendingIgContainer = r.containerId;
+  resultEl.textContent = r.isVideo ? 'Post created — Instagram needs a moment to process video. Click Publish Now when ready.' : 'Post created — ready to publish.';
+  document.getElementById('igPublishBtn').style.display = 'inline-flex';
+});
+document.getElementById('igPublishBtn').addEventListener('click', async ()=>{
+  if(!pendingIgContainer){ toast('Create a post first'); return; }
+  const resultEl = document.getElementById('igCreateResult');
+  resultEl.textContent = 'Publishing...';
+  const r = await apiPost({ action:'igPublishContainer', containerId: pendingIgContainer });
+  if(r.ok){
+    resultEl.textContent = '✓ Published to @isonalidotcom';
+    toast('✓ Posted to Instagram');
+    pendingIgContainer = null;
+    document.getElementById('igPublishBtn').style.display = 'none';
+    loadIgStats();
+  } else {
+    resultEl.textContent = r.error || 'Could not publish yet';
+    if(r.stillProcessing) toast('Still processing — try Publish again in a moment');
+  }
+});
+
 /* ---------------- INSTAGRAM: PLANNER ---------------- */
 document.getElementById('planSaveBtn').addEventListener('click', async ()=>{
   const idea = document.getElementById('planIdea').value.trim();
   if(!idea){ toast('Add an idea first'); return; }
-  const payload = {
-    action:'addPlan',
-    platform: document.getElementById('planPlatform').value,
-    type: document.getElementById('planType').value,
-    date: document.getElementById('planDate').value,
-    idea, caption: document.getElementById('planCaption').value.trim()
-  };
-  const r = await apiPost(payload);
-  if(r.ok){
-    toast('✓ Idea added');
-    ['planDate','planIdea','planCaption'].forEach(id=>document.getElementById(id).value='');
-    await loadData();
-  } else { toast('Could not add idea'); }
+  const r = await apiPost({
+    action:'addPlan', platform: document.getElementById('planPlatform').value, type: document.getElementById('planType').value,
+    date: document.getElementById('planDate').value, idea, caption: document.getElementById('planCaption').value.trim()
+  });
+  if(r.ok){ toast('✓ Idea added'); ['planDate','planIdea','planCaption'].forEach(id=>document.getElementById(id).value=''); await loadData(); }
+  else { toast('Could not add idea'); }
 });
 const PLAN_PIPELINE = ['Idea','Drafted','Scheduled','Posted'];
 function renderPlanner(){
@@ -733,36 +842,33 @@ function renderPlanner(){
   list.innerHTML = rows.map(p=>{
     const idx = PLAN_PIPELINE.indexOf(p.Status);
     const next = idx>=0 && idx<PLAN_PIPELINE.length-1 ? PLAN_PIPELINE[idx+1] : null;
-    return `
-    <div class="item-card">
-      <div class="item-main">
-        <h3>${esc(p.Idea)}</h3>
-        <div class="item-meta">${esc(p.Platform||'')} · ${esc(p.Type||'')} ${p.Date?'· '+esc(p.Date):''}${p.Caption?`<br>${esc(p.Caption)}`:''}</div>
-      </div>
+    return `<div class="item-card">
+      <div class="item-main"><h3>${esc(p.Idea)}</h3><div class="item-meta">${esc(p.Platform||'')} · ${esc(p.Type||'')} ${p.Date?'· '+esc(p.Date):''}${p.Caption?`<br>${esc(p.Caption)}`:''}</div></div>
       <div class="item-side">
         <span class="status-tag ${p.Status==='Posted'?'paid':'awaiting'}">${esc(p.Status||'Idea')}</span>
-        ${next ? `<button class="mini-btn" onclick="advancePlan('${esc(p.Id)}','${next}')">Mark as ${next}</button>` : ''}
+        <div style="display:flex; gap:6px;">
+          ${next ? `<button class="mini-btn" onclick="advancePlan('${esc(p.Id)}','${next}')">Mark as ${next}</button>` : ''}
+          <button class="mini-btn danger" onclick="deletePlan('${esc(p.Id)}')">Delete</button>
+        </div>
       </div>
     </div>`;
   }).join('');
 }
-async function advancePlan(id, status){
-  const r = await apiPost({ action:'updatePlan', id, status });
-  if(r.ok){ toast(`✓ Marked as ${status}`); await loadData(); }
+async function advancePlan(id, status){ const r = await apiPost({ action:'updatePlan', id, status }); if(r.ok){ toast(`✓ Marked as ${status}`); await loadData(); } }
+async function deletePlan(id){
+  if(!confirm('Delete this idea?')) return;
+  const r = await apiPost({ action:'deletePlan', id });
+  if(r.ok){ toast('✓ Deleted'); await loadData(); } else { toast('Could not delete'); }
 }
 
 /* ---------------- INSTAGRAM: WEEKLY METRICS ---------------- */
 document.getElementById('metricsSaveBtn').addEventListener('click', async ()=>{
-  const payload = {
-    action:'addMetrics',
-    date: document.getElementById('metricsDate').value,
-    followers: document.getElementById('metricsFollowers').value,
-    reach: document.getElementById('metricsReach').value,
-    profileViews: document.getElementById('metricsProfileViews').value,
-    linkClicks: document.getElementById('metricsLinkClicks').value,
+  const r = await apiPost({
+    action:'addMetrics', date: document.getElementById('metricsDate').value,
+    followers: document.getElementById('metricsFollowers').value, reach: document.getElementById('metricsReach').value,
+    profileViews: document.getElementById('metricsProfileViews').value, linkClicks: document.getElementById('metricsLinkClicks').value,
     notes: document.getElementById('metricsNotes').value.trim()
-  };
-  const r = await apiPost(payload);
+  });
   if(r.ok){
     toast("✓ Logged this week's numbers");
     ['metricsDate','metricsFollowers','metricsReach','metricsProfileViews','metricsLinkClicks','metricsNotes'].forEach(id=>document.getElementById(id).value='');
@@ -776,12 +882,8 @@ function renderMetrics(){
   list.innerHTML = rows.slice(0,12).map((m,i)=>{
     const prev = rows[i+1];
     const delta = prev ? (Number(m.Followers)||0) - (Number(prev.Followers)||0) : null;
-    return `
-    <div class="item-card">
-      <div class="item-main">
-        <h3>${esc(m.Date)}</h3>
-        <div class="item-meta">Followers: ${esc(m.Followers)}${delta!==null?` (${delta>=0?'+':''}${delta})`:''} · Reach: ${esc(m.Reach)} · Profile views: ${esc(m.ProfileViews)} · Link clicks: ${esc(m.LinkClicks)}</div>
-      </div>
+    return `<div class="item-card"><div class="item-main"><h3>${esc(m.Date)}</h3>
+      <div class="item-meta">Followers: ${esc(m.Followers)}${delta!==null?` (${delta>=0?'+':''}${delta})`:''} · Reach: ${esc(m.Reach)} · Profile views: ${esc(m.ProfileViews)} · Link clicks: ${esc(m.LinkClicks)}</div></div>
     </div>`;
   }).join('');
 }
@@ -791,52 +893,28 @@ function renderReels(){
   const list = document.getElementById('reelsList');
   if(!DATA.reels.length){ list.innerHTML = emptyState('No reels uploaded yet', 'Drop video files into the "iSonali Website Reels" Drive folder.'); return; }
   list.innerHTML = DATA.reels.map(v=>`
-    <div class="item-card">
-      <div class="item-main"><h3>${esc(v.name)}</h3><div class="item-meta">Added ${v.added ? new Date(v.added).toLocaleDateString('en-IN') : ''}</div></div>
-      <div class="item-side"><button class="mini-btn" onclick="removeReel('${esc(v.id)}')">Remove</button></div>
+    <div class="item-card"><div class="item-main"><h3>${esc(v.name)}</h3><div class="item-meta">Added ${v.added ? new Date(v.added).toLocaleDateString('en-IN') : ''}</div></div>
+      <div class="item-side"><button class="mini-btn danger" onclick="removeReel('${esc(v.id)}')">Remove</button></div>
     </div>`).join('');
 }
-async function removeReel(id){
-  const r = await apiPost({ action:'removeReel', id });
-  if(r.ok){ toast('✓ Removed'); await loadData(); } else { toast('Could not remove'); }
-}
+async function removeReel(id){ const r = await apiPost({ action:'removeReel', id }); if(r.ok){ toast('✓ Removed'); await loadData(); } else { toast('Could not remove'); } }
 
 /* ---------------- INSTAGRAM: YOUTUBE ---------------- */
 async function loadYoutube(){
   try{
     const r = await apiGet('youtube');
-    if(!r.ok){ return; }
+    if(!r.ok) return;
     const c = r.channel || {};
     document.getElementById('ytStats').innerHTML = `
       <div class="stat-card"><div class="label">Subscribers</div><div class="value">${(c.subscribers||0).toLocaleString('en-IN')}</div></div>
       <div class="stat-card"><div class="label">Total Views</div><div class="value">${(c.totalViews||0).toLocaleString('en-IN')}</div></div>
       <div class="stat-card"><div class="label">Videos</div><div class="value">${c.videoCount||0}</div></div>`;
-    const list = document.getElementById('ytVideoList');
-    list.innerHTML = (r.videos||[]).map(v=>`
-      <div class="item-card">
-        <div class="item-main"><h3>${esc(v.title)}</h3><div class="item-meta">${v.isShort?'Short':'Video'} · ${new Date(v.publishedAt).toLocaleDateString('en-IN')}</div></div>
+    document.getElementById('ytVideoList').innerHTML = (r.videos||[]).map(v=>`
+      <div class="item-card"><div class="item-main"><h3>${esc(v.title)}</h3><div class="item-meta">${v.isShort?'Short':'Video'} · ${new Date(v.publishedAt).toLocaleDateString('en-IN')}</div></div>
         <div class="item-side"><div class="price-tag">${(v.views||0).toLocaleString('en-IN')} views</div></div>
       </div>`).join('');
   } catch(err){}
 }
-
-/* ---------------- SEO: UTM BUILDER ---------------- */
-document.getElementById('utmGenerateBtn').addEventListener('click', ()=>{
-  const base = document.getElementById('utmBase').value.trim() || 'https://isonali.com';
-  const source = document.getElementById('utmSource').value.trim();
-  const medium = document.getElementById('utmMedium').value.trim();
-  const campaign = document.getElementById('utmCampaign').value.trim();
-  const content = document.getElementById('utmContent').value.trim();
-  if(!source || !medium || !campaign){ toast('Fill in source, medium, and campaign'); return; }
-  const url = new URL(base);
-  url.searchParams.set('utm_source', source);
-  url.searchParams.set('utm_medium', medium);
-  url.searchParams.set('utm_campaign', campaign);
-  if(content) url.searchParams.set('utm_content', content);
-  const box = document.getElementById('utmResult');
-  box.style.display = 'block';
-  box.innerHTML = `<code class="small">${esc(url.toString())}</code> <button class="mini-btn" style="margin-left:10px;" onclick="navigator.clipboard.writeText('${url.toString()}');toast('Copied!')">Copy</button>`;
-});
 
 /* ---------------- TABS ---------------- */
 document.querySelectorAll('.tab-btn').forEach(btn=>{
