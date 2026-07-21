@@ -273,18 +273,19 @@ function timestampsMatch_(sheetValue, requestValue) {
 function addToClients_(info) {
   var sh = sheet_(SHEETS.CLIENTS);
   var key = String(info.phone || info.email || "");
-  if (!key) return;
+  if (!key) return false;
   var values = sh.getDataRange().getValues();
   for (var r = 1; r < values.length; r++) {
     if (String(values[r][0]) === key) {
       // already a client - keep their existing Groups, just refresh contact details
       sh.getRange(r + 1, 2, 1, 4).setValues([[info.name || values[r][1], info.email || values[r][2],
         info.phone || values[r][3], info.city || values[r][4]]]);
-      return;
+      return false; // existing member, nothing new
     }
   }
   sh.appendRow([key, info.name || "", info.email || "", info.phone || "", info.city || "",
     info.program || "", "Registration", new Date().toISOString().slice(0, 10)]);
+  return true; // brand new member
 }
 
 function upsertClient_(d) {
@@ -682,26 +683,35 @@ function syncRazorpay_() {
   }
 
   var sh = sheet_(SHEETS.PAY);
+  upgradePaymentsHeader_(sh);
+
   var existing = {};
   sh.getDataRange().getValues().slice(1).forEach(function (row) { existing[row[0]] = true; });
 
-  var added = 0, registered = 0;
+  var added = 0, registered = 0, captured = 0;
   var rows = [];
 
   items.forEach(function (pmt) {
-    if (existing[pmt.id]) return;
     var name = rzpName_(pmt);
     var program = rzpProgram_(pmt);
-    rows.push([pmt.id, new Date(pmt.created_at * 1000).toISOString(),
-      pmt.amount / 100, pmt.currency, pmt.status, pmt.method || "",
-      name, pmt.email || "", pmt.contact || "", pmt.description || "", program]);
-    added++;
 
-    // A captured payment IS the registration - promote the payer to a client.
+    // Only append rows we have never stored before...
+    if (!existing[pmt.id]) {
+      rows.push([pmt.id, new Date(pmt.created_at * 1000).toISOString(),
+        pmt.amount / 100, pmt.currency, pmt.status, pmt.method || "",
+        name, pmt.email || "", pmt.contact || "", pmt.description || "", program]);
+      added++;
+    }
+
+    // ...but ALWAYS reconcile captured payments into the member list. Payments
+    // synced by an older version of this script were recorded without ever
+    // creating a client, so this backfills them. addToClients_ is keyed by
+    // phone and returns true only when someone is genuinely new.
     if (pmt.status === "captured") {
-      addToClients_({ name: name, email: pmt.email || "", phone: pmt.contact || "",
+      captured++;
+      var isNew = addToClients_({ name: name, email: pmt.email || "", phone: pmt.contact || "",
         city: "", program: program });
-      registered++;
+      if (isNew) registered++;
       markRegistrationPaid_(pmt);
     }
   });
@@ -709,7 +719,32 @@ function syncRazorpay_() {
   if (rows.length) {
     sh.getRange(sh.getLastRow() + 1, 1, rows.length, rows[0].length).setValues(rows);
   }
-  return { ok: true, added: added, total: items.length, registered: registered, reconciled: registered };
+  return { ok: true, added: added, total: items.length, captured: captured,
+    registered: registered, reconciled: registered };
+}
+
+// Older versions of this script wrote 9 columns to Payments. The current
+// version writes 11 (Name and Program were added). If the sheet still has the
+// old header row, every value after "Method" would be read under the wrong
+// name - so rewrite the header and shuffle the old rows into place first.
+function upgradePaymentsHeader_(sh) {
+  var want = HEADERS.Payments;
+  var lastCol = sh.getLastColumn();
+  var header = lastCol ? sh.getRange(1, 1, 1, lastCol).getValues()[0] : [];
+  if (String(header[6]) === "Name" && String(header[10]) === "Program") return; // already current
+
+  var lastRow = sh.getLastRow();
+  if (lastRow > 1) {
+    // Old order: ...Method, Email, Contact, Description
+    // New order: ...Method, Name, Email, Contact, Description, Program
+    var old = sh.getRange(2, 1, lastRow - 1, Math.max(lastCol, 9)).getValues();
+    var moved = old.map(function (r) {
+      return [r[0], r[1], r[2], r[3], r[4], r[5], "", r[6] || "", r[7] || "", r[8] || "", r[8] || ""];
+    });
+    sh.getRange(2, 1, moved.length, want.length).setValues(moved);
+  }
+  sh.getRange(1, 1, 1, want.length).setValues([want]);
+  sh.setFrozenRows(1);
 }
 
 // Razorpay puts the payer's name in different places depending on the method.

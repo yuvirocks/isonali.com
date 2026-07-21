@@ -725,12 +725,18 @@ async function runSync(){
   btns.forEach(b=>{ b.disabled = true; b.style.opacity = '.6'; });
   statusEl.textContent = 'Checking with Razorpay...';
   try{
-    const r = await apiPost({ action:'syncRazorpay' });
+    // POST is the current path. Older deployments of Code.gs only accept the
+    // GET form, so fall back to it rather than failing silently.
+    let r = await apiPost({ action:'syncRazorpay' });
+    if (!r.ok && /unknown action/i.test(r.error||'')) r = await apiGet('syncRazorpay');
+
     if (r.ok){
       statusEl.textContent = 'Last checked ' + new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
-      let msg = r.added > 0 ? `✓ ${r.added} new payment${r.added===1?'':'s'} pulled in` : '✓ All caught up';
-      if (r.registered > 0) msg += ` — ${r.registered} new member${r.registered===1?'':'s'} 🎉`;
-      toast(msg);
+      const parts = [];
+      if (r.added > 0) parts.push(`${r.added} new payment${r.added===1?'':'s'}`);
+      if (r.registered > 0) parts.push(`${r.registered} new member${r.registered===1?'':'s'} 🎉`);
+      if (typeof r.captured === 'number') parts.push(`${r.captured} paid on record`);
+      toast(parts.length ? '✓ ' + parts.join(' · ') : '✓ All caught up — nothing new from Razorpay');
       await loadData();
     } else { statusEl.textContent = r.error || 'Sync failed'; toast(r.error || 'Could not sync — check your Razorpay keys'); }
   } catch(err){ statusEl.textContent = 'Sync failed — try again'; toast('Could not reach the dashboard server.'); }
