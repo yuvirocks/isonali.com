@@ -514,6 +514,19 @@
           </div>
         </div>
 
+        <h3 class="section-title">🔌 Connection</h3>
+        <p class="section-sub">If the dashboard can't reach the server, check this first.</p>
+        <div class="form-card">
+          <label class="field-label">Apps Script URL currently in use</label>
+          <div style="word-break:break-all; font-size:12.5px; color:var(--ink-soft); margin-bottom:12px;" id="scriptUrlShown"></div>
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <button class="btn btn-ghost btn-small" id="testConnBtn">🧪 Test connection</button>
+            <a class="btn btn-ghost btn-small" id="openScriptBtn" target="_blank" rel="noopener">↗ Open it in a new tab</a>
+          </div>
+          <div id="connResult" class="section-sub" style="margin-top:12px;"></div>
+          <p class="section-sub" style="margin-top:10px;">If the URL is wrong, update <code class="small">SCRIPT_URL</code> near the top of the script block in both <code class="small">dashboard.html</code> and <code class="small">index.html</code>.</p>
+        </div>
+
         <h3 class="section-title">🧹 Clean slate</h3>
         <p class="section-sub">Wipes every stored row — old registrations, test entries, leads, enquiries and payments — then rebuilds the member list from Razorpay so only real paying customers remain. Batches and content are untouched.</p>
         <div class="banner danger">This cannot be undone. Your Google Sheet tabs will be emptied and recreated.</div>
@@ -538,6 +551,13 @@ const DATA = { registrations:[], crm:[], clients:[], planner:[], metrics:[], pay
 let ACCESS_KEY = localStorage.getItem('isonali_dash_key') || '';
 let pendingIgContainer = null;
 
+/* A fetch that never even reaches Google means one of three things — say so,
+   because "check your connection" is almost never the real cause. */
+const UNREACHABLE = 'Cannot reach Apps Script. Usually one of: (1) the deployment URL changed — '
+  + 'in Apps Script use Deploy → Manage deployments → ✏️ Edit → New version, which KEEPS the URL '
+  + '(creating a brand new deployment gives a different one); (2) deployment access is not set to '
+  + '"Anyone"; (3) you are offline. Open Settings → Test connection to see Google\'s actual response.';
+
 /* ---------------- API HELPERS ---------------- */
 async function apiGet(action, extraParams){
   const url = new URL(SCRIPT_URL);
@@ -551,7 +571,7 @@ async function apiGet(action, extraParams){
     try { return JSON.parse(text); }
     catch(e){ return { ok:false, error:`Server returned an invalid response (HTTP ${res.status})` }; }
   } catch (err) {
-    return { ok:false, error:'Could not reach the dashboard server. Check your connection and try again.' };
+    return { ok:false, error:UNREACHABLE };
   }
 }
 async function apiPost(payload){
@@ -566,7 +586,7 @@ async function apiPost(payload){
     try { return JSON.parse(text); }
     catch(e){ return { ok:false, error:`Server returned an invalid response (HTTP ${res.status})` }; }
   } catch (err) {
-    return { ok:false, error:'Could not reach the dashboard server. Check your connection and try again.' };
+    return { ok:false, error:UNREACHABLE };
   }
 }
 
@@ -1099,6 +1119,25 @@ function renderCrm(){
     </div>`).join('') : emptyState('🌱','No leads yet','Add people you’re following up with.');
 }
 document.getElementById('crmSearch').addEventListener('input', renderCrm);
+
+/* ---------------- CONNECTION TEST ---------------- */
+document.getElementById('scriptUrlShown').textContent = SCRIPT_URL;
+document.getElementById('openScriptBtn').href = `${SCRIPT_URL}?action=login&key=${encodeURIComponent(ACCESS_KEY)}`;
+document.getElementById('testConnBtn').addEventListener('click', async ()=>{
+  const out = document.getElementById('connResult');
+  out.textContent = 'Testing...';
+  try{
+    const res = await fetch(`${SCRIPT_URL}?action=login&key=${encodeURIComponent(ACCESS_KEY)}`, { cache:'no-store' });
+    const text = await res.text();
+    let parsed = null;
+    try { parsed = JSON.parse(text); } catch(e){}
+    if (parsed && parsed.ok) out.textContent = `✓ Connected. HTTP ${res.status}, access key accepted. The server is reachable.`;
+    else if (parsed) out.textContent = `Reached the server (HTTP ${res.status}) but it replied: ${parsed.error || 'key rejected'}. Check DASH_KEY in Script Properties.`;
+    else out.textContent = `Reached something at that URL (HTTP ${res.status}) but it returned a web page, not data — the deployment is probably not set to "Anyone", or this URL points at an old deployment. First 200 characters: ${text.slice(0,200)}`;
+  } catch(err){
+    out.textContent = `The request never completed (${err.message}). ${UNREACHABLE}`;
+  }
+});
 
 /* ---------------- RESET ---------------- */
 document.getElementById('resetBtn').addEventListener('click', async ()=>{
