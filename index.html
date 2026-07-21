@@ -648,7 +648,7 @@
             </div>
           </div>
           <div class="kids-actions">
-            <button class="button button-coral register" data-program="Kids Coaching Program" data-price="₹199/session">Not sure? Enquire first</button>
+            <a class="button button-coral" href="#contact">Not sure? Enquire first</a>
             <a class="button button-outline" href="#contact">Ask a question</a>
           </div>
         </div>
@@ -869,8 +869,20 @@
       document.body.classList.remove("modal-open");
     }
 
+    // Straight-to-payment: the Razorpay page collects name, email and phone, so
+    // there is no form on the website. Every payment attempt (successful or not)
+    // is pulled into the dashboard from Razorpay. If a program has no fixed-amount
+    // link configured yet, we fall back to the details modal so nothing breaks.
+    function goToPayment(program, price) {
+      const link = config.paymentLinks[program];
+      if (!link) { openRegistration(program, price); return; }
+      const payUrl = new URL(link);
+      payUrl.searchParams.set("description", program);
+      window.open(payUrl.toString(), "_blank", "noopener");
+    }
+
     document.querySelectorAll(".register").forEach(button => {
-      button.addEventListener("click", () => openRegistration(button.dataset.program, button.dataset.price));
+      button.addEventListener("click", () => goToPayment(button.dataset.program, button.dataset.price));
     });
     document.getElementById("modal-close").addEventListener("click", closeRegistration);
     modal.addEventListener("click", event => { if (event.target === modal) closeRegistration(); });

@@ -63,7 +63,8 @@ var SHEETS = {
   METRICS: "InstaMetrics",
   PAY: "Payments",
   WEB: "Webinars",
-  ENQ: "Enquiries"
+  ENQ: "Enquiries",
+  BATCH: "Batches"
 };
 
 var HEADERS = {
@@ -72,9 +73,10 @@ var HEADERS = {
   Clients: ["Key","Name","Email","Phone","City","Groups","Source","JoinedDate"],
   ContentPlanner: ["Id","Platform","Type","Date","Idea","Caption","Status","Link","Views","Likes","Notes"],
   InstaMetrics: ["Date","Followers","Reach","ProfileViews","LinkClicks","Notes"],
-  Payments: ["PaymentId","Date","Amount","Currency","Status","Method","Email","Contact","Description"],
+  Payments: ["PaymentId","Date","Amount","Currency","Status","Method","Name","Email","Contact","Description","Program"],
   Webinars: ["Id","Title","DateTime","Platform","JoinLink","Price","Status","Notes","Group"],
-  Enquiries: ["Id","Timestamp","Name","Email","Phone","Course","Message","Status","Reply","RepliedAt"]
+  Enquiries: ["Id","Timestamp","Name","Email","Phone","Course","Message","Status","Reply","RepliedAt"],
+  Batches: ["Id","Name","Program","DateTime","Platform","JoinLink","Status","Notes","CreatedAt"]
 };
 
 function spreadsheet_() {
@@ -143,6 +145,7 @@ function doGetInner_(e) {
       payments: readSheet_(SHEETS.PAY),
       webinars: readSheet_(SHEETS.WEB),
       enquiries: readSheet_(SHEETS.ENQ),
+      batches: readSheet_(SHEETS.BATCH),
       reels: websiteReels_(),
       razorpayConfigured: !!props.getProperty("RZP_KEY_ID"),
       youtubeConfigured: !!YT_API_KEY,
@@ -223,8 +226,14 @@ function doPostInner_(e) {
     case "replyEnquiry":   return ok_(replyEnquiry_(data));
     case "removeReel":     return ok_(removeReel_(data));
     case "upsertClient":   return ok_(upsertClient_(data));
-    case "bulkAddToGroup": return ok_(bulkAddToGroup_(data));
     case "sendGroupEmail": return ok_(sendGroupEmail_(data));
+    case "addBatch":       return ok_(addBatch_(data));
+    case "updateBatch":    return ok_(updateBatch_(data));
+    case "deleteBatch":    return ok_(deleteBatch_(data));
+    case "setBatchMembers": return ok_(setBatchMembers_(data));
+    case "sendBatchLink":  return ok_(sendBatchLink_(data));
+    case "syncRazorpay":   return ok_(syncRazorpay_());
+    case "resetDatabase":  return ok_(resetDatabase_(data));
     case "igCreateContainer": return ok_(igCreateContainer_(data));
     case "igPublishContainer": return ok_(igPublishContainer_(data));
     default:             return ok_({ ok: false, error: "unknown action" });
@@ -236,7 +245,10 @@ function setRegStatus_(d) {
   var sh = sheet_(SHEETS.REG);
   var values = sh.getDataRange().getValues();
   for (var r = 1; r < values.length; r++) {
-    if (String(values[r][0]) === String(d.timestamp) && String(values[r][3]) === String(d.phone)) {
+    // Values read from Sheets are Date objects, while the dashboard receives
+    // JSON ISO timestamps. Comparing their string representations makes every
+    // manual status update miss its row.
+    if (timestampsMatch_(values[r][0], d.timestamp) && String(values[r][3]) === String(d.phone)) {
       sh.getRange(r + 1, 9).setValue(d.status);
       if (d.status === "PAID") {
         var row = values[r];
@@ -246,6 +258,14 @@ function setRegStatus_(d) {
     }
   }
   return { ok: false, error: "row not found" };
+}
+
+function timestampsMatch_(sheetValue, requestValue) {
+  if (String(sheetValue) === String(requestValue)) return true;
+  var sheetTime = sheetValue instanceof Date ? sheetValue.getTime() : new Date(sheetValue).getTime();
+  var requestTime = new Date(requestValue).getTime();
+  // Sheets preserves timestamps at second precision for this workflow.
+  return !isNaN(sheetTime) && !isNaN(requestTime) && Math.abs(sheetTime - requestTime) < 1000;
 }
 
 // Adds/updates a client in the Main Database once they're a paying customer.
@@ -282,23 +302,6 @@ function upsertClient_(d) {
   sh.appendRow([key, d.name || "", d.email || "", d.phone || "", d.city || "", d.groups || "",
     d.source || "Manual", new Date().toISOString().slice(0, 10)]);
   return { ok: true };
-}
-
-// Adds a group tag to several selected clients at once, without wiping their existing groups.
-function bulkAddToGroup_(d) {
-  if (!d.group || !d.keys || !d.keys.length) return { ok: false, error: "group and keys[] required" };
-  var sh = sheet_(SHEETS.CLIENTS);
-  var values = sh.getDataRange().getValues();
-  var keys = d.keys.map(String);
-  var updated = 0;
-  for (var r = 1; r < values.length; r++) {
-    if (keys.indexOf(String(values[r][0])) === -1) continue;
-    var groups = String(values[r][5] || "").split(",").map(function (g) { return g.trim(); }).filter(Boolean);
-    if (groups.indexOf(d.group) === -1) groups.push(d.group);
-    sh.getRange(r + 1, 6).setValue(groups.join(", "));
-    updated++;
-  }
-  return { ok: true, updated: updated };
 }
 
 // Email everyone in a given group (Groups column contains a comma-separated list).
@@ -491,6 +494,169 @@ function replyEnquiry_(d) {
   return { ok: false, error: "enquiry not found" };
 }
 
+/* ---------------- BATCHES (group members by date & time) ----------------
+   A batch is simply a named group with a date/time and a join link.
+   Membership lives in the Clients sheet's "Groups" column (comma separated),
+   so a member can belong to more than one batch.                         */
+
+function groupList_(value) {
+  return String(value || "").split(",").map(function (g) { return g.trim(); })
+    .filter(function (g) { return g.length; });
+}
+
+function addBatch_(d) {
+  if (!d.name) return { ok: false, error: "Batch name is required" };
+  var id = Utilities.getUuid();
+  sheet_(SHEETS.BATCH).appendRow([id, d.name, d.program || "", d.dateTime || "",
+    d.platform || "Google Meet", d.joinLink || "", d.status || "Scheduled",
+    d.notes || "", new Date().toISOString()]);
+  return { ok: true, id: id };
+}
+
+function updateBatch_(d) {
+  var sh = sheet_(SHEETS.BATCH);
+  var values = sh.getDataRange().getValues();
+  var cols = { name: 2, program: 3, dateTime: 4, platform: 5, joinLink: 6, status: 7, notes: 8 };
+  for (var r = 1; r < values.length; r++) {
+    if (String(values[r][0]) !== String(d.id)) continue;
+    var oldName = String(values[r][1]);
+    for (var k in cols) if (d[k] != null) sh.getRange(r + 1, cols[k]).setValue(d[k]);
+    // Keep membership intact when a batch is renamed.
+    if (d.name && d.name !== oldName) renameGroupEverywhere_(oldName, d.name);
+    return { ok: true };
+  }
+  return { ok: false, error: "batch not found" };
+}
+
+function deleteBatch_(d) {
+  var sh = sheet_(SHEETS.BATCH);
+  var values = sh.getDataRange().getValues();
+  for (var r = 1; r < values.length; r++) {
+    if (String(values[r][0]) === String(d.id)) {
+      renameGroupEverywhere_(String(values[r][1]), null); // null = remove
+      sh.deleteRow(r + 1);
+      return { ok: true };
+    }
+  }
+  return { ok: false, error: "batch not found" };
+}
+
+// Rename (or remove, when newName is null) a group across every client row.
+function renameGroupEverywhere_(oldName, newName) {
+  var sh = sheet_(SHEETS.CLIENTS);
+  var values = sh.getDataRange().getValues();
+  for (var r = 1; r < values.length; r++) {
+    var groups = groupList_(values[r][5]);
+    if (groups.indexOf(oldName) === -1) continue;
+    groups = groups.map(function (g) { return g === oldName ? newName : g; })
+      .filter(function (g) { return g; });
+    sh.getRange(r + 1, 6).setValue(groups.join(", "));
+  }
+}
+
+// Replace a batch's member list in one shot. d.keys = array of client keys (phone).
+function setBatchMembers_(d) {
+  if (!d.batchName) return { ok: false, error: "batchName required" };
+  var wanted = {};
+  (d.keys || []).forEach(function (k) { wanted[String(k)] = true; });
+
+  var sh = sheet_(SHEETS.CLIENTS);
+  var values = sh.getDataRange().getValues();
+  var changed = 0;
+  for (var r = 1; r < values.length; r++) {
+    var key = String(values[r][0]);
+    var groups = groupList_(values[r][5]);
+    var has = groups.indexOf(d.batchName) !== -1;
+    if (wanted[key] && !has) groups.push(d.batchName);
+    else if (!wanted[key] && has) groups = groups.filter(function (g) { return g !== d.batchName; });
+    else continue;
+    sh.getRange(r + 1, 6).setValue(groups.join(", "));
+    changed++;
+  }
+  return { ok: true, changed: changed, members: Object.keys(wanted).length };
+}
+
+// Send a batch's session details by email, and return ready-to-click WhatsApp
+// links. d.keys (optional) limits the send to specific people; without it the
+// whole batch is contacted.
+function sendBatchLink_(d) {
+  var batch = readSheet_(SHEETS.BATCH).filter(function (b) { return String(b.Id) === String(d.batchId); })[0];
+  if (!batch) return { ok: false, error: "batch not found" };
+
+  var only = null;
+  if (d.keys && d.keys.length) {
+    only = {};
+    d.keys.forEach(function (k) { only[String(k)] = true; });
+  }
+
+  var members = readSheet_(SHEETS.CLIENTS).filter(function (c) {
+    if (only) return !!only[String(c.Key)];
+    return groupList_(c.Groups).indexOf(batch.Name) !== -1;
+  });
+  if (!members.length) return { ok: false, error: "no members in this batch yet" };
+
+  var when = batch.DateTime
+    ? Utilities.formatDate(new Date(batch.DateTime), Session.getScriptTimeZone(), "EEE, d MMM yyyy 'at' h:mm a")
+    : "";
+  var subject = d.subject || ("Your session: " + batch.Name);
+  var template = d.message || ("Hi {name},\n\nHere are the details for your session" +
+    (batch.Program ? " (" + batch.Program + ")" : "") + ".\n\n" +
+    "Batch: " + batch.Name + "\n" +
+    (when ? "When: " + when + "\n" : "") +
+    (batch.Platform ? "Where: " + batch.Platform + "\n" : "") +
+    (batch.JoinLink ? "Join link: " + batch.JoinLink + "\n" : "") +
+    (batch.Notes ? "\n" + batch.Notes + "\n" : "") +
+    "\nSee you there!\nSonali\nisonali.com");
+
+  var emailed = 0, failed = [];
+  var whatsappLinks = [];
+  members.forEach(function (c) {
+    var body = template.replace(/\{name\}/g, c.Name || "there");
+    if (c.Email) {
+      try {
+        MailApp.sendEmail({ to: c.Email, subject: subject, body: body, name: "Sonali - isonali.com" });
+        emailed++;
+      } catch (err) { failed.push(c.Name || c.Email); }
+    }
+    if (c.Phone) {
+      var last10 = String(c.Phone).replace(/\D/g, "").slice(-10);
+      whatsappLinks.push({
+        name: c.Name || last10,
+        link: "https://wa.me/91" + last10 + "?text=" + encodeURIComponent(body)
+      });
+    }
+  });
+
+  return { ok: true, emailed: emailed, total: members.length, failed: failed, whatsappLinks: whatsappLinks };
+}
+
+/* ---------------- DATABASE RESET ----------------
+   Wipes every data tab and rebuilds the paid/registered list straight from
+   Razorpay, so the dashboard only ever shows people who actually paid.
+   Guarded by the dashboard key AND an explicit confirmation string.       */
+
+function resetDatabase_(d) {
+  if (String(d.confirm) !== "DELETE") {
+    return { ok: false, error: 'Confirmation missing - type DELETE to proceed' };
+  }
+  var ss = spreadsheet_();
+  var wiped = [];
+  [SHEETS.REG, SHEETS.CRM, SHEETS.CLIENTS, SHEETS.PAY, SHEETS.ENQ].forEach(function (name) {
+    var sh = ss.getSheetByName(name);
+    if (sh) ss.deleteSheet(sh);      // delete + recreate guarantees fresh headers
+    sheet_(name);
+    wiped.push(name);
+  });
+  var sync = syncRazorpay_();
+  return {
+    ok: true,
+    wiped: wiped,
+    rebuilt: sync.ok ? sync.added : 0,
+    registered: sync.ok ? sync.registered : 0,
+    syncError: sync.ok ? null : sync.error
+  };
+}
+
 /* ---------------- RAZORPAY SYNC (optional) ---------------- */
 
 function syncRazorpay_() {
@@ -498,46 +664,86 @@ function syncRazorpay_() {
   var id = props.getProperty("RZP_KEY_ID"), secret = props.getProperty("RZP_KEY_SECRET");
   if (!id || !secret) return { ok: false, error: "Razorpay keys not configured" };
 
-  var resp = UrlFetchApp.fetch("https://api.razorpay.com/v1/payments?count=100", {
-    headers: { Authorization: "Basic " + Utilities.base64Encode(id + ":" + secret) },
-    muteHttpExceptions: true
-  });
-  if (resp.getResponseCode() !== 200) return { ok: false, error: "Razorpay API " + resp.getResponseCode() };
+  // Pull up to 500 payments, newest first (Razorpay caps each page at 100).
+  var items = [], page;
+  for (page = 0; page < 5; page++) {
+    var url = "https://api.razorpay.com/v1/payments?count=100&skip=" + (page * 100);
+    var resp = UrlFetchApp.fetch(url, {
+      headers: { Authorization: "Basic " + Utilities.base64Encode(id + ":" + secret) },
+      muteHttpExceptions: true
+    });
+    if (resp.getResponseCode() !== 200) {
+      if (page === 0) return { ok: false, error: "Razorpay API " + resp.getResponseCode() };
+      break; // keep whatever we already fetched
+    }
+    var batch = JSON.parse(resp.getContentText()).items || [];
+    items = items.concat(batch);
+    if (batch.length < 100) break;
+  }
 
-  var items = JSON.parse(resp.getContentText()).items || [];
   var sh = sheet_(SHEETS.PAY);
   var existing = {};
   sh.getDataRange().getValues().slice(1).forEach(function (row) { existing[row[0]] = true; });
 
-  var added = 0, reconciled = 0;
-  var regSheet = sheet_(SHEETS.REG);
-  var regValues = regSheet.getDataRange().getValues();
+  var added = 0, registered = 0;
+  var rows = [];
 
   items.forEach(function (pmt) {
     if (existing[pmt.id]) return;
-    sh.appendRow([pmt.id, new Date(pmt.created_at * 1000).toISOString(),
+    var name = rzpName_(pmt);
+    var program = rzpProgram_(pmt);
+    rows.push([pmt.id, new Date(pmt.created_at * 1000).toISOString(),
       pmt.amount / 100, pmt.currency, pmt.status, pmt.method || "",
-      pmt.email || "", pmt.contact || "", pmt.description || ""]);
+      name, pmt.email || "", pmt.contact || "", pmt.description || "", program]);
     added++;
 
-    if (pmt.status !== "captured") return;
-    var last10 = String(pmt.contact || "").replace(/\D/g, "").slice(-10);
-    for (var r = 1; r < regValues.length; r++) {
-      var regPhone = String(regValues[r][3] || "").replace(/\D/g, "").slice(-10);
-      var regEmail = String(regValues[r][2] || "").toLowerCase();
-      var alreadyPaid = regValues[r][8] === "PAID";
-      var matches = (last10 && regPhone === last10) || (pmt.email && regEmail === String(pmt.email).toLowerCase());
-      if (matches && !alreadyPaid) {
-        regSheet.getRange(r + 1, 9).setValue("PAID");
-        regValues[r][8] = "PAID";
-        addToClients_({ name: regValues[r][1], email: regValues[r][2], phone: regValues[r][3],
-          city: regValues[r][4], program: regValues[r][6] });
-        reconciled++;
-        break;
-      }
+    // A captured payment IS the registration - promote the payer to a client.
+    if (pmt.status === "captured") {
+      addToClients_({ name: name, email: pmt.email || "", phone: pmt.contact || "",
+        city: "", program: program });
+      registered++;
+      markRegistrationPaid_(pmt);
     }
   });
-  return { ok: true, added: added, total: items.length, reconciled: reconciled };
+
+  if (rows.length) {
+    sh.getRange(sh.getLastRow() + 1, 1, rows.length, rows[0].length).setValues(rows);
+  }
+  return { ok: true, added: added, total: items.length, registered: registered, reconciled: registered };
+}
+
+// Razorpay puts the payer's name in different places depending on the method.
+function rzpName_(pmt) {
+  var notes = pmt.notes || {};
+  var fromNotes = notes.name || notes.Name || notes.full_name || notes.customer_name || "";
+  if (fromNotes) return String(fromNotes);
+  if (pmt.card && pmt.card.name) return String(pmt.card.name);
+  if (pmt.email) return String(pmt.email).split("@")[0].replace(/[._-]+/g, " ");
+  return "";
+}
+
+// The program name comes from the ?description= we attach to each payment link.
+function rzpProgram_(pmt) {
+  var notes = pmt.notes || {};
+  return String(notes.program || notes.Program || pmt.description || "");
+}
+
+// Legacy support: if an old website-form registration exists for this payer,
+// flip it to PAID so nothing looks unpaid twice.
+function markRegistrationPaid_(pmt) {
+  var sh = sheet_(SHEETS.REG);
+  var values = sh.getDataRange().getValues();
+  var last10 = String(pmt.contact || "").replace(/\D/g, "").slice(-10);
+  var email = String(pmt.email || "").toLowerCase();
+  for (var r = 1; r < values.length; r++) {
+    if (values[r][8] === "PAID") continue;
+    var regPhone = String(values[r][3] || "").replace(/\D/g, "").slice(-10);
+    var regEmail = String(values[r][2] || "").toLowerCase();
+    if ((last10 && regPhone === last10) || (email && regEmail === email)) {
+      sh.getRange(r + 1, 9).setValue("PAID");
+      return;
+    }
+  }
 }
 
 // Website reels: served from a Drive folder so videos play natively on the
@@ -548,22 +754,28 @@ function reelsFolder_() {
 }
 
 function websiteReels_() {
-  var cache = CacheService.getScriptCache();
-  var hit = cache.get("reels_v1");
-  if (hit) return JSON.parse(hit);
-  var folder = reelsFolder_();
-  var files = folder.getFiles();
-  var list = [];
-  while (files.hasNext()) {
-    var f = files.next();
-    if (String(f.getMimeType()).indexOf("video/") !== 0) continue;
-    try { f.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW); } catch (err) {}
-    list.push({ id: f.getId(), name: f.getName(), added: f.getDateCreated().toISOString() });
+  // Drive is optional. A missing Drive authorization must not stop the public
+  // website or the rest of the dashboard from loading.
+  try {
+    var cache = CacheService.getScriptCache();
+    var hit = cache.get("reels_v1");
+    if (hit) return JSON.parse(hit);
+    var folder = reelsFolder_();
+    var files = folder.getFiles();
+    var list = [];
+    while (files.hasNext()) {
+      var f = files.next();
+      if (String(f.getMimeType()).indexOf("video/") !== 0) continue;
+      try { f.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW); } catch (err) {}
+      list.push({ id: f.getId(), name: f.getName(), added: f.getDateCreated().toISOString() });
+    }
+    list.sort(function (a, b) { return a.added < b.added ? 1 : -1; });
+    var res = { ok: true, videos: list, folderUrl: folder.getUrl() };
+    cache.put("reels_v1", JSON.stringify(res), 300); // 5 min cache
+    return res;
+  } catch (err) {
+    return { ok: false, videos: [], folderUrl: "", error: "Drive access has not been authorized" };
   }
-  list.sort(function (a, b) { return a.added < b.added ? 1 : -1; });
-  var res = { ok: true, videos: list, folderUrl: folder.getUrl() };
-  cache.put("reels_v1", JSON.stringify(res), 300); // 5 min cache
-  return res;
 }
 
 function removeReel_(d) {
